@@ -50,7 +50,7 @@ Now REST and enjoy!
 Let's say I want to list all available OneAgent versions of the Cluster. I go to Environment v1 > Deployment > Installer > agent
 
 
-![Explanation of generated Params and path variables](/images/params-explanation.png)
+![Explanation of generated Params and path variables](images/params-explanation.png)
 
 1. Click o the request
 2. Select the query parameters (query parameters are always optional)
