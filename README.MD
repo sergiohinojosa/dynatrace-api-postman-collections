@@ -1,6 +1,6 @@
-> ## ***🥼⚗ Spend more time innovating and less time configuring***
+> ***🥼⚗ Spend more time innovating and less time configuring***
 
-# Importing & generating a 📬 Postman Collection for the Dynatrace API 
+# Importing & generating a 📬 Postman Collection from & for the Dynatrace API 
 
 This repository is a quick explanation how to generate a Postman collection **(sorted out, with examples, query parameters, path variables, descriptions and documentation 📖)** from the OpenApi spec so you can keep your collections updated with the Dynatrace API development. This repo also contains the parameterized Collections and some tips so you get started quickly with the [Dynatrace API](https://www.dynatrace.com/support/help/extend-dynatrace/dynatrace-api/).
 
