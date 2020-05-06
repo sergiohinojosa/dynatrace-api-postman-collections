@@ -1,0 +1,839 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Dynatrace Environment API v2",
+    "description" : "\nDocumentation of the Dynatrace Environment API v2. Resources here generally supersede those in v1. The process of migrating resources from v1 is still in progress. If you miss a resource, consider using the Dynatrace Environment API v1. Refer to the [help page](https://www.dynatrace.com/support/help/shortlink/section-api) to read about use-cases and examples.\n\nNotes about compatibility:\n* Operations marked as early adopter or preview may be changed in non-compatible ways, although we try to avoid this.\n* We may add new enum constants without incrementing the API version; thus, clients need to handle unknown enum constants gracefully.",
+    "version" : "2.0"
+  },
+  "servers" : [ {
+    "url" : "{{tenant}}{{envApi}}",
+    "variables" : { }
+  } ],
+  "tags" : [ {
+    "name" : "Metrics",
+    "description" : "Read metrics and their data points"
+  }, {
+    "name" : "Audit logs",
+    "description" : "Read audit logs"
+  } ],
+  "paths" : {
+    "/auditlogs" : {
+      "get" : {
+        "tags" : [ "Audit logs" ],
+        "summary" : "Gets the audit log of your Dynatrace environment | maturity=EARLY_ADOPTER",
+        "description" : "You can limit the output by using pagination: \n1. Specify the number of results per page in the **pageSize** query parameter. \n2. Use the cursor from the **nextPageKey** field of the previous response in the **nextPageKey** query parameter to obtain subsequent pages.",
+        "operationId" : "getLogs",
+        "parameters" : [ {
+          "name" : "nextPageKey",
+          "in" : "query",
+          "description" : "The cursor for the next page of results. You can find it in the **nextPageKey** field of the previous response. \n\nThe first page is always returned if you don't specify the **nextPageKey** query parameter. \n\nWhen the **nextPageKey** is set to obtain subsequent pages, you must omit all other query parameters. ",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "The desired amount of log entries for which data is delivered in a single response payload. \n\nThe maximal allowed page size is `5000`. \n\nIf not set, `1000` is used.",
+          "schema" : {
+            "maximum" : 5000,
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "Filters the audit log. You can use the following criteria: \n* **user**. The `EQUALS` operator is used. \n* **eventType**. The `EQUALS` operator is used. \n* **category**. The `EQUALS` operator is used. \n* **entityId**. The `CONTAINS` operator is used. \n\nFor every criterion you can specify several comma-separated values, for example `eventType(CREATE,UPDATE)`. In this case, the OR logic applies. \n\nYou can specify several comma-separated criteria, for example `eventType(CREATE,UPDATE),category(CONFIG)`. If several criteria are specified, the AND logic applies. \n\nYou can specify the value of a criterion as a quoted or an unquoted string. \n\nFor the quoted string the following special characters must be escaped with a tilde (`~`) inside quotes: \n* Tilde `~` \n* Quote `\"` \nFor example `entityId(\"myEntity (15559409040709225)\")`. \n\nFor the unquoted string, the following special characters and keywords must be escaped with a tilde (`~`) \n* Opening bracket `(` \n* Closing bracket `)` \n* Comma `,` \n* Tilde `~`",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "from",
+          "in" : "query",
+          "description" : "The start of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the relative timeframe of two weeks is used (`now-2w`).",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "The end of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the current timestamp is used.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "The sorting of audit log entries: \n* `timestamp`: Oldest first. \n* `-timestamp`: Newest first. \n\nIf not set, the newest first sorting is applied.",
+          "schema" : {
+            "type" : "string",
+            "default" : "-timestamp"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuditLog"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadAuditLogs" : [ ]
+        } ],
+        "x-feature-flag" : "AUDIT_LOG_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/auditlogs/{id}" : {
+      "get" : {
+        "tags" : [ "Audit logs" ],
+        "summary" : "Gets the specified entry of the audit log | maturity=EARLY_ADOPTER",
+        "operationId" : "getLog",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the required log entry.",
+          "required" : true,
+          "schema" : {
+            "maxLength" : 19,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuditLogEntry"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not found",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request. Invalid ID format.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadAuditLogs" : [ ]
+        } ],
+        "x-feature-flag" : "AUDIT_LOG_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/metrics" : {
+      "get" : {
+        "tags" : [ "Metrics" ],
+        "summary" : "Lists all available metrics",
+        "description" : "You can narrow down the output by selecting metrics in the **metricSelector** field. \n\nYou can additionally limit the output by using pagination: \n\n1. Specify the number of results per page in the **pageSize** query parameter. \n\n2. Then use the cursor from the **nextPageKey** field of the response in the **nextPageKey** query parameter to obtain subsequent pages. All other query parameters must be omitted.",
+        "operationId" : "listDescriptors_1",
+        "parameters" : [ {
+          "name" : "nextPageKey",
+          "in" : "query",
+          "description" : "The cursor for the next page of results. You can find it in the **nextPageKey** field of the previous response. \n\nThe first page is always returned if you don't specify the **nextPageKey** query parameter. \n\nWhen the **nextPageKey** is set to obtain subsequent pages, you must omit all other query parameters. ",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "The desired amount of primary entities for which data is delivered in a single response payload. \n\nThe maximal allowed page size is `1000`. \n\nIf not set, `100` is used.",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "metricSelector",
+          "in" : "query",
+          "description" : "Selects metrics for the query by their keys.\n\nYou can specify multiple metric keys separated by commas. For example: `metrickey1,metrickey2`. \n\nTo select multiple metrics belonging to the same parent, you can use this shorthand: list the last part of the required metric keys in parentheses, separated by commas, while keeping the common part untouched. For example, to list the `builtin:host.cpu.idle` and `builtin:host.cpu.user` metric, you could write: `builtin:host.cpu.(idle,user)`.\n\nYou can set additional transformation operators, separated by a colon (`:`). See the [Metrics API - selector transformations help page](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) for additional information on available result transformations.\n\nUse a trailing asterisk to select a complete hierarchy of metrics, e.g. `builtin:*` selects all Dynatrace-provided metrics. To find metrics based on a search term, rather than hierarchical, use the `text` parameter instead of this one.\n\n The length of the string is limited to 1,000 characters.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "text",
+          "in" : "query",
+          "description" : "Metric registry search term. Only show metrics that contain the term in their ID, display name, or description. Use the `metricSelector` parameter instead of this one to select a complete metric hierarchy instead of doing a text-based search.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "fields",
+          "in" : "query",
+          "description" : "Defines the list of metric properties included in the response. \n\n`metricId` is **always** included in the result. The following additional properties are available: \n\n* `displayName`: The name of the metric in the user interface. Enabled by default. \n* `description`: A short description of the metric. Enabled by default. \n* `unit`: The unit of the metric. Enabled by default. \n* `aggregationTypes`: The list of allowed aggregations for the metric. Note that it may be different after a [transformation](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) is applied. \n* `defaultAggregation`: The default aggregation of the metric. It is used when no aggregation is specified or the `:auto` transformation is set. \n* `dimensionDefinitions`: The fine metric division (for example, process group and process ID for some process-related metric). \n* `transformations`: A list of [transformations](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) that can be applied to the metric.\n* `dimensionDefinitions`: A list of dimensions available for the metric.\n* `entityType`: A list of entity types supported by the metric.\n\nTo add properties, list them with leading plus `+`. To exclude default properties, list them with leading minus `-`. \n\nTo specify several properties, join them with a comma (for example `fields=+aggregationTypes,-description`).\n\nIf you specify just one property, the response contains the metric key and the specified property.To return metric keys only, specify `metricId` here.",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricsList"
+                }
+              },
+              "text/csv; header=present; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricsList"
+                }
+              },
+              "text/csv; header=absent; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricsList"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Syntax or validation error. **metricSelector** or **fields** have syntactic or semantic errors."
+          },
+          "404" : {
+            "description" : "Not found. The requested resource is not found or the query is incorrect."
+          },
+          "406" : {
+            "description" : "Not acceptable. The requested media type is not supported. Check the **Accept** header of your request."
+          }
+        },
+        "security" : [ {
+          "DataExport" : [ ]
+        } ]
+      }
+    },
+    "/metrics/query" : {
+      "get" : {
+        "tags" : [ "Metrics" ],
+        "summary" : "Gets data points of the specified metrics",
+        "description" : "The following limits apply: \n* The amount of aggregated data points in the response is limited to 1,000 \n* The amount of series in the response is limited to 1,000 \n   * The amount of data points per series is limited to 10,080 \n   * The overall amount of data points is limited to 100,000 \n",
+        "operationId" : "query_1",
+        "parameters" : [ {
+          "name" : "nextPageKey",
+          "in" : "query",
+          "description" : "The cursor for the next page of results. You can find it in the **nextPageKey** field of the previous response. \n\nThe first page is always returned if you don't specify the **nextPageKey** query parameter. \n\nWhen the **nextPageKey** is set to obtain subsequent pages, you must omit all other query parameters. ",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "The desired amount of primary entities for which data is delivered in a single response payload. \n\nThe maximal allowed page size is `1000`. \n\nIf not set, `100` is used.",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "metricSelector",
+          "in" : "query",
+          "description" : "Selects metrics for the query by their keys. You can select up to 10 metrics for one query.\n\nYou can specify multiple metric keys separated by commas. For example: `metrickey1,metrickey2`. \n\nTo select multiple metrics belonging to the same parent, you can use this shorthand: list the last part of the required metric keys in parentheses, separated by commas, while keeping the common part untouched. For example, to list the `builtin:host.cpu.idle` and `builtin:host.cpu.user` metric, you could write: `builtin:host.cpu.(idle,user)`.\n\nYou can set additional transformation operators, separated by a colon (`:`). See the [Metrics API - selector transformations help page](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) for additional information on available result transformations.\n\n The length of the string is limited to 1,000 characters.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "resolution",
+          "in" : "query",
+          "description" : "The desired resolution of data points. \n\nYou can use one of the following options: \n* One aggregated data point of each series. Set `Inf` to use this option. \n* The desired amount of data points. This is the default option. This is a reference number of points, which is not necessarily equal to the number of the returned data points. \n* The desired timespan between data points. This is a reference timespan, which is not necessarily equal to the returned timespan. To use this option, specify the unit of the timespan. \n\nValid units for the timespan are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the default is 120 **data points**.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "from",
+          "in" : "query",
+          "description" : "The start of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the relative timeframe of two weeks is used (`now-2w`).",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "The end of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the current timestamp is used.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "entitySelector",
+          "in" : "query",
+          "description" : "Specifies the entity selector of the query. \n\nYou can set one or several of the following criteria: \n\n* Entity type (required): `type(HOST)`. \n* Tag: `tag(value)` \n* Management zone ID: `mzId(ID)` \n* Management zone name: `mz(caseSensitiveMzName)` \n* Health state (HEALTHY,UNHEALTHY): `healthState(HEALTHY)` \n* Dynatrace entity ID: `entityId(id)`. You can specify several IDs, separated by a comma (`id-1,id-2`). \n* Entity name: `entityName(value)`. You can specify several entity names, separated by a comma (`id-1,id-2`). \n\nTo set several criteria, separate them with a comma (`,`). Only results matching **all** criteria are included into response. \n\nUse the `GET /metrics/{metricId}` call to find out which entity types the metric you're interested in supports. \n\nTo set a universal scope, matching all entities, omit this parameter.\n\n The length of the string is limited to 1,000 characters.",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricData"
+                }
+              },
+              "text/csv; header=present; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricData"
+                }
+              },
+              "text/csv; header=absent; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Syntax or validation error. From and to parameters, scope or resolution are incorrect individually or in their combined meaning."
+          },
+          "403" : {
+            "description" : "Failed. The request is valid but the response is too big to process. Split your query into several queries with limited scopes."
+          },
+          "404" : {
+            "description" : "Not found. The requested resource is not found or the query is incorrect."
+          },
+          "406" : {
+            "description" : "Not acceptable. The requested media type is not supported. Check the **Accept** header of your request."
+          }
+        },
+        "security" : [ {
+          "DataExport" : [ ]
+        } ]
+      }
+    },
+    "/metrics/{metricId}" : {
+      "get" : {
+        "tags" : [ "Metrics" ],
+        "summary" : "Gets the descriptor of the specified metric",
+        "operationId" : "getSchema_1",
+        "parameters" : [ {
+          "name" : "metricId",
+          "in" : "path",
+          "description" : "The key of the required metric. \n\nYou can set additional transformation operators, separated by a colon (`:`). See the [Metrics API - selector transformations help page](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) for additional information on available result transformations.\n\n The length of the string is limited to 1,000 characters.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricDescriptor"
+                }
+              },
+              "text/csv; header=present; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricDescriptor"
+                }
+              },
+              "text/csv; header=absent; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricDescriptor"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not found. The requested resource is not found or the query is incorrect."
+          },
+          "406" : {
+            "description" : "Not acceptable. The requested media type is not supported. Check the **Accept** header of your request."
+          }
+        },
+        "security" : [ {
+          "DataExport" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "AuditLog" : {
+        "type" : "object",
+        "properties" : {
+          "totalCount" : {
+            "type" : "integer",
+            "description" : "The total number of log entities in the result.",
+            "format" : "int64"
+          },
+          "nextPageKey" : {
+            "type" : "string",
+            "description" : "The cursor for the next page of results. Without it, you'll get the first page again."
+          },
+          "auditLogs" : {
+            "type" : "array",
+            "description" : "A list of audit log entries ordered by the creation timestamp.",
+            "items" : {
+              "$ref" : "#/components/schemas/AuditLogEntry"
+            }
+          }
+        },
+        "description" : "The audit log of your environment.",
+        "example" : {
+          "totalCount" : 10,
+          "nextPageKey" : "___a7acX3q0AAAAAACJidWlsdGluOnNlcnZpY2lUVEJCUzBaNVIxVjJOSGt6Y3oyLTcwMUZWRkxlclH__9rtpxferQ",
+          "auditLogs" : [ {
+            "logId" : "197425568800060000",
+            "eventType" : "UPDATE",
+            "category" : "CONFIG",
+            "entityId" : "MOBILE_RUM: MOBILE_APPLICATION-752C223D59734CD2",
+            "environmentId" : "prod-env-13",
+            "user" : "test.user@company.com",
+            "userType" : "USER_NAME",
+            "userOrigin" : "webui (192.168.0.2)",
+            "timestamp" : 1974255688445,
+            "success" : true,
+            "patch" : [ {
+              "op" : "replace",
+              "path" : "/refreshTimeIntervalMillis",
+              "value" : 30000,
+              "oldValue" : 20000
+            } ]
+          } ]
+        }
+      },
+      "AuditLogEntry" : {
+        "required" : [ "category", "environmentId", "eventType", "logId", "success", "timestamp", "user", "userType" ],
+        "type" : "object",
+        "properties" : {
+          "logId" : {
+            "maxLength" : 19,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The ID of the log entry.",
+            "readOnly" : true
+          },
+          "eventType" : {
+            "type" : "string",
+            "description" : "The type of the recorded operation.",
+            "readOnly" : true,
+            "enum" : [ "CREATE", "DELETE", "GENERAL", "LOGIN", "LOGOUT", "READ", "UPDATE" ]
+          },
+          "category" : {
+            "type" : "string",
+            "description" : "The category of the recorded operation.",
+            "readOnly" : true,
+            "enum" : [ "CONFIG", "DEBUG_UI", "TOKEN", "WEB_UI" ]
+          },
+          "entityId" : {
+            "type" : "string",
+            "description" : "The ID of an entity from the **category**. \n\n For example, it can be config ID for the `CONFIG` category or token ID for the `TOKEN` category.",
+            "readOnly" : true
+          },
+          "environmentId" : {
+            "type" : "string",
+            "description" : "The ID of the Dynatrace environment where the recorded operation occurred.",
+            "readOnly" : true
+          },
+          "user" : {
+            "type" : "string",
+            "description" : "The ID of the user who performed the recorded operation.",
+            "readOnly" : true
+          },
+          "userType" : {
+            "type" : "string",
+            "description" : "The type of the authentication of the **user**.",
+            "readOnly" : true,
+            "enum" : [ "PUBLIC_TOKEN_IDENTIFIER", "REQUEST_ID", "SERVICE_NAME", "TOKEN_HASH", "USER_NAME" ]
+          },
+          "userOrigin" : {
+            "type" : "string",
+            "description" : "The origin and the IP address of the **user**.",
+            "readOnly" : true
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "description" : "The timestamp of the record creation, in UTC milliseconds.",
+            "format" : "int64",
+            "readOnly" : true
+          },
+          "success" : {
+            "type" : "boolean",
+            "description" : "The recorded operation is successful (`true`) or failed (`false`).",
+            "readOnly" : true
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "The logged message.",
+            "readOnly" : true
+          },
+          "patch" : {
+            "type" : "object",
+            "description" : "The patch of the recorded operation as the JSON representation. \n\n The format is an enhanced RFC 6902. The patch also carries the previous value in the **oldValue** field.",
+            "readOnly" : true
+          }
+        },
+        "description" : "An entry of the audit log.",
+        "example" : {
+          "logId" : "197425568800060000",
+          "eventType" : "UPDATE",
+          "category" : "CONFIG",
+          "entityId" : "MOBILE_RUM: MOBILE_APPLICATION-752C223D59734CD2",
+          "environmentId" : "prod-env-13",
+          "user" : "test.user@company.com",
+          "userType" : "USER_NAME",
+          "userOrigin" : "webui (192.168.0.2)",
+          "timestamp" : 1974255688445,
+          "success" : true,
+          "patch" : [ {
+            "op" : "replace",
+            "path" : "/refreshTimeIntervalMillis",
+            "value" : 30000,
+            "oldValue" : 20000
+          } ]
+        }
+      },
+      "ConstraintViolation" : {
+        "type" : "object",
+        "properties" : {
+          "parameterLocation" : {
+            "type" : "string",
+            "enum" : [ "PATH", "PAYLOAD_BODY", "QUERY" ]
+          },
+          "location" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Error" : {
+        "type" : "object",
+        "properties" : {
+          "constraintViolations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ConstraintViolation"
+            }
+          },
+          "code" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ErrorEnvelope" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "$ref" : "#/components/schemas/Error"
+          }
+        }
+      },
+      "MetricDefaultAggregation" : {
+        "type" : "object",
+        "properties" : {
+          "parameter" : {
+            "type" : "number",
+            "description" : "The percentile to be delivered. Valid values are between `0` and `100`. \n\nApplicable only to the `percentile` aggregation type.",
+            "format" : "double"
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "The type of default aggregation.",
+            "enum" : [ "auto", "avg", "count", "max", "median", "min", "percentile", "sum", "value" ]
+          }
+        },
+        "description" : "The default aggregation of a metric."
+      },
+      "MetricDescriptor" : {
+        "type" : "object",
+        "properties" : {
+          "dimensionDefinitions" : {
+            "type" : "array",
+            "description" : "The fine metric division (for example, process group and process ID for some process-related metric).",
+            "items" : {
+              "$ref" : "#/components/schemas/MetricDimensionDefinition"
+            }
+          },
+          "entityType" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "List of admissible primary entity types for this metric. Can be used for the `type` predicate in the `entitySelector`.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "metricId" : {
+            "type" : "string",
+            "description" : "The fully qualified key of the metric. \n\nIf a transformation has been used it is reflected in the metric key."
+          },
+          "aggregationTypes" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "The list of allowed aggregations for this metric.",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "auto", "avg", "count", "max", "median", "min", "percentile", "sum", "value" ]
+            }
+          },
+          "defaultAggregation" : {
+            "$ref" : "#/components/schemas/MetricDefaultAggregation"
+          },
+          "displayName" : {
+            "type" : "string",
+            "description" : "The name of the metric in the user interface."
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "A short description of the metric."
+          },
+          "transformations" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "Transform operators that could be appended to the current transformation list. Must be enabled with the \"fields\" parameter on `/metrics` and is always present on `/metrics/{metricId}`.",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "filter", "fold", "merge", "names", "parents", "rate" ]
+            }
+          },
+          "unit" : {
+            "type" : "string",
+            "description" : "The unit of the metric.",
+            "enum" : [ "Bit", "BitPerHour", "BitPerMinute", "BitPerSecond", "Byte", "BytePerHour", "BytePerMinute", "BytePerSecond", "Cores", "Count", "GibiByte", "Giga", "GigaByte", "Hour", "KibiByte", "KibiBytePerHour", "KibiBytePerMinute", "KibiBytePerSecond", "Kilo", "KiloByte", "KiloBytePerHour", "KiloBytePerMinute", "KiloBytePerSecond", "MebiByte", "MebiBytePerHour", "MebiBytePerMinute", "MebiBytePerSecond", "Mega", "MegaByte", "MegaBytePerHour", "MegaBytePerMinute", "MegaBytePerSecond", "MicroSecond", "MilliCores", "MilliSecond", "MilliSecondPerMinute", "Minute", "NanoSecond", "NanoSecondPerMinute", "NotApplicable", "PerHour", "PerMinute", "PerSecond", "Percent", "Promille", "Ratio", "Second", "State", "Unspecified" ]
+          }
+        },
+        "description" : "The descriptor of a metric.",
+        "example" : {
+          "metricId" : "builtin:host.cpu.user:merge(0):max:fold",
+          "displayName" : "CPU user",
+          "description" : "Percentage of user-space CPU time currently utilized, per host.",
+          "unit" : "Percent",
+          "aggregationTypes" : [ "auto", "avg", "max", "min" ],
+          "transformations" : [ "fold" ],
+          "defaultAggregation" : {
+            "type" : "avg"
+          },
+          "dimensionDefinitions" : [ {
+            "name" : "primary",
+            "type" : "ENTITY"
+          } ]
+        }
+      },
+      "MetricDimensionDefinition" : {
+        "type" : "object",
+        "properties" : {
+          "index" : {
+            "type" : "integer",
+            "description" : "The unique 0-based index of the dimension. \n\n Appending transformations such as :names or :parents may change the indexes of dimensions.",
+            "format" : "int32"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the dimension."
+          },
+          "key" : {
+            "type" : "string",
+            "description" : "The key of the dimension. \n\n It must be unique within the metric."
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "The type of the dimension.",
+            "enum" : [ "ENTITY", "NUMBER", "OTHER", "STRING", "VOID" ]
+          }
+        },
+        "description" : "The dimension of a metric."
+      },
+      "MetricsList" : {
+        "type" : "object",
+        "properties" : {
+          "totalCount" : {
+            "type" : "integer",
+            "description" : "The estimated number of metrics in the result.",
+            "format" : "int64"
+          },
+          "nextPageKey" : {
+            "type" : "string",
+            "description" : "The cursor for the next page of results. Has the value of `null` on the last page. \n\nUse it in the **nextPageKey** query parameter to obtain subsequent pages of the result."
+          },
+          "metrics" : {
+            "type" : "array",
+            "description" : "A list of metric along with their descriptors",
+            "items" : {
+              "$ref" : "#/components/schemas/MetricDescriptor"
+            }
+          }
+        },
+        "description" : "A list of metrics along with their descriptors.",
+        "example" : {
+          "totalCount" : 3,
+          "nextPageKey" : "ABCDEFABCDEFABCDEF_",
+          "metrics" : [ {
+            "metricId" : "builtin:host.cpu.user:merge(0):max:fold",
+            "displayName" : "CPU user",
+            "description" : "Percentage of user-space CPU time currently utilized, per host.",
+            "unit" : "Percent",
+            "aggregationTypes" : [ "auto", "avg", "max", "min" ],
+            "transformations" : [ "fold" ],
+            "defaultAggregation" : {
+              "type" : "avg"
+            },
+            "dimensionDefinitions" : [ {
+              "name" : "primary",
+              "type" : "ENTITY"
+            } ]
+          }, {
+            "metricKey" : "builtin:host.cpu.idle",
+            "displayName" : "CPU idle",
+            "description" : "Percentage of CPU time not being utilized, per host.",
+            "unit" : "Percent",
+            "aggregationTypes" : [ "auto", "avg", "max", "min" ],
+            "transformations" : [ "filter", "fold", "merge", "names", "parents" ],
+            "defaultAggregation" : {
+              "type" : "avg"
+            },
+            "dimensionDefinitions" : [ {
+              "name" : "primary",
+              "type" : "ENTITY"
+            } ]
+          } ]
+        }
+      },
+      "MetricData" : {
+        "type" : "object",
+        "properties" : {
+          "totalCount" : {
+            "type" : "integer",
+            "description" : "The total number of primary entities in the result. \n\nHas the `0` value if none of the requested metrics is suitable for pagination.",
+            "format" : "int64"
+          },
+          "nextPageKey" : {
+            "type" : "string",
+            "description" : "The cursor for the next page of results. Has the value of `null` on the last page. \n\nUse it in the **nextPageKey** query parameter to obtain subsequent pages of the result."
+          },
+          "result" : {
+            "type" : "array",
+            "description" : "A list of metrics and their data points.",
+            "items" : {
+              "$ref" : "#/components/schemas/MetricDataPoints"
+            }
+          }
+        },
+        "description" : "A list of metrics and their data points.",
+        "example" : {
+          "totalCount" : 3,
+          "nextPageKey" : "ABCDEFABCDEFABCDEF_",
+          "result" : [ {
+            "metricId" : "builtin:host.disk.avail",
+            "data" : [ {
+              "dimensions" : [ "HOST-F1266E1D0AAC2C3C", "DISK-F1266E1D0AAC2C3F" ],
+              "timestamps" : [ 3151435100000, 3151438700000, 3151442300000 ],
+              "values" : [ 11.1, 22.2, 33.3 ]
+            }, {
+              "dimensions" : [ "HOST-F1266E1D0AAC2C3C", "DISK-F1266E1D0AAC2C3D" ],
+              "timestamps" : [ 3151435100000, 3151438700000, 3151442300000 ],
+              "values" : [ 111.1, 222.2, 333.3 ]
+            } ]
+          }, {
+            "metricId" : "builtin:host.cpu.idle",
+            "data" : [ {
+              "dimensions" : [ "HOST-F1266E1D0AAC2C3C" ],
+              "timestamps" : [ 3151435100000, 3151438700000, 3151442300000 ],
+              "values" : [ 1.1, 2.2, 3.3 ]
+            } ]
+          } ]
+        }
+      },
+      "MetricDataPoints" : {
+        "type" : "object",
+        "properties" : {
+          "metricId" : {
+            "type" : "string",
+            "description" : "The key of the metric. \n\nIf any transformation is applied, it is included here."
+          },
+          "data" : {
+            "type" : "array",
+            "description" : "Data points of the metric.",
+            "items" : {
+              "$ref" : "#/components/schemas/MetricDataPoints"
+            }
+          }
+        },
+        "description" : "Data points of a metric.",
+        "example" : {
+          "metricId" : "builtin:host.disk.avail",
+          "data" : [ {
+            "dimensions" : [ "HOST-F1266E1D0AAC2C3C", "DISK-F1266E1D0AAC2C3F" ],
+            "timestamps" : [ 3151435100000, 3151438700000, 3151442300000 ],
+            "values" : [ 11.1, 22.2, 33.3 ]
+          }, {
+            "dimensions" : [ "HOST-F1266E1D0AAC2C3C", "DISK-F1266E1D0AAC2C3D" ],
+            "timestamps" : [ 3151435100000, 3151438700000, 3151442300000 ],
+            "values" : [ 111.1, 222.2, 333.3 ]
+          } ]
+        }
+      }
+    },
+    "__securitySchemes" : {
+      "WriteConfig" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Write configuration** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "ReadConfig" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Read configuration** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "DataImport" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Data ingest, e.g.: metrics and events** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "ReadAuditLogs" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Read audit logs** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "LogExport" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Export logs** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "DataExport" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Access problem and event feed, metrics, and topology** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "DeploymentManagement" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Deployment management** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      }
+    }
+  }
+}

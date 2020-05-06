@@ -1,0 +1,1017 @@
+{
+	"info": {
+		"_postman_id": "e88aae70-3286-4136-b110-eb55edcbe152",
+		"name": "Dynatrace Environment API v2",
+		"description": "\nDocumentation of the Dynatrace Environment API v2. Resources here generally supersede those in v1. The process of migrating resources from v1 is still in progress. If you miss a resource, consider using the Dynatrace Environment API v1. Refer to the [help page](https://www.dynatrace.com/support/help/shortlink/section-api) to read about use-cases and examples.\n\nNotes about compatibility:\n* Operations marked as early adopter or preview may be changed in non-compatible ways, although we try to avoid this.\n* We may add new enum constants without incrementing the API version; thus, clients need to handle unknown enum constants gracefully.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "auditlogs",
+			"item": [
+				{
+					"name": "Gets the audit log of your Dynatrace environment | maturity=EARLY_ADOPTER",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{tenant}}{{envApi}}/auditlogs?nextPageKey=<string>&pageSize=<integer>&filter=<string>&from=<string>&to=<string>&sort=-timestamp",
+							"host": [
+								"{{tenant}}{{envApi}}"
+							],
+							"path": [
+								"auditlogs"
+							],
+							"query": [
+								{
+									"key": "nextPageKey",
+									"value": "<string>",
+									"description": "The cursor for the next page of results. You can find it in the **nextPageKey** field of the previous response. \n\nThe first page is always returned if you don't specify the **nextPageKey** query parameter. \n\nWhen the **nextPageKey** is set to obtain subsequent pages, you must omit all other query parameters. "
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>",
+									"description": "The desired amount of log entries for which data is delivered in a single response payload. \n\nThe maximal allowed page size is `5000`. \n\nIf not set, `1000` is used."
+								},
+								{
+									"key": "filter",
+									"value": "<string>",
+									"description": "Filters the audit log. You can use the following criteria: \n* **user**. The `EQUALS` operator is used. \n* **eventType**. The `EQUALS` operator is used. \n* **category**. The `EQUALS` operator is used. \n* **entityId**. The `CONTAINS` operator is used. \n\nFor every criterion you can specify several comma-separated values, for example `eventType(CREATE,UPDATE)`. In this case, the OR logic applies. \n\nYou can specify several comma-separated criteria, for example `eventType(CREATE,UPDATE),category(CONFIG)`. If several criteria are specified, the AND logic applies. \n\nYou can specify the value of a criterion as a quoted or an unquoted string. \n\nFor the quoted string the following special characters must be escaped with a tilde (`~`) inside quotes: \n* Tilde `~` \n* Quote `\"` \nFor example `entityId(\"myEntity (15559409040709225)\")`. \n\nFor the unquoted string, the following special characters and keywords must be escaped with a tilde (`~`) \n* Opening bracket `(` \n* Closing bracket `)` \n* Comma `,` \n* Tilde `~`"
+								},
+								{
+									"key": "from",
+									"value": "<string>",
+									"description": "The start of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the relative timeframe of two weeks is used (`now-2w`)."
+								},
+								{
+									"key": "to",
+									"value": "<string>",
+									"description": "The end of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the current timestamp is used."
+								},
+								{
+									"key": "sort",
+									"value": "-timestamp",
+									"description": "The sorting of audit log entries: \n* `timestamp`: Oldest first. \n* `-timestamp`: Newest first. \n\nIf not set, the newest first sorting is applied."
+								}
+							]
+						},
+						"description": "You can limit the output by using pagination: \n1. Specify the number of results per page in the **pageSize** query parameter. \n2. Use the cursor from the **nextPageKey** field of the previous response in the **nextPageKey** query parameter to obtain subsequent pages."
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/auditlogs?nextPageKey=<string>&pageSize=<integer>&filter=<string>&from=<string>&to=<string>&sort=-timestamp",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"auditlogs"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "filter",
+											"value": "<string>"
+										},
+										{
+											"key": "from",
+											"value": "<string>"
+										},
+										{
+											"key": "to",
+											"value": "<string>"
+										},
+										{
+											"key": "sort",
+											"value": "-timestamp"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Gets the specified entry of the audit log | maturity=EARLY_ADOPTER",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{tenant}}{{envApi}}/auditlogs/:id",
+							"host": [
+								"{{tenant}}{{envApi}}"
+							],
+							"path": [
+								"auditlogs",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "<string>",
+									"description": "(Required) The ID of the required log entry."
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Not found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/auditlogs/:id",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"auditlogs",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/auditlogs/:id",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"auditlogs",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Bad Request. Invalid ID format.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/auditlogs/:id",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"auditlogs",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "metrics",
+			"item": [
+				{
+					"name": "Lists all available metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{tenant}}{{envApi}}/metrics?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&text=<string>&fields=<string>",
+							"host": [
+								"{{tenant}}{{envApi}}"
+							],
+							"path": [
+								"metrics"
+							],
+							"query": [
+								{
+									"key": "nextPageKey",
+									"value": "<string>",
+									"description": "The cursor for the next page of results. You can find it in the **nextPageKey** field of the previous response. \n\nThe first page is always returned if you don't specify the **nextPageKey** query parameter. \n\nWhen the **nextPageKey** is set to obtain subsequent pages, you must omit all other query parameters. "
+								},
+								{
+									"key": "pageSize",
+									"value": "<long>",
+									"description": "The desired amount of primary entities for which data is delivered in a single response payload. \n\nThe maximal allowed page size is `1000`. \n\nIf not set, `100` is used."
+								},
+								{
+									"key": "metricSelector",
+									"value": "<string>",
+									"description": "Selects metrics for the query by their keys.\n\nYou can specify multiple metric keys separated by commas. For example: `metrickey1,metrickey2`. \n\nTo select multiple metrics belonging to the same parent, you can use this shorthand: list the last part of the required metric keys in parentheses, separated by commas, while keeping the common part untouched. For example, to list the `builtin:host.cpu.idle` and `builtin:host.cpu.user` metric, you could write: `builtin:host.cpu.(idle,user)`.\n\nYou can set additional transformation operators, separated by a colon (`:`). See the [Metrics API - selector transformations help page](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) for additional information on available result transformations.\n\nUse a trailing asterisk to select a complete hierarchy of metrics, e.g. `builtin:*` selects all Dynatrace-provided metrics. To find metrics based on a search term, rather than hierarchical, use the `text` parameter instead of this one.\n\n The length of the string is limited to 1,000 characters."
+								},
+								{
+									"key": "text",
+									"value": "<string>",
+									"description": "Metric registry search term. Only show metrics that contain the term in their ID, display name, or description. Use the `metricSelector` parameter instead of this one to select a complete metric hierarchy instead of doing a text-based search."
+								},
+								{
+									"key": "fields",
+									"value": "<string>",
+									"description": "Defines the list of metric properties included in the response. \n\n`metricId` is **always** included in the result. The following additional properties are available: \n\n* `displayName`: The name of the metric in the user interface. Enabled by default. \n* `description`: A short description of the metric. Enabled by default. \n* `unit`: The unit of the metric. Enabled by default. \n* `aggregationTypes`: The list of allowed aggregations for the metric. Note that it may be different after a [transformation](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) is applied. \n* `defaultAggregation`: The default aggregation of the metric. It is used when no aggregation is specified or the `:auto` transformation is set. \n* `dimensionDefinitions`: The fine metric division (for example, process group and process ID for some process-related metric). \n* `transformations`: A list of [transformations](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) that can be applied to the metric.\n* `dimensionDefinitions`: A list of dimensions available for the metric.\n* `entityType`: A list of entity types supported by the metric.\n\nTo add properties, list them with leading plus `+`. To exclude default properties, list them with leading minus `-`. \n\nTo specify several properties, join them with a comma (for example `fields=+aggregationTypes,-description`).\n\nIf you specify just one property, the response contains the metric key and the specified property.To return metric keys only, specify `metricId` here."
+								}
+							]
+						},
+						"description": "You can narrow down the output by selecting metrics in the **metricSelector** field. \n\nYou can additionally limit the output by using pagination: \n\n1. Specify the number of results per page in the **pageSize** query parameter. \n\n2. Then use the cursor from the **nextPageKey** field of the response in the **nextPageKey** query parameter to obtain subsequent pages. All other query parameters must be omitted."
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&text=<string>&fields=<string>",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<long>"
+										},
+										{
+											"key": "metricSelector",
+											"value": "<string>"
+										},
+										{
+											"key": "text",
+											"value": "<string>"
+										},
+										{
+											"key": "fields",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Syntax or validation error. **metricSelector** or **fields** have syntactic or semantic errors.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&text=<string>&fields=<string>",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<long>"
+										},
+										{
+											"key": "metricSelector",
+											"value": "<string>"
+										},
+										{
+											"key": "text",
+											"value": "<string>"
+										},
+										{
+											"key": "fields",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Not acceptable. The requested media type is not supported. Check the **Accept** header of your request.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&text=<string>&fields=<string>",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<long>"
+										},
+										{
+											"key": "metricSelector",
+											"value": "<string>"
+										},
+										{
+											"key": "text",
+											"value": "<string>"
+										},
+										{
+											"key": "fields",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "Not Acceptable",
+							"code": 406,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Not found. The requested resource is not found or the query is incorrect.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&text=<string>&fields=<string>",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<long>"
+										},
+										{
+											"key": "metricSelector",
+											"value": "<string>"
+										},
+										{
+											"key": "text",
+											"value": "<string>"
+										},
+										{
+											"key": "fields",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Gets data points of the specified metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{tenant}}{{envApi}}/metrics/query?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&resolution=<string>&from=<string>&to=<string>&entitySelector=<string>",
+							"host": [
+								"{{tenant}}{{envApi}}"
+							],
+							"path": [
+								"metrics",
+								"query"
+							],
+							"query": [
+								{
+									"key": "nextPageKey",
+									"value": "<string>",
+									"description": "The cursor for the next page of results. You can find it in the **nextPageKey** field of the previous response. \n\nThe first page is always returned if you don't specify the **nextPageKey** query parameter. \n\nWhen the **nextPageKey** is set to obtain subsequent pages, you must omit all other query parameters. "
+								},
+								{
+									"key": "pageSize",
+									"value": "<long>",
+									"description": "The desired amount of primary entities for which data is delivered in a single response payload. \n\nThe maximal allowed page size is `1000`. \n\nIf not set, `100` is used."
+								},
+								{
+									"key": "metricSelector",
+									"value": "<string>",
+									"description": "Selects metrics for the query by their keys. You can select up to 10 metrics for one query.\n\nYou can specify multiple metric keys separated by commas. For example: `metrickey1,metrickey2`. \n\nTo select multiple metrics belonging to the same parent, you can use this shorthand: list the last part of the required metric keys in parentheses, separated by commas, while keeping the common part untouched. For example, to list the `builtin:host.cpu.idle` and `builtin:host.cpu.user` metric, you could write: `builtin:host.cpu.(idle,user)`.\n\nYou can set additional transformation operators, separated by a colon (`:`). See the [Metrics API - selector transformations help page](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) for additional information on available result transformations.\n\n The length of the string is limited to 1,000 characters."
+								},
+								{
+									"key": "resolution",
+									"value": "<string>",
+									"description": "The desired resolution of data points. \n\nYou can use one of the following options: \n* One aggregated data point of each series. Set `Inf` to use this option. \n* The desired amount of data points. This is the default option. This is a reference number of points, which is not necessarily equal to the number of the returned data points. \n* The desired timespan between data points. This is a reference timespan, which is not necessarily equal to the returned timespan. To use this option, specify the unit of the timespan. \n\nValid units for the timespan are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the default is 120 **data points**."
+								},
+								{
+									"key": "from",
+									"value": "<string>",
+									"description": "The start of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the relative timeframe of two weeks is used (`now-2w`)."
+								},
+								{
+									"key": "to",
+									"value": "<string>",
+									"description": "The end of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the current timestamp is used."
+								},
+								{
+									"key": "entitySelector",
+									"value": "<string>",
+									"description": "Specifies the entity selector of the query. \n\nYou can set one or several of the following criteria: \n\n* Entity type (required): `type(HOST)`. \n* Tag: `tag(value)` \n* Management zone ID: `mzId(ID)` \n* Management zone name: `mz(caseSensitiveMzName)` \n* Health state (HEALTHY,UNHEALTHY): `healthState(HEALTHY)` \n* Dynatrace entity ID: `entityId(id)`. You can specify several IDs, separated by a comma (`id-1,id-2`). \n* Entity name: `entityName(value)`. You can specify several entity names, separated by a comma (`id-1,id-2`). \n\nTo set several criteria, separate them with a comma (`,`). Only results matching **all** criteria are included into response. \n\nUse the `GET /metrics/{metricId}` call to find out which entity types the metric you're interested in supports. \n\nTo set a universal scope, matching all entities, omit this parameter.\n\n The length of the string is limited to 1,000 characters."
+								}
+							]
+						},
+						"description": "The following limits apply: \n* The amount of aggregated data points in the response is limited to 1,000 \n* The amount of series in the response is limited to 1,000 \n   * The amount of data points per series is limited to 10,080 \n   * The overall amount of data points is limited to 100,000 \n"
+					},
+					"response": [
+						{
+							"name": "Not acceptable. The requested media type is not supported. Check the **Accept** header of your request.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics/query?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&resolution=<string>&from=<string>&to=<string>&entitySelector=<string>",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics",
+										"query"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<long>"
+										},
+										{
+											"key": "metricSelector",
+											"value": "<string>"
+										},
+										{
+											"key": "resolution",
+											"value": "<string>"
+										},
+										{
+											"key": "from",
+											"value": "<string>"
+										},
+										{
+											"key": "to",
+											"value": "<string>"
+										},
+										{
+											"key": "entitySelector",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "Not Acceptable",
+							"code": 406,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Failed. The request is valid but the response is too big to process. Split your query into several queries with limited scopes.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics/query?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&resolution=<string>&from=<string>&to=<string>&entitySelector=<string>",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics",
+										"query"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<long>"
+										},
+										{
+											"key": "metricSelector",
+											"value": "<string>"
+										},
+										{
+											"key": "resolution",
+											"value": "<string>"
+										},
+										{
+											"key": "from",
+											"value": "<string>"
+										},
+										{
+											"key": "to",
+											"value": "<string>"
+										},
+										{
+											"key": "entitySelector",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Syntax or validation error. From and to parameters, scope or resolution are incorrect individually or in their combined meaning.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics/query?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&resolution=<string>&from=<string>&to=<string>&entitySelector=<string>",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics",
+										"query"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<long>"
+										},
+										{
+											"key": "metricSelector",
+											"value": "<string>"
+										},
+										{
+											"key": "resolution",
+											"value": "<string>"
+										},
+										{
+											"key": "from",
+											"value": "<string>"
+										},
+										{
+											"key": "to",
+											"value": "<string>"
+										},
+										{
+											"key": "entitySelector",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics/query?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&resolution=<string>&from=<string>&to=<string>&entitySelector=<string>",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics",
+										"query"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<long>"
+										},
+										{
+											"key": "metricSelector",
+											"value": "<string>"
+										},
+										{
+											"key": "resolution",
+											"value": "<string>"
+										},
+										{
+											"key": "from",
+											"value": "<string>"
+										},
+										{
+											"key": "to",
+											"value": "<string>"
+										},
+										{
+											"key": "entitySelector",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Not found. The requested resource is not found or the query is incorrect.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics/query?nextPageKey=<string>&pageSize=<long>&metricSelector=<string>&resolution=<string>&from=<string>&to=<string>&entitySelector=<string>",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics",
+										"query"
+									],
+									"query": [
+										{
+											"key": "nextPageKey",
+											"value": "<string>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<long>"
+										},
+										{
+											"key": "metricSelector",
+											"value": "<string>"
+										},
+										{
+											"key": "resolution",
+											"value": "<string>"
+										},
+										{
+											"key": "from",
+											"value": "<string>"
+										},
+										{
+											"key": "to",
+											"value": "<string>"
+										},
+										{
+											"key": "entitySelector",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Gets the descriptor of the specified metric",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{tenant}}{{envApi}}/metrics/:metricId",
+							"host": [
+								"{{tenant}}{{envApi}}"
+							],
+							"path": [
+								"metrics",
+								":metricId"
+							],
+							"variable": [
+								{
+									"key": "metricId",
+									"value": "<string>",
+									"description": "(Required) The key of the required metric. \n\nYou can set additional transformation operators, separated by a colon (`:`). See the [Metrics API - selector transformations help page](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) for additional information on available result transformations.\n\n The length of the string is limited to 1,000 characters."
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics/:metricId",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics",
+										":metricId"
+									],
+									"variable": [
+										{
+											"key": "metricId"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Not acceptable. The requested media type is not supported. Check the **Accept** header of your request.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics/:metricId",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics",
+										":metricId"
+									],
+									"variable": [
+										{
+											"key": "metricId"
+										}
+									]
+								}
+							},
+							"status": "Not Acceptable",
+							"code": 406,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Not found. The requested resource is not found or the query is incorrect.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{tenant}}{{envApi}}/metrics/:metricId",
+									"host": [
+										"{{tenant}}{{envApi}}"
+									],
+									"path": [
+										"metrics",
+										":metricId"
+									],
+									"variable": [
+										{
+											"key": "metricId"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "Api-Token {{apiToken}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Authorization",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "2682b8e1-755d-4a10-a2a0-a8b62edc774c",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "8dc52024-9622-4ad9-9f6b-35d12ce86df8",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "df6dd66a-f6f1-4ff1-aa48-13855fbfd9d8",
+			"key": "baseUrl",
+			"value": "{{tenant}}{{envApi}}",
+			"type": "string"
+		},
+		{
+			"id": "c61f1695-82a4-40cc-8302-2a16ca6cb733",
+			"key": "envApi",
+			"value": "/api/v2",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
