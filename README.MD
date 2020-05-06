@@ -47,7 +47,7 @@ Now REST and enjoy!
 
 ### Quick intro on how to use the generated params and path variables
 
-Let's say I want to list all available OneAgent versions of the Cluster. I go to Environment v1 > Deployment > Installer > agent
+Let's say I want to list all available OneAgent Installer Linux versions available on the Cluster. I go to Environment v1 > Deployment > Installer > agent
 
 
 ![Explanation of generated Params and path variables](images/params-explanation.png)
