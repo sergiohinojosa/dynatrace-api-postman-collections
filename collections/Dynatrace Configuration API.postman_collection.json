@@ -27633,6 +27633,13 @@
 				"id": "72ebec97-1982-4430-aa06-39d3dee2736d",
 				"type": "text/javascript",
 				"exec": [
+					"var tenant = pm.variables.get(\"tenant\");",
+					"var apiToken = pm.variables.get(\"apiToken\");",
+					"",
+					"// Add Authorization as QueryParameter for MC tenants",
+					"if (tenant.includes('managed.internal.dynatrace.com')) {",
+					"    pm.request.url.query.add(\"Api-Token=\" + apiToken);",
+					"}",
 					""
 				]
 			}
