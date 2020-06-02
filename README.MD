@@ -27,7 +27,7 @@ If you notice the collections are documented, they include examples in the Body 
 
 The Collections are parameterized so you can quickly change from personal or customer's environment SaaS or Managed, sprint or production, does not matter. If you have already environments, just make sure that the variables are setted with **protocol** and **no leading slashes**, like the following:
 
->Dynatrace Tenant **https://{your-domain}/e/{your-environment-id}** for managed or **https://{your-environment-id}.live.dynatrace.com** for SaaS
+>Dynatrace Tenant **https://your-domain/e/{your-environment-id}** for managed or **https://your-environment-id.live.dynatrace.com** for SaaS
 
 | variable | value    |
 |-------|-----------------|
