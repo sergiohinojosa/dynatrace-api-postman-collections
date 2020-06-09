@@ -3,13 +3,13 @@
 # You need bash version 4+ to execute this bash since we are using arrays.
 
 # Tenant https://abcd.live.dynatrace.com/
-TENANT="https://blr06292.live.dynatrace.com"
+TENANT="https://abcd.live.dynatrace.com"
 
 # Copy the cookies in format cookies="Cookie: key=value; key2=value2; "
 # You need SRV, b925d32c & apmsessionid
 # A request that don't have those together and match the server values, will reset the apmsessionid and cut the response.
 #b925d32c=xx;
-cookies="Cookie: SRV=server1; b925d32c=OSDVGRTP2RPMKIOM2MCYEYC3GM ; apmsessionid=node0hwmt728k49gno0jl5x2z4cmp6108.node0; "
+cookies="Cookie: SRV=xxx; b925d32c=xxx ; apmsessionid=xxx; "
 contentType="Content-Type: application/json"
 
 declare -A spec
