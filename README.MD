@@ -5,7 +5,7 @@
 This repository is a quick explanation how to generate a Postman collection **(sorted out, with examples, query parameters, path variables, descriptions and documentation 📖)** from the OpenApi spec so you can keep your collections updated with the Dynatrace API development. This repo also contains the parameterized Collections and some tips so you get started quickly with the [Dynatrace API](https://www.dynatrace.com/support/help/extend-dynatrace/dynatrace-api/).
 
 ## Actual Version of the generated collections
-Build 192.87
+Build 194.72
 
 ## Get Started with Postman and the Dynatrace API's
 
@@ -59,10 +59,11 @@ Let's say I want to list all available OneAgent Installer Linux versions availab
 5. Analyze the response
 
 ### Where is the Authorization? 
-The Authorization Header is setted at the Collection level. All the requests are imported so that they per default inherit the authorization from the parent. 
+The Authorization is setted at the Collection level as Query Parameter. All the requests are imported so that they per default inherit the authorization from the parent. More about authorization [read here](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication/)
 
 ## Generate your own Postman Collections
-Generate the Postman Collections is fairly simple. Altough there are unfortunately some manual steps for importing and setting the Collection as wished. Below are the steps needed for generating them so other users can import them without any further configurations.
+Generate the Postman Collections is fairly simple. Altough there are unfortunately some manual steps for importing and setting the Collection as wished. Below are the steps needed for generating them so other users can import them without any further configurations. 
+> For downloading and parsing the specs with bash and curl, take a look at the 'downloadspecs.sh' file
 
 1. ### Login to the tenant and download the specification. 
 
@@ -80,11 +81,10 @@ From
 To
 ```json
   "servers" : [ {
-    "url" : "{{tenant}}{{configApi}}",
+    "url" : "{{tenant}}{{api}}",
     "variables" : { }
   } ],
 ```
-for the environment specs do {{envApi}}.
 
 
 3. ### Remove securitySchemes
@@ -99,7 +99,7 @@ From
 
 To
 ```json
-  "__securitySchemes" 
+  "_securitySchemes" 
 ```
 
 4. ### Import the  json spec
@@ -115,22 +115,32 @@ and enter this values in the Authorization of the Collection:
 |       |                |
 |-------|-----------------|
 | type  | API Key         |
-| key   |  Authorization  |
-| value | Api-Token {{apiToken}} |
-|Add to | Add to header |
+| key   |  Api-Token      |
+| value |  {{apiToken}}   |
+|Add to | Query Params    |
+     
+
+Then go to Variables and define the api variables
 
 
-Then go to Variables and define the configApi variable
+|collection | variable   |     value   |
+|-----------|------------|-------------|
+|env1   |  api   |  /api/v1            |
+|env2   |  api   |  /api/v2            |
+|config1|  api   |  /api/config/v1     |
 
 
-| variable  | initial value    | current value   |
-|------------|-----------------|-----------------|
-| configApi  | /api/config/v1  |  /api/config/v1 |
+6. ### Set the Dynatrace Release
+Just modify the name of the collection after importing (before exporting) you dont have a conflict with previos versions and the user knows the version imported.
+
+|collection | Name                    |
+|-----------|-------------------------|
+|env1       |  Dynatrace Environment API v1 (version)     |
+|env2       |  Dynatrace Environment API v2 (version)     |
+|config1    |  Dynatrace Configuration API (version)      |
 
 
-for envApi would be the same with its respective endpoint.
-You are done. The collection is the same as the ones in the **collections** 📁 folder
-
+You are done. Export the collection save it in the **collections** 📁 folder and submit a pull request.
 
 ## 🤲Contributing
 If you want to contribute, do the steps described in  **Generate your own Postman Collections**. Export the collections and update the files under the collections and specs folder. Make a pull request. Done!
