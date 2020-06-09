@@ -6,7 +6,7 @@
     "version" : "1.0"
   },
   "servers" : [ {
-    "url" : "{{tenant}}{{api}}",
+    "url" : "{{tenant}}/api/v1",
     "variables" : { }
   } ],
   "tags" : [ {

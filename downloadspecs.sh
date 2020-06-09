@@ -1,13 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Getting the bash from the environment (we expect 4+)
 # You need bash version 4+ to execute this bash since we are using arrays.
 
 # Tenant https://abcd.live.dynatrace.com/
-TENANT="https://xxx.live.dynatrace.com"
+TENANT="https://blr06292.live.dynatrace.com"
 
 # Copy the cookies in format cookies="Cookie: key=value; key2=value2; "
 # You need SRV, b925d32c & apmsessionid
 # A request that don't have those together and match the server values, will reset the apmsessionid and cut the response.
-cookies="Cookie: SRV=xx; b925d32c=xx; apmsessionid=xx; "
+#b925d32c=xx;
+cookies="Cookie: SRV=server1; b925d32c=OSDVGRTP2RPMKIOM2MCYEYC3GM ; apmsessionid=node0hwmt728k49gno0jl5x2z4cmp6108.node0; "
 contentType="Content-Type: application/json"
 
 declare -A spec
@@ -21,12 +23,12 @@ download_specs(){
     for key in "${!spec[@]}"
       do
       echo "Fetching spec ${key} - $TENANT${spec[${key}]}"
-      echo $key -H "$contentType" -H "$cookies" $TENANT${spec[${key}]}
+      # echo $key -H "$contentType" -H "$cookies" $TENANT${spec[${key}]}
       curl -s -o specs/$key.json -H "$contentType" -H "$cookies" $TENANT${spec[${key}]}
       result=$?
       # If file size is 0 we assume you are not authorized.
       fileSize=$(wc specs/$key.json | awk '{print $1}')
-      if [ 0 -eq $fileSize ]; 
+      if [ 0 -eq $fileSize ];
         then 
         echo "You are not authorized. Check your security Cookies. $cookies"
         exit
@@ -38,7 +40,7 @@ download_specs(){
 parse_specs(){
     for key in "${!spec[@]}"
       do
-      sed -i.bak -e 's~'"$TENANT.*\""'~{{tenant}}{{api}}\"~' -e 's~securityScheme~_securityScheme~' specs/$key.json
+      sed -i.bak -e 's~'"$TENANT"'~{{tenant}}~' -e 's~securityScheme~_securityScheme~' specs/$key.json
     done
     # Clean up
     rm specs/*.bak
@@ -50,7 +52,4 @@ parse_specs
 
 echo "Now import the specs in Postman and add the Authorization at Collection level"
 exit
-# Add the variable in the collections at collection level.
-api = /api/v1
-api = /api/v2
-api = /api/config/v1
+# Api-Token
