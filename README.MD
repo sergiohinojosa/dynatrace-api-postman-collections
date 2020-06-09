@@ -68,7 +68,7 @@ Generate the Postman Collections is fairly simple. Altough there are unfortunate
 1. ### Login to the tenant and download the specification. 
 
 
-2. ### Parameterize the Server variable
+2. ### Parameterize the Server variable (just the tenant without endpoint)
 
 From
 ```json
@@ -81,7 +81,7 @@ From
 To
 ```json
   "servers" : [ {
-    "url" : "{{tenant}}{{api}}",
+    "url" : "{{tenant}}/api/config/v1",
     "variables" : { }
   } ],
 ```
