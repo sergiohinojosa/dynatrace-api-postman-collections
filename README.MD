@@ -106,7 +106,7 @@ To
 
 you can drag and drop it.
 
-5. ### Set the Authorization and api endpoint Variable
+1. ### Set the Authorization and apiToken Variable
 
 After is imported go to settings:
 
@@ -117,20 +117,11 @@ and enter this values in the Authorization of the Collection:
 | type  | API Key         |
 | key   |  Api-Token      |
 | value |  {{apiToken}}   |
-|Add to | Query Params    |
+| Add to | Query Params    |
      
 
-Then go to Variables and define the api variables
 
-
-|collection | variable   |     value   |
-|-----------|------------|-------------|
-|env1   |  api   |  /api/v1            |
-|env2   |  api   |  /api/v2            |
-|config1|  api   |  /api/config/v1     |
-
-
-6. ### Set the Dynatrace Release
+1. ### Set the Dynatrace Release
 Just modify the name of the collection after importing (before exporting) you dont have a conflict with previos versions and the user knows the version imported.
 
 |collection | Name                    |
