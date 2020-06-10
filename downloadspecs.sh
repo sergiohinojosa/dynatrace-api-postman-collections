@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Getting the bash from the environment (we expect 4+)
-# You need bash version 4+ to execute this bash since we are using arrays.
+# Getting the bash from the environment
+# You need BASH version 4+ to execute this script properly since we are using arrays with key-values.
 
 # Tenant https://abcd.live.dynatrace.com/
-TENANT="https://abcd.live.dynatrace.com"
+TENANT="https://abdc.live.dynatrace.com"
 
 # Copy the cookies in format cookies="Cookie: key=value; key2=value2; "
 # You need SRV, b925d32c & apmsessionid
@@ -25,12 +25,14 @@ download_specs(){
       echo "Fetching spec ${key} - $TENANT${spec[${key}]}"
       # echo $key -H "$contentType" -H "$cookies" $TENANT${spec[${key}]}
       curl -s -o specs/$key.json -H "$contentType" -H "$cookies" $TENANT${spec[${key}]}
-      result=$?
+      # Test if not logged in exists in the page. 0 if exists 1 if not.
+      grep -Fq "not logged in" specs/$key.json 
+      loggedin=$?
       # If file size is 0 we assume you are not authorized.
       fileSize=$(wc specs/$key.json | awk '{print $1}')
-      if [ 0 -eq $fileSize ];
+      if [ 0 -eq $loggedin ] || [ 0 -eq $fileSize ];
         then 
-        echo "You are not authorized. Check your security Cookies. $cookies"
+        echo "You are not logged-in/authorized. Check your security Cookies. $cookies"
         exit
       else
         echo "Spec downloaded specs/$key.json $fileSize bytes"  
