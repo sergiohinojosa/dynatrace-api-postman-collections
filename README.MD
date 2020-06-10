@@ -106,7 +106,7 @@ To
 
 you can drag and drop it.
 
-1. ### Set the Authorization and apiToken Variable
+5. ### Set the Authorization and apiToken Variable
 
 After is imported go to settings:
 
@@ -121,7 +121,7 @@ and enter this values in the Authorization of the Collection:
      
 
 
-1. ### Set the Dynatrace Release
+6. ### Set the Dynatrace Release
 Just modify the name of the collection after importing (before exporting) you dont have a conflict with previos versions and the user knows the version imported.
 
 |collection | Name                    |
