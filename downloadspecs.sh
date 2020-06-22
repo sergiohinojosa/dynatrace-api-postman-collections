@@ -9,7 +9,7 @@ TENANT="https://blr06292.live.dynatrace.com"
 # You need SRV, b925d32c & apmsessionid
 # A request that don't have those together and match the server values, will reset the apmsessionid and cut the response.
 #b925d32c=xx;
-cookies="Cookie: SRV=server4; b925d32c=AN4HOYIHFWD3J2CBSAARHH2IIU ; apmsessionid=node01bfoduovdlyauhtwdy2v6pzdl4978.node0; "
+cookies="Cookie: SRV=xxx; b925d32c=xxx ; apmsessionid=xxxxx; "
 contentType="Content-Type: application/json"
 
 declare -A spec
