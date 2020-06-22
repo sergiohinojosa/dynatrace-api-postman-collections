@@ -55,6 +55,9 @@
     "name" : "Service - Custom services",
     "description" : "Manage custom services"
   }, {
+    "name" : "Anomaly detection - Process groups",
+    "description" : "Manage anomaly detection configuration for process groups"
+  }, {
     "name" : "Service - Request naming",
     "description" : "Manage request naming rules"
   }, {
@@ -80,10 +83,10 @@
     "description" : "Manage metric subscriptions for web applications"
   }, {
     "name" : "Calculated metrics - Synthetic",
-    "description" : "Manage metric subscriptions for synthetic monitors"
+    "description" : "Manage calculated metrics for synthetic monitors"
   }, {
     "name" : "Calculated metrics - Mobile & custom applications",
-    "description" : "Manage metric subscriptions for mobile & custom applications"
+    "description" : "Manage calculated metrics for mobile & custom apps"
   }, {
     "name" : "Calculated metrics - Log monitoring",
     "description" : "Manage metric subscriptions for log monitoring"
@@ -131,36 +134,23 @@
     "description" : "Manage credentials for Synthetic monitors"
   } ],
   "paths" : {
-    "/alertingProfiles" : {
-      "get" : {
-        "tags" : [ "Alerting Profiles" ],
-        "summary" : "Lists all alerting profiles available in your environment | maturity=EARLY_ADOPTER",
-        "operationId" : "getAlertingProfiles",
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/StubList"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "ReadConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "ALERTING_PROFILES_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      },
+    "/alertingProfiles/{id}/validator" : {
       "post" : {
         "tags" : [ "Alerting Profiles" ],
-        "summary" : "Creates a new alerting profile | maturity=EARLY_ADOPTER",
-        "description" : "The body must not provide an ID. An ID is assigned automatically by the Dynatrace server.",
-        "operationId" : "createAlertingProfile",
+        "summary" : "Validates the payload the `PUT /alertingProfiles/{id}` request | maturity=EARLY_ADOPTER",
+        "operationId" : "validateCreateOrUpdateAlertingProfile",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the alerting profile to be validated.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
         "requestBody" : {
-          "description" : "The JSON body of the request. Contains parameters of the new alerting profile.",
+          "description" : "The JSON body of the request. Contains parameters of the alerting profile to be validated.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
@@ -170,15 +160,8 @@
           }
         },
         "responses" : {
-          "201" : {
-            "description" : "Success. The new alerting profile has been created. The response contains the ID of the new alerting profile.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/EntityShortRepresentation"
-                }
-              }
-            }
+          "204" : {
+            "description" : "Validated. The submitted alerting profile is valid. Response doesn't have a body"
           },
           "400" : {
             "description" : "Failed. The input is invalid.",
@@ -351,23 +334,36 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
-    "/alertingProfiles/{id}/validator" : {
+    "/alertingProfiles" : {
+      "get" : {
+        "tags" : [ "Alerting Profiles" ],
+        "summary" : "Lists all alerting profiles available in your environment | maturity=EARLY_ADOPTER",
+        "operationId" : "getAlertingProfiles",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StubList"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "ALERTING_PROFILES_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
       "post" : {
         "tags" : [ "Alerting Profiles" ],
-        "summary" : "Validates the payload the `PUT /alertingProfiles/{id}` request | maturity=EARLY_ADOPTER",
-        "operationId" : "validateCreateOrUpdateAlertingProfile",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "The ID of the alerting profile to be validated.",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "format" : "uuid"
-          }
-        } ],
+        "summary" : "Creates a new alerting profile | maturity=EARLY_ADOPTER",
+        "description" : "The body must not provide an ID. An ID is assigned automatically by the Dynatrace server.",
+        "operationId" : "createAlertingProfile",
         "requestBody" : {
-          "description" : "The JSON body of the request. Contains parameters of the alerting profile to be validated.",
+          "description" : "The JSON body of the request. Contains parameters of the new alerting profile.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
@@ -377,8 +373,15 @@
           }
         },
         "responses" : {
-          "204" : {
-            "description" : "Validated. The submitted alerting profile is valid. Response doesn't have a body"
+          "201" : {
+            "description" : "Success. The new alerting profile has been created. The response contains the ID of the new alerting profile.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntityShortRepresentation"
+                }
+              }
+            }
           },
           "400" : {
             "description" : "Failed. The input is invalid.",
@@ -1294,6 +1297,203 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
+    "/anomalyDetection/processGroups/{id}" : {
+      "get" : {
+        "tags" : [ "Anomaly detection - Process groups" ],
+        "summary" : "Gets the configuration of anomaly detection for the specified process group | maturity=EARLY_ADOPTER",
+        "operationId" : "getLocalAvailabilityConfig",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The Dynatrace entity ID of the required process group.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AnomalyDetectionPG"
+                }
+              }
+            },
+            "x-beta" : "true"
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-beta" : "true"
+          },
+          "404" : {
+            "description" : "Process group doesn't exist",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-beta" : "true"
+          }
+        },
+        "security" : [ {
+          "ReadConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "AV_PG_ALERTING_SETTING_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Anomaly detection - Process groups" ],
+        "summary" : "Updates the configuration of anomaly detection for the specified process group | maturity=EARLY_ADOPTER",
+        "operationId" : "setLocalAvailabilityConfig",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The Dynatrace entity ID of the required process group.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains parameters of anomaly detection for a process group.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AnomalyDetectionPG"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Success. The configuration has been updated. Response doesn't have a body.",
+            "x-beta" : "true"
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-beta" : "true"
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "AV_PG_ALERTING_SETTING_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Anomaly detection - Process groups" ],
+        "summary" : "Switches off anomaly detection for the specified process group | maturity=EARLY_ADOPTER",
+        "operationId" : "deleteLocalAvailabilityConfig",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The Dynatrace entity ID of the required process group.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Success. The configuration has been updated. Response doesn't have a body.",
+            "x-beta" : "true"
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-beta" : "true"
+          },
+          "404" : {
+            "description" : "Process group doesn't exist",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-beta" : "true"
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "AV_PG_ALERTING_SETTING_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/anomalyDetection/processGroups/{id}/validator" : {
+      "post" : {
+        "tags" : [ "Anomaly detection - Process groups" ],
+        "summary" : "Validates the payload for the `PUT /anomalyDetection/processGroups/{id}` request | maturity=EARLY_ADOPTER",
+        "operationId" : "validateLocalPgAvailabilityAlertingEvent",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The Dynatrace entity ID of the required process group.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains anomaly detection configuration to be validated.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AnomalyDetectionPG"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Validated. The submitted configuration is valid. Response doesn't have a body.",
+            "x-beta" : "true"
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-beta" : "true"
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "AV_PG_ALERTING_SETTING_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
     "/anomalyDetection/services" : {
       "get" : {
         "tags" : [ "Anomaly detection - Services" ],
@@ -1478,7 +1678,7 @@
       "get" : {
         "tags" : [ "Web application configuration" ],
         "summary" : "Lists all existing web applications",
-        "operationId" : "listConfigurations",
+        "operationId" : "listConfigurations_1",
         "responses" : {
           "200" : {
             "description" : "Success",
@@ -1499,7 +1699,7 @@
         "tags" : [ "Web application configuration" ],
         "summary" : "Creates a new web application",
         "description" : "The body must not provide an ID as that will be automatically assigned by Dynatrace server.",
-        "operationId" : "createConfiguration",
+        "operationId" : "createConfiguration_1",
         "requestBody" : {
           "description" : "JSON body of the request, containing parameters of the new web application configuraiton.",
           "content" : {
@@ -1541,7 +1741,7 @@
       "get" : {
         "tags" : [ "Web application configuration" ],
         "summary" : "Gets the configuration of the specified web application",
-        "operationId" : "getConfiguration_3",
+        "operationId" : "getConfiguration_4",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -1623,7 +1823,7 @@
       "delete" : {
         "tags" : [ "Web application configuration" ],
         "summary" : "Deletes the specified web application",
-        "operationId" : "deleteConfiguration",
+        "operationId" : "deleteConfiguration_1",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -1970,7 +2170,7 @@
       "post" : {
         "tags" : [ "Web application configuration" ],
         "summary" : "Validates the configuration of the web application for the `PUT /applications/web/{id}` request.",
-        "operationId" : "validateConfiguration_3",
+        "operationId" : "validateConfiguration_5",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -2014,7 +2214,7 @@
       "post" : {
         "tags" : [ "Web application configuration" ],
         "summary" : "Validates the configuration of the web application for the `POST /applications/web` request",
-        "operationId" : "validateConfiguration_4",
+        "operationId" : "validateConfiguration_6",
         "requestBody" : {
           "description" : "JSON body of the request, containing the web application configuration to validate.",
           "content" : {
@@ -2049,7 +2249,7 @@
       "get" : {
         "tags" : [ "Application detection rules" ],
         "summary" : "Lists all available application detection rules",
-        "operationId" : "listConfigurations_1",
+        "operationId" : "listConfigurations_2",
         "responses" : {
           "200" : {
             "description" : "Success",
@@ -3168,10 +3368,10 @@
         } ]
       }
     },
-    "/service/customServices/{technology}/{id}/validator" : {
+    "/service/customServices/{technology}/validator" : {
       "post" : {
         "tags" : [ "Service - Custom services" ],
-        "summary" : "Validate the new custom service for the `PUT /customServices/{technology}/{id}` request",
+        "summary" : "Validate the new custom service for the `POST /customServices/{technology}` request",
         "operationId" : "validateItem",
         "parameters" : [ {
           "name" : "technology",
@@ -3181,15 +3381,6 @@
           "schema" : {
             "type" : "string",
             "enum" : [ "dotNet", "go", "java", "nodeJS", "php" ]
-          }
-        }, {
-          "name" : "id",
-          "in" : "path",
-          "description" : "The ID of the custom service to validate.",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "format" : "uuid"
           }
         } ],
         "requestBody" : {
@@ -3222,10 +3413,10 @@
         } ]
       }
     },
-    "/service/customServices/{technology}/validator" : {
+    "/service/customServices/{technology}/{id}/validator" : {
       "post" : {
         "tags" : [ "Service - Custom services" ],
-        "summary" : "Validate the new custom service for the `POST /customServices/{technology}` request",
+        "summary" : "Validate the new custom service for the `PUT /customServices/{technology}/{id}` request",
         "operationId" : "validateItem_1",
         "parameters" : [ {
           "name" : "technology",
@@ -3235,6 +3426,15 @@
           "schema" : {
             "type" : "string",
             "enum" : [ "dotNet", "go", "java", "nodeJS", "php" ]
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the custom service to validate.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
           }
         } ],
         "requestBody" : {
@@ -3825,7 +4025,7 @@
       "post" : {
         "tags" : [ "Data privacy and security" ],
         "summary" : "Validates new data privacy and security settings for the `PUT /dataPrivacy` request.",
-        "operationId" : "validateConfiguration_5",
+        "operationId" : "validateConfiguration_7",
         "requestBody" : {
           "content" : {
             "application/json; charset=utf-8" : {
@@ -3890,6 +4090,83 @@
         "responses" : {
           "204" : {
             "description" : "Validated. The submitted extension is valid. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "EXTENSIONS_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/extensions/{id}/global" : {
+      "get" : {
+        "tags" : [ "Extensions" ],
+        "summary" : "Get the global configuration of the specified OneAgent or JMX extension | maturity=EARLY_ADOPTER",
+        "operationId" : "getExtensionGlobalConfiguration",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the extension to be updated.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Global configuration of given extension.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GlobalExtensionConfiguration"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "EXTENSIONS_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Extensions" ],
+        "summary" : "Updates the configuration of the specified OneAgent or JMX extension | maturity=EARLY_ADOPTER",
+        "operationId" : "updateGlobalExtensionConfiguration",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the extension to be updated.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains updated configuration of the extension.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GlobalExtensionConfiguration"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Success. Extension configuration has been updated. Response doesn't have a body."
           },
           "400" : {
             "description" : "Failed. The input is invalid",
@@ -3991,83 +4268,6 @@
                 }
               }
             }
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "EXTENSIONS_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      }
-    },
-    "/extensions/{id}/global" : {
-      "get" : {
-        "tags" : [ "Extensions" ],
-        "summary" : "Get the global configuration of the specified OneAgent or JMX extension | maturity=EARLY_ADOPTER",
-        "operationId" : "getExtensionGlobalConfiguration",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "The ID of the extension to be updated.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Global configuration of given extension.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/GlobalExtensionConfiguration"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "ReadConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "EXTENSIONS_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      },
-      "put" : {
-        "tags" : [ "Extensions" ],
-        "summary" : "Updates the configuration of the specified OneAgent or JMX extension | maturity=EARLY_ADOPTER",
-        "operationId" : "updateGlobalExtensionConfiguration",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "The ID of the extension to be updated.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "requestBody" : {
-          "description" : "The JSON body of the request. Contains updated configuration of the extension.",
-          "content" : {
-            "application/json; charset=utf-8" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/GlobalExtensionConfiguration"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "204" : {
-            "description" : "Success. Extension configuration has been updated. Response doesn't have a body."
           },
           "400" : {
             "description" : "Failed. The input is invalid",
@@ -4616,7 +4816,7 @@
       "get" : {
         "tags" : [ "Frequent issue detection" ],
         "summary" : "Gets the configuration of frequent issue detection",
-        "operationId" : "getConfiguration_5",
+        "operationId" : "getConfiguration_6",
         "responses" : {
           "200" : {
             "description" : "Success",
@@ -4636,7 +4836,7 @@
       "put" : {
         "tags" : [ "Frequent issue detection" ],
         "summary" : "Updates the configuration of frequent issue detection",
-        "operationId" : "updateConfiguration_3",
+        "operationId" : "updateConfiguration_4",
         "requestBody" : {
           "description" : "The JSON body of the request, containing parameters of the frequent issue detection configuration",
           "content" : {
@@ -4671,7 +4871,7 @@
       "post" : {
         "tags" : [ "Frequent issue detection" ],
         "summary" : "Validates the payload for the `PUT /frequentIssueDetection` request",
-        "operationId" : "validateConfiguration_6",
+        "operationId" : "validateConfiguration_8",
         "requestBody" : {
           "description" : "The JSON body of the request, containing parameters of the frequent issue detection configuration",
           "content" : {
@@ -5304,7 +5504,7 @@
       "post" : {
         "tags" : [ "Maintenance windows" ],
         "summary" : "Validates the payload for the `POST /maintenancewindow` request",
-        "operationId" : "validateConfiguration_7",
+        "operationId" : "validateConfiguration_9",
         "requestBody" : {
           "description" : "The JSON body of the request. Contains parameters of the maintenance window be validated.",
           "content" : {
@@ -5339,7 +5539,7 @@
       "post" : {
         "tags" : [ "Maintenance windows" ],
         "summary" : "Validates the payload for the `PUT /maintenancewindow/{id}` request",
-        "operationId" : "validateConfiguration_8",
+        "operationId" : "validateConfiguration_10",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -5825,21 +6025,20 @@
       "post" : {
         "tags" : [ "Calculated metrics - Mobile & custom applications" ],
         "summary" : "Validates the payload for the `POST /calculatedMetrics/mobile` request | maturity=EARLY_ADOPTER",
-        "description" : "The body must not provide an ID.",
         "operationId" : "validateCreateMobileMetric",
         "requestBody" : {
+          "description" : "The JSON body of the request. Contains the definition of the metric to be validated. \n\nThe key of the metric must be omitted.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/MobileMetric"
+                "$ref" : "#/components/schemas/CalculatedMobileMetric"
               }
             }
-          },
-          "required" : true
+          }
         },
         "responses" : {
           "204" : {
-            "description" : "Validated. The submitted mobile metric is valid. The response doesn't have a body."
+            "description" : "Validated. The submitted metric is valid. The response doesn't have a body."
           },
           "400" : {
             "description" : "Failed. The input is invalid.",
@@ -5867,24 +6066,25 @@
         "parameters" : [ {
           "name" : "metricKey",
           "in" : "path",
+          "description" : "The key of the metric to be validated.",
           "required" : true,
           "schema" : {
             "type" : "string"
           }
         } ],
         "requestBody" : {
+          "description" : "The JSON body of the request. Contains the definition of the metric to be validated.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/MobileMetricUpdate"
+                "$ref" : "#/components/schemas/CalculatedMobileMetricUpdate"
               }
             }
-          },
-          "required" : true
+          }
         },
         "responses" : {
           "204" : {
-            "description" : "Validated. The submitted mobile metric is valid. The response doesn't have a body."
+            "description" : "Validated. The submitted metric is valid. The response doesn't have a body."
           },
           "400" : {
             "description" : "Failed. The input is invalid.",
@@ -5904,10 +6104,111 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
+    "/calculatedMetrics/mobile/{metricKey}" : {
+      "get" : {
+        "tags" : [ "Calculated metrics - Mobile & custom applications" ],
+        "summary" : "Gets the descriptor of the specified calculated metric for mobile or custom app | maturity=EARLY_ADOPTER",
+        "operationId" : "getItem_1",
+        "parameters" : [ {
+          "name" : "metricKey",
+          "in" : "path",
+          "description" : "The key of the required metric.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CalculatedMobileMetric"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "MOBILE_METRIC_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Calculated metrics - Mobile & custom applications" ],
+        "summary" : "Updates the specified calculated metric for a mobile or custom app | maturity=EARLY_ADOPTER",
+        "operationId" : "update",
+        "parameters" : [ {
+          "name" : "metricKey",
+          "in" : "path",
+          "description" : "The key of the metric to be updated.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains the updated definition of the calculated mobile metric.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CalculatedMobileMetricUpdate"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Success. The metric has been updated. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "MOBILE_METRIC_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Calculated metrics - Mobile & custom applications" ],
+        "summary" : "Deletes the specified calculated metric for mobile or custom app | maturity=EARLY_ADOPTER",
+        "operationId" : "delete_2",
+        "parameters" : [ {
+          "name" : "metricKey",
+          "in" : "path",
+          "description" : "The key of the metric to be deleted.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Deleted. Response doesn't have a body."
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "MOBILE_METRIC_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
     "/calculatedMetrics/mobile" : {
       "get" : {
         "tags" : [ "Calculated metrics - Mobile & custom applications" ],
-        "summary" : "Lists all calculated mobile metrics configured in your environment | maturity=EARLY_ADOPTER",
+        "summary" : "Lists all calculated metrics for mobile and custom apps configured in your environment | maturity=EARLY_ADOPTER",
         "operationId" : "getList_1",
         "responses" : {
           "200" : {
@@ -5929,21 +6230,21 @@
       },
       "post" : {
         "tags" : [ "Calculated metrics - Mobile & custom applications" ],
-        "summary" : "Stores the provided calculated mobile metric configuration. | maturity=EARLY_ADOPTER",
+        "summary" : "Creates a new calculated metric for a mobile or custom app | maturity=EARLY_ADOPTER",
         "operationId" : "create",
         "requestBody" : {
-          "description" : "JSON body of the request containing definition of the new calculated mobile metric.",
+          "description" : "The JSON body of the request. Contains the definition of the new calculated metric for mobile or custom app.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/MobileMetric"
+                "$ref" : "#/components/schemas/CalculatedMobileMetric"
               }
             }
           }
         },
         "responses" : {
           "201" : {
-            "description" : "Success. The calculated mobile metric has been created. Response contains its ID and name.",
+            "description" : "Success. The calculated mobile metric has been created. Response contains its key and name.",
             "content" : {
               "application/json; charset=utf-8" : {
                 "schema" : {
@@ -5961,117 +6262,6 @@
                 }
               }
             }
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "MOBILE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      }
-    },
-    "/calculatedMetrics/mobile/{metricKey}" : {
-      "get" : {
-        "tags" : [ "Calculated metrics - Mobile & custom applications" ],
-        "summary" : "Gets the descriptor of the specified calculated mobile metric | maturity=EARLY_ADOPTER",
-        "operationId" : "getItem_1",
-        "parameters" : [ {
-          "name" : "metricKey",
-          "in" : "path",
-          "description" : "The ID of the required calculated mobile metric.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MobileMetric"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "ReadConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "MOBILE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      },
-      "put" : {
-        "tags" : [ "Calculated metrics - Mobile & custom applications" ],
-        "summary" : "Updates the specified calculated mobile metric. | maturity=EARLY_ADOPTER",
-        "operationId" : "update",
-        "parameters" : [ {
-          "name" : "metricKey",
-          "in" : "path",
-          "description" : "The ID of the calculated mobile metric to update.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "requestBody" : {
-          "description" : "JSON body of the request containing updated definition of the calculated mobile metric.",
-          "content" : {
-            "application/json; charset=utf-8" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/MobileMetricUpdate"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "201" : {
-            "description" : "Success. Calculated mobile metric has been updated. Response doesn't have a body.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/EntityShortRepresentation"
-                }
-              }
-            }
-          },
-          "204" : {
-            "description" : "Success. Calculated mobile metric has been updated. Response doesn't have a body."
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "MOBILE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      },
-      "delete" : {
-        "tags" : [ "Calculated metrics - Mobile & custom applications" ],
-        "summary" : "Deletes the specified calculated mobile metric | maturity=EARLY_ADOPTER",
-        "operationId" : "delete_2",
-        "parameters" : [ {
-          "name" : "metricKey",
-          "in" : "path",
-          "description" : "The ID of the calculated mobile metric to delete.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "Deleted. Response doesn't have a body."
           }
         },
         "security" : [ {
@@ -6164,6 +6354,107 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
+    "/calculatedMetrics/rum/{metricKey}" : {
+      "get" : {
+        "tags" : [ "Calculated metrics - Web applications" ],
+        "summary" : "Gets the definition of the specified calculated RUM metric. | maturity=EARLY_ADOPTER",
+        "operationId" : "getItem_2",
+        "parameters" : [ {
+          "name" : "metricKey",
+          "in" : "path",
+          "description" : "The ID of the calculated RUM metric you're inquiring.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RumMetric"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "RUM_METRIC_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Calculated metrics - Web applications" ],
+        "summary" : "Updates the specified calculated RUM metric. | maturity=EARLY_ADOPTER",
+        "operationId" : "update_1",
+        "parameters" : [ {
+          "name" : "metricKey",
+          "in" : "path",
+          "description" : "The ID of the calculated RUM metric to update.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "JSON body of the request containing updated definition of the calculated RUM metric.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RumMetricUpdate"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Success. Calculated RUM metric has been updated. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "RUM_METRIC_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Calculated metrics - Web applications" ],
+        "summary" : "Deletes the calculated RUM metric configuration with the given id. | maturity=EARLY_ADOPTER",
+        "operationId" : "delete_3",
+        "parameters" : [ {
+          "name" : "metricKey",
+          "in" : "path",
+          "description" : "The ID of the calculated RUM metric to delete.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Deleted. Response does not have a body."
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "RUM_METRIC_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
     "/calculatedMetrics/rum" : {
       "get" : {
         "tags" : [ "Calculated metrics - Web applications" ],
@@ -6230,121 +6521,10 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
-    "/calculatedMetrics/rum/{metricKey}" : {
-      "get" : {
-        "tags" : [ "Calculated metrics - Web applications" ],
-        "summary" : "Gets the definition of the specified calculated RUM metric. | maturity=EARLY_ADOPTER",
-        "operationId" : "getItem_2",
-        "parameters" : [ {
-          "name" : "metricKey",
-          "in" : "path",
-          "description" : "The ID of the calculated RUM metric you're inquiring.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/RumMetric"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "ReadConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "RUM_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      },
-      "put" : {
-        "tags" : [ "Calculated metrics - Web applications" ],
-        "summary" : "Updates the specified calculated RUM metric. | maturity=EARLY_ADOPTER",
-        "operationId" : "update_1",
-        "parameters" : [ {
-          "name" : "metricKey",
-          "in" : "path",
-          "description" : "The ID of the calculated RUM metric to update.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "requestBody" : {
-          "description" : "JSON body of the request containing updated definition of the calculated RUM metric.",
-          "content" : {
-            "application/json; charset=utf-8" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/RumMetricUpdate"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "201" : {
-            "description" : "Success. Calculated RUM metric has been updated. Response doesn't have a body.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/EntityShortRepresentation"
-                }
-              }
-            }
-          },
-          "204" : {
-            "description" : "Success. Calculated RUM metric has been updated. Response doesn't have a body."
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "RUM_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      },
-      "delete" : {
-        "tags" : [ "Calculated metrics - Web applications" ],
-        "summary" : "Deletes the calculated RUM metric configuration with the given id. | maturity=EARLY_ADOPTER",
-        "operationId" : "delete_3",
-        "parameters" : [ {
-          "name" : "metricKey",
-          "in" : "path",
-          "description" : "The ID of the calculated RUM metric to delete.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "Deleted. Response does not have a body."
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "RUM_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      }
-    },
     "/calculatedMetrics/service/validator" : {
       "post" : {
         "tags" : [ "Calculated metrics - Services" ],
-        "summary" : "Validates the payload for the `POST /calculatedMetric/service` request | maturity=EARLY_ADOPTER",
+        "summary" : "Validates the payload for the `POST /calculatedMetric/service` request",
         "operationId" : "validateItem_2",
         "requestBody" : {
           "description" : "The JSON body of the request. Contains the calculated service metric to be validated.",
@@ -6373,15 +6553,13 @@
         },
         "security" : [ {
           "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SERVICE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
+        } ]
       }
     },
     "/calculatedMetrics/service/{metricKey}/validator" : {
       "post" : {
         "tags" : [ "Calculated metrics - Services" ],
-        "summary" : "Validates the payload for the `PUT /calculatedMetric/service/{id}` request | maturity=EARLY_ADOPTER",
+        "summary" : "Validates the payload for the `PUT /calculatedMetric/service/{id}` request",
         "operationId" : "validatePut",
         "parameters" : [ {
           "name" : "metricKey",
@@ -6419,81 +6597,13 @@
         },
         "security" : [ {
           "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SERVICE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      }
-    },
-    "/calculatedMetrics/service" : {
-      "get" : {
-        "tags" : [ "Calculated metrics - Services" ],
-        "summary" : "Lists all calculated service metrics configured in your environment | maturity=EARLY_ADOPTER",
-        "operationId" : "getList_3",
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/StubList"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "ReadConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SERVICE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      },
-      "post" : {
-        "tags" : [ "Calculated metrics - Services" ],
-        "summary" : "Creates a new calculated service metric | maturity=EARLY_ADOPTER",
-        "operationId" : "post_1",
-        "requestBody" : {
-          "description" : "The JSON body of the request. Contains parameters of the new calculated service metric.",
-          "content" : {
-            "application/json; charset=utf-8" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/CalculatedServiceMetric"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "201" : {
-            "description" : "Success. The calculated service metric has been created. Response contains the key of the new metric.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/EntityShortRepresentation"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SERVICE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
+        } ]
       }
     },
     "/calculatedMetrics/service/{metricKey}" : {
       "get" : {
         "tags" : [ "Calculated metrics - Services" ],
-        "summary" : "Gets the descriptor of the specified calculated service metric | maturity=EARLY_ADOPTER",
+        "summary" : "Gets the descriptor of the specified calculated service metric",
         "operationId" : "getItem_3",
         "parameters" : [ {
           "name" : "metricKey",
@@ -6518,13 +6628,11 @@
         },
         "security" : [ {
           "ReadConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SERVICE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
+        } ]
       },
       "put" : {
         "tags" : [ "Calculated metrics - Services" ],
-        "summary" : "Updates the specified calculated service metric | maturity=EARLY_ADOPTER",
+        "summary" : "Updates the specified calculated service metric",
         "description" : "If the calculated service metric with the specified key doesn't exist, a new metric is created.",
         "operationId" : "put",
         "parameters" : [ {
@@ -6573,13 +6681,11 @@
         },
         "security" : [ {
           "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SERVICE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
+        } ]
       },
       "delete" : {
         "tags" : [ "Calculated metrics - Services" ],
-        "summary" : "Deletes the specified calculated service metric | maturity=EARLY_ADOPTER",
+        "summary" : "Deletes the specified calculated service metric",
         "operationId" : "delete_4",
         "parameters" : [ {
           "name" : "metricKey",
@@ -6597,30 +6703,89 @@
         },
         "security" : [ {
           "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SERVICE_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
+        } ]
+      }
+    },
+    "/calculatedMetrics/service" : {
+      "get" : {
+        "tags" : [ "Calculated metrics - Services" ],
+        "summary" : "Lists all calculated service metrics configured in your environment",
+        "operationId" : "getList_3",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StubList"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadConfigToken" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Calculated metrics - Services" ],
+        "summary" : "Creates a new calculated service metric",
+        "operationId" : "post_1",
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains parameters of the new calculated service metric.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CalculatedServiceMetric"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Success. The calculated service metric has been created. Response contains the key of the new metric.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntityShortRepresentation"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ]
       }
     },
     "/calculatedMetrics/synthetic/validator" : {
       "post" : {
         "tags" : [ "Calculated metrics - Synthetic" ],
         "summary" : "Validates the payload for the `POST /calculatedMetrics/synthetic` request | maturity=EARLY_ADOPTER",
-        "description" : "The body must not provide an ID.",
         "operationId" : "validateCreateSyntheticMetric",
         "requestBody" : {
+          "description" : "The JSON body of the request. Contains the definition of the metric to be validated. \n\nThe key of the metric must be omitted.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/SyntheticMetric"
+                "$ref" : "#/components/schemas/CalculatedSyntheticMetric"
               }
             }
-          },
-          "required" : true
+          }
         },
         "responses" : {
           "204" : {
-            "description" : "Validated. The submitted synthetic metric is valid. The response doesn't have a body."
+            "description" : "Validated. The submitted calculated synthetic metric is valid. The response doesn't have a body."
           },
           "400" : {
             "description" : "Failed. The input is invalid.",
@@ -6648,24 +6813,25 @@
         "parameters" : [ {
           "name" : "metricKey",
           "in" : "path",
+          "description" : "The key of the metric to be validated.",
           "required" : true,
           "schema" : {
             "type" : "string"
           }
         } ],
         "requestBody" : {
+          "description" : "The JSON body of the request. Contains the update to the metric to be validated.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
                 "$ref" : "#/components/schemas/SyntheticMetricUpdate"
               }
             }
-          },
-          "required" : true
+          }
         },
         "responses" : {
           "204" : {
-            "description" : "Validated. The submitted synthetic metric is valid. The response doesn't have a body."
+            "description" : "Validated. The submitted calculated synthetic metric is valid. The response doesn't have a body."
           },
           "400" : {
             "description" : "Failed. The input is invalid.",
@@ -6685,10 +6851,111 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
+    "/calculatedMetrics/synthetic/{metricKey}" : {
+      "get" : {
+        "tags" : [ "Calculated metrics - Synthetic" ],
+        "summary" : "Gets the descriptor of the specified calculated synthetic metric | maturity=EARLY_ADOPTER",
+        "operationId" : "getItem_4",
+        "parameters" : [ {
+          "name" : "metricKey",
+          "in" : "path",
+          "description" : "The key of the required calculated synthetic metric.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CalculatedSyntheticMetric"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "SYNTHETIC_METRIC_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Calculated metrics - Synthetic" ],
+        "summary" : "Updates the specified calculated synthetic metric | maturity=EARLY_ADOPTER",
+        "operationId" : "update_2",
+        "parameters" : [ {
+          "name" : "metricKey",
+          "in" : "path",
+          "description" : "The key of the calculated synthetic metric to be updated.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains the update to the calculated synthetic metric.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SyntheticMetricUpdate"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Success. The calculated synthetic metric has been updated. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "SYNTHETIC_METRIC_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Calculated metrics - Synthetic" ],
+        "summary" : "Deletes the specified calculated synthetic metric | maturity=EARLY_ADOPTER",
+        "operationId" : "delete_5",
+        "parameters" : [ {
+          "name" : "metricKey",
+          "in" : "path",
+          "description" : "The key of the calculated synthetic metric to be deleted.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Deleted. Response doesn't have a body."
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "SYNTHETIC_METRIC_CONFIG_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
     "/calculatedMetrics/synthetic" : {
       "get" : {
         "tags" : [ "Calculated metrics - Synthetic" ],
-        "summary" : "Lists all calculated synthetic metric configurations. | maturity=EARLY_ADOPTER",
+        "summary" : "Lists all calculated synthetic metrics available in your environment | maturity=EARLY_ADOPTER",
         "operationId" : "getList_4",
         "responses" : {
           "200" : {
@@ -6710,21 +6977,21 @@
       },
       "post" : {
         "tags" : [ "Calculated metrics - Synthetic" ],
-        "summary" : "Stores the provided calculated synthetic metric configuration. | maturity=EARLY_ADOPTER",
+        "summary" : "Creates a new calculated synthetic metric | maturity=EARLY_ADOPTER",
         "operationId" : "create_2",
         "requestBody" : {
-          "description" : "JSON body of the request containing definition of the new calculated synthetic metric.",
+          "description" : "The JSON body of the request. Contains definition of the new calculated synthetic metric.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/SyntheticMetric"
+                "$ref" : "#/components/schemas/CalculatedSyntheticMetric"
               }
             }
           }
         },
         "responses" : {
           "201" : {
-            "description" : "Success. The calculated synthetic metric has been created. Response contains its ID and name.",
+            "description" : "Success. The calculated synthetic metric has been created. Response contains its key and name.",
             "content" : {
               "application/json; charset=utf-8" : {
                 "schema" : {
@@ -6742,117 +7009,6 @@
                 }
               }
             }
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SYNTHETIC_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      }
-    },
-    "/calculatedMetrics/synthetic/{metricKey}" : {
-      "get" : {
-        "tags" : [ "Calculated metrics - Synthetic" ],
-        "summary" : "Gets the definition of the specified calculated synthetic metric. | maturity=EARLY_ADOPTER",
-        "operationId" : "getItem_4",
-        "parameters" : [ {
-          "name" : "metricKey",
-          "in" : "path",
-          "description" : "The ID of the calculated synthetic metric you're inquiring.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SyntheticMetric"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "ReadConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SYNTHETIC_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      },
-      "put" : {
-        "tags" : [ "Calculated metrics - Synthetic" ],
-        "summary" : "Updates the specified calculated synthetic metric. | maturity=EARLY_ADOPTER",
-        "operationId" : "update_2",
-        "parameters" : [ {
-          "name" : "metricKey",
-          "in" : "path",
-          "description" : "The ID of the calculated synthetic metric to update.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "requestBody" : {
-          "description" : "JSON body of the request containing updated definition of the calculated synthetic metric.",
-          "content" : {
-            "application/json; charset=utf-8" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/SyntheticMetricUpdate"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "201" : {
-            "description" : "Success. Calculated synthetic metric has been updated. Response doesn't have a body.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/EntityShortRepresentation"
-                }
-              }
-            }
-          },
-          "204" : {
-            "description" : "Success. Calculated synthetic metric has been updated. Response doesn't have a body."
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SYNTHETIC_METRIC_CONFIG_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      },
-      "delete" : {
-        "tags" : [ "Calculated metrics - Synthetic" ],
-        "summary" : "Deletes the calculated synthetic metric configuration with the given id. | maturity=EARLY_ADOPTER",
-        "operationId" : "delete_5",
-        "parameters" : [ {
-          "name" : "metricKey",
-          "in" : "path",
-          "description" : "The ID of the calculated synthetic metric to delete.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "Deleted. Response does not have a body."
           }
         },
         "security" : [ {
@@ -8268,7 +8424,7 @@
       "get" : {
         "tags" : [ "Service - Request attributes" ],
         "summary" : "Lists all available request attributes",
-        "operationId" : "listConfigurations_2",
+        "operationId" : "listConfigurations_3",
         "responses" : {
           "200" : {
             "description" : "Success",
@@ -8289,7 +8445,7 @@
         "tags" : [ "Service - Request attributes" ],
         "summary" : "Creates a new request attribute",
         "description" : "The body must not provide an ID as IDs are automatically assigned.",
-        "operationId" : "createConfiguration_1",
+        "operationId" : "createConfiguration_2",
         "requestBody" : {
           "content" : {
             "application/json; charset=utf-8" : {
@@ -8331,7 +8487,7 @@
       "get" : {
         "tags" : [ "Service - Request attributes" ],
         "summary" : "Shows the properties of the specified request attribute",
-        "operationId" : "getConfiguration_6",
+        "operationId" : "getConfiguration_7",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -8422,7 +8578,7 @@
       "delete" : {
         "tags" : [ "Service - Request attributes" ],
         "summary" : "Deletes the specified request attribute",
-        "operationId" : "deleteConfiguration_2",
+        "operationId" : "deleteConfiguration_3",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -8443,11 +8599,21 @@
         } ]
       }
     },
-    "/service/requestAttributes/validator" : {
+    "/service/requestAttributes/{id}/validator" : {
       "post" : {
         "tags" : [ "Service - Request attributes" ],
-        "summary" : "Validates new request attributes for the `POST /requestAttributes` request",
-        "operationId" : "validateConfiguration_9",
+        "summary" : "Validate updates of existing request attribute for the `PUT /requestAttributes/{id}` request",
+        "operationId" : "validateConfiguration_11",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the request attribute to be validated.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
         "requestBody" : {
           "content" : {
             "application/json; charset=utf-8" : {
@@ -8478,21 +8644,11 @@
         } ]
       }
     },
-    "/service/requestAttributes/{id}/validator" : {
+    "/service/requestAttributes/validator" : {
       "post" : {
         "tags" : [ "Service - Request attributes" ],
-        "summary" : "Validate updates of existing request attribute for the `PUT /requestAttributes/{id}` request",
-        "operationId" : "validateConfiguration_10",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "The ID of the request attribute to be validated.",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "format" : "uuid"
-          }
-        } ],
+        "summary" : "Validates new request attributes for the `POST /requestAttributes` request",
+        "operationId" : "validateConfiguration_12",
         "requestBody" : {
           "content" : {
             "application/json; charset=utf-8" : {
@@ -8640,79 +8796,6 @@
         } ]
       }
     },
-    "/service/requestNaming" : {
-      "get" : {
-        "tags" : [ "Service - Request naming" ],
-        "summary" : "Lists all request naming rules along with their parameters",
-        "operationId" : "getList_5",
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/StubList"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "ReadConfigToken" : [ ]
-        } ]
-      },
-      "post" : {
-        "tags" : [ "Service - Request naming" ],
-        "summary" : "Creates a new request naming rule",
-        "description" : "The new rule goes to the end of the rules list and will be the last to evaluate. Existing rules remain unaffected.",
-        "operationId" : "post_2",
-        "parameters" : [ {
-          "name" : "position",
-          "in" : "query",
-          "description" : "Order of the new request naming rule. Set to `PREPEND` to prepend it to the list, `APPEND` to append it. Defaults to `APPEND`.",
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "APPEND", "PREPEND" ],
-            "default" : "APPEND"
-          }
-        } ],
-        "requestBody" : {
-          "description" : "The JSON body of the request containing parameters of the new request naming rule. \n\n You must not specify the ID of the rule!",
-          "content" : {
-            "application/json; charset=utf-8" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/RequestNaming"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "201" : {
-            "description" : "Success. The request naming has been created. Response contains the new service's ID.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/EntityShortRepresentation"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ]
-      }
-    },
     "/service/requestNaming/{id}" : {
       "get" : {
         "tags" : [ "Service - Request naming" ],
@@ -8822,6 +8905,79 @@
         } ]
       }
     },
+    "/service/requestNaming" : {
+      "get" : {
+        "tags" : [ "Service - Request naming" ],
+        "summary" : "Lists all request naming rules along with their parameters",
+        "operationId" : "getList_5",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StubList"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadConfigToken" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Service - Request naming" ],
+        "summary" : "Creates a new request naming rule",
+        "description" : "The new rule goes to the end of the rules list and will be the last to evaluate. Existing rules remain unaffected.",
+        "operationId" : "post_2",
+        "parameters" : [ {
+          "name" : "position",
+          "in" : "query",
+          "description" : "Order of the new request naming rule. Set to `PREPEND` to prepend it to the list, `APPEND` to append it. Defaults to `APPEND`.",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "APPEND", "PREPEND" ],
+            "default" : "APPEND"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request containing parameters of the new request naming rule. \n\n You must not specify the ID of the rule!",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RequestNaming"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Success. The request naming has been created. Response contains the new service's ID.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntityShortRepresentation"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ]
+      }
+    },
     "/service/resourceNaming/validator" : {
       "post" : {
         "tags" : [ "Service - Request naming" ],
@@ -8912,6 +9068,90 @@
         "security" : [ {
           "WriteConfigToken" : [ ]
         } ]
+      }
+    },
+    "/service/detectionRules/FULL_WEB_REQUEST/validator" : {
+      "post" : {
+        "tags" : [ "Service - Detection full web request" ],
+        "summary" : "Validates the payload for the `POST /ruleBasedServiceDetection/FULL_WEB_REQUEST` request | maturity=EARLY_ADOPTER",
+        "operationId" : "validatePostConfiguration_1",
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains parameters of the service detection rule to be validated.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FullWebRequestRule"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Validated. The service detection rule is valid. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "SERVICE_DETECTION_RULES_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/service/detectionRules/FULL_WEB_REQUEST/{id}/validator" : {
+      "post" : {
+        "tags" : [ "Service - Detection full web request" ],
+        "summary" : "Validates the payload for the `PUT /service/detectionRules/FULL_WEB_REQUEST/{id}` request | maturity=EARLY_ADOPTER",
+        "operationId" : "validatePutConfiguration_1",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the service detection rule to be validated.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains parameters of the service detection rule to be validated.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FullWebRequestRule"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Validated. The service detection rule is valid. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteConfigToken" : [ ]
+        } ],
+        "x-feature-flag" : "SERVICE_DETECTION_RULES_API",
+        "x-maturity" : "EARLY_ADOPTER"
       }
     },
     "/service/detectionRules/FULL_WEB_REQUEST/order" : {
@@ -9150,20 +9390,20 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
-    "/service/detectionRules/FULL_WEB_REQUEST/validator" : {
+    "/service/detectionRules/FULL_WEB_SERVICE/validator" : {
       "post" : {
-        "tags" : [ "Service - Detection full web request" ],
-        "summary" : "Validates the payload for the `POST /ruleBasedServiceDetection/FULL_WEB_REQUEST` request | maturity=EARLY_ADOPTER",
-        "operationId" : "validatePostConfiguration",
+        "tags" : [ "Service - Detection full web service" ],
+        "summary" : "Validates the payload for the `POST /ruleBasedServiceDetection/FULL_WEB_SERVICE` request | maturity=EARLY_ADOPTER",
+        "operationId" : "validatePostConfiguration_2",
         "requestBody" : {
-          "description" : "The JSON body of the request. Contains parameters of the service detection rule to be validated.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/FullWebRequestRule"
+                "$ref" : "#/components/schemas/FullWebServiceRule"
               }
             }
-          }
+          },
+          "required" : true
         },
         "responses" : {
           "204" : {
@@ -9187,11 +9427,11 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
-    "/service/detectionRules/FULL_WEB_REQUEST/{id}/validator" : {
+    "/service/detectionRules/FULL_WEB_SERVICE/{id}/validator" : {
       "post" : {
-        "tags" : [ "Service - Detection full web request" ],
-        "summary" : "Validates the payload for the `PUT /service/detectionRules/FULL_WEB_REQUEST/{id}` request | maturity=EARLY_ADOPTER",
-        "operationId" : "validatePutConfiguration",
+        "tags" : [ "Service - Detection full web service" ],
+        "summary" : "Validate the payload for the `PUT /ruleBasedServiceDetection/FULL_WEB_SERVICE/{id}` request | maturity=EARLY_ADOPTER",
+        "operationId" : "validatePutConfiguration_2",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -9203,14 +9443,14 @@
           }
         } ],
         "requestBody" : {
-          "description" : "The JSON body of the request. Contains parameters of the service detection rule to be validated.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/FullWebRequestRule"
+                "$ref" : "#/components/schemas/FullWebServiceRule"
               }
             }
-          }
+          },
+          "required" : true
         },
         "responses" : {
           "204" : {
@@ -9470,16 +9710,16 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
-    "/service/detectionRules/FULL_WEB_SERVICE/validator" : {
+    "/service/detectionRules/OPAQUE_AND_EXTERNAL_WEB_REQUEST/validator" : {
       "post" : {
-        "tags" : [ "Service - Detection full web service" ],
-        "summary" : "Validates the payload for the `POST /ruleBasedServiceDetection/FULL_WEB_SERVICE` request | maturity=EARLY_ADOPTER",
-        "operationId" : "validatePostConfiguration_1",
+        "tags" : [ "Service - Detection opaque and external web request" ],
+        "summary" : "Validates the payload for the `POST /ruleBasedServiceDetection/OPAQUE_AND_EXTERNAL_WEB_REQUEST` request | maturity=EARLY_ADOPTER",
+        "operationId" : "validatePostConfiguration_3",
         "requestBody" : {
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/FullWebServiceRule"
+                "$ref" : "#/components/schemas/OpaqueAndExternalWebRequestRule"
               }
             }
           },
@@ -9507,11 +9747,11 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
-    "/service/detectionRules/FULL_WEB_SERVICE/{id}/validator" : {
+    "/service/detectionRules/OPAQUE_AND_EXTERNAL_WEB_REQUEST/{id}/validator" : {
       "post" : {
-        "tags" : [ "Service - Detection full web service" ],
-        "summary" : "Validate the payload for the `PUT /ruleBasedServiceDetection/FULL_WEB_SERVICE/{id}` request | maturity=EARLY_ADOPTER",
-        "operationId" : "validatePutConfiguration_1",
+        "tags" : [ "Service - Detection opaque and external web request" ],
+        "summary" : "Validate the payload for the `PUT /ruleBasedServiceDetection/OPAQUE_AND_EXTERNAL_WEB_REQUEST/{id}` request | maturity=EARLY_ADOPTER",
+        "operationId" : "validatePutConfiguration_3",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -9526,7 +9766,7 @@
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/FullWebServiceRule"
+                "$ref" : "#/components/schemas/OpaqueAndExternalWebRequestRule"
               }
             }
           },
@@ -9781,90 +10021,6 @@
           },
           "404" : {
             "description" : "Failed. The rule with the specified ID doesn't exist."
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SERVICE_DETECTION_RULES_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      }
-    },
-    "/service/detectionRules/OPAQUE_AND_EXTERNAL_WEB_REQUEST/validator" : {
-      "post" : {
-        "tags" : [ "Service - Detection opaque and external web request" ],
-        "summary" : "Validates the payload for the `POST /ruleBasedServiceDetection/OPAQUE_AND_EXTERNAL_WEB_REQUEST` request | maturity=EARLY_ADOPTER",
-        "operationId" : "validatePostConfiguration_2",
-        "requestBody" : {
-          "content" : {
-            "application/json; charset=utf-8" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/OpaqueAndExternalWebRequestRule"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "204" : {
-            "description" : "Validated. The service detection rule is valid. Response doesn't have a body."
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "WriteConfigToken" : [ ]
-        } ],
-        "x-feature-flag" : "SERVICE_DETECTION_RULES_API",
-        "x-maturity" : "EARLY_ADOPTER"
-      }
-    },
-    "/service/detectionRules/OPAQUE_AND_EXTERNAL_WEB_REQUEST/{id}/validator" : {
-      "post" : {
-        "tags" : [ "Service - Detection opaque and external web request" ],
-        "summary" : "Validate the payload for the `PUT /ruleBasedServiceDetection/OPAQUE_AND_EXTERNAL_WEB_REQUEST/{id}` request | maturity=EARLY_ADOPTER",
-        "operationId" : "validatePutConfiguration_2",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "The ID of the service detection rule to be validated.",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "format" : "uuid"
-          }
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json; charset=utf-8" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/OpaqueAndExternalWebRequestRule"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "204" : {
-            "description" : "Validated. The service detection rule is valid. Response doesn't have a body."
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
           }
         },
         "security" : [ {
@@ -10380,28 +10536,6 @@
         } ]
       }
     },
-    "/symfiles/info" : {
-      "get" : {
-        "tags" : [ "Mobile Deobfuscation and Symbolication" ],
-        "summary" : "Retrieves information about used/empty diskspace, number of stored files,....",
-        "operationId" : "getInfo",
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SymbolFileStorageInfo"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "DssFileManagement" : [ ]
-        } ]
-      }
-    },
     "/symfiles" : {
       "get" : {
         "tags" : [ "Mobile Deobfuscation and Symbolication" ],
@@ -10414,6 +10548,28 @@
               "application/json; charset=utf-8" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/SymbolFileList"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "DssFileManagement" : [ ]
+        } ]
+      }
+    },
+    "/symfiles/info" : {
+      "get" : {
+        "tags" : [ "Mobile Deobfuscation and Symbolication" ],
+        "summary" : "Retrieves information about used/empty diskspace, number of stored files,....",
+        "operationId" : "getInfo",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SymbolFileStorageInfo"
                 }
               }
             }
@@ -10711,7 +10867,7 @@
       "get" : {
         "tags" : [ "Azure credentials configuration" ],
         "summary" : "Gets the configuration of the specified Azure credentials",
-        "operationId" : "getConfiguration_7",
+        "operationId" : "getConfiguration_8",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -10741,7 +10897,7 @@
         "tags" : [ "Azure credentials configuration" ],
         "summary" : "Updates an existing Azure credentials configuration",
         "description" : "* You can't change the Application ID or Directory ID of an Azure configuration. If you need to change them, create a new credentials configuration. \n* If a configuration with the specified ID doesn't exist, a new configuration is created.",
-        "operationId" : "updateConfiguration_4",
+        "operationId" : "updateConfiguration_5",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -10793,7 +10949,7 @@
       "delete" : {
         "tags" : [ "Azure credentials configuration" ],
         "summary" : "Deletes the specified Azure credentials configuration",
-        "operationId" : "deleteConfiguration_3",
+        "operationId" : "deleteConfiguration_4",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -10892,7 +11048,7 @@
         "tags" : [ "Azure credentials configuration" ],
         "summary" : "Creates a new Azure credentials configuration",
         "description" : "The body must not provide an ID. An ID is assigned automatically by the Dynatrace server.",
-        "operationId" : "createConfiguration_2",
+        "operationId" : "createConfiguration_3",
         "requestBody" : {
           "description" : "The JSON body of the request. Contains parameters of the new Azure credentials configuration.",
           "content" : {
@@ -10934,7 +11090,7 @@
       "post" : {
         "tags" : [ "Azure credentials configuration" ],
         "summary" : "Validates the payload for the `POST /azure/credentials` request",
-        "operationId" : "validateConfiguration_11",
+        "operationId" : "validateConfiguration_13",
         "requestBody" : {
           "description" : "The JSON body of the request. Contains the Azure credentials configuration to be validated.",
           "content" : {
@@ -11226,7 +11382,7 @@
       "get" : {
         "tags" : [ "Kubernetes credentials configuration" ],
         "summary" : "Gets the configuration of the specified Kubernetes credentials | maturity=EARLY_ADOPTER",
-        "operationId" : "getConfiguration_8",
+        "operationId" : "getConfiguration_9",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -11256,8 +11412,8 @@
       "put" : {
         "tags" : [ "Kubernetes credentials configuration" ],
         "summary" : "Updates an existing Kubernetes credentials configuration | maturity=EARLY_ADOPTER",
-        "description" : "You can't change the URL of the Kubernetes cluster. \n\nIf a configuration with the specified ID doesn't exist, a new configuration is created.",
-        "operationId" : "updateConfiguration_5",
+        "description" : "You can't change the URL of the Kubernetes cluster. \n\nIf a configuration with the specified ID doesn't exist, a new configuration is created.\n\nIDs of entities are computed server side upon creation. If you want to create a new entity, use the POST method without an ID. To update an existing entity, use the PUT method with an existing, valid ID. To re-create an entity under a specific ID, a valid ID must be provided with the PUT method.",
+        "operationId" : "updateConfiguration_6",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -11310,7 +11466,7 @@
       "delete" : {
         "tags" : [ "Kubernetes credentials configuration" ],
         "summary" : "Deletes the specified Kubernetes credentials configuration | maturity=EARLY_ADOPTER",
-        "operationId" : "deleteConfiguration_4",
+        "operationId" : "deleteConfiguration_5",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -11412,7 +11568,7 @@
         "tags" : [ "Kubernetes credentials configuration" ],
         "summary" : "Creates a new Kubernetes credentials configuration | maturity=EARLY_ADOPTER",
         "description" : "The body must not provide an ID as it will be automatically assigned by the Dynatrace server.",
-        "operationId" : "createConfiguration_3",
+        "operationId" : "createConfiguration_4",
         "requestBody" : {
           "description" : "The JSON body of the request. Contains parameters of the new Kubernetes credentials configuration.",
           "content" : {
@@ -11455,7 +11611,7 @@
       "post" : {
         "tags" : [ "Kubernetes credentials configuration" ],
         "summary" : "Validates the payload for the `POST /kubernetes/credentials` request | maturity=EARLY_ADOPTER",
-        "operationId" : "validateConfiguration_12",
+        "operationId" : "validateConfiguration_14",
         "requestBody" : {
           "description" : "The JSON body of the request. Contains the Kubernetes credentials configuration to be validated.",
           "content" : {
@@ -11490,58 +11646,6 @@
   },
   "components" : {
     "schemas" : {
-      "EntityShortRepresentation" : {
-        "required" : [ "id" ],
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "description" : "The ID of the Dynatrace entity."
-          },
-          "name" : {
-            "type" : "string",
-            "description" : "The name of the Dynatrace entity.",
-            "readOnly" : true
-          },
-          "description" : {
-            "type" : "string",
-            "description" : "A short description of the Dynatrace entity.",
-            "readOnly" : true
-          }
-        },
-        "description" : "The short representation of a Dynatrace entity.",
-        "example" : {
-          "id" : "6a98d7bc-abb9-44f8-ae6a-73e68e71812a",
-          "name" : "Dynatrace entity",
-          "description" : "Dynatrace entity for the REST API example"
-        }
-      },
-      "StubList" : {
-        "required" : [ "values" ],
-        "type" : "object",
-        "properties" : {
-          "values" : {
-            "type" : "array",
-            "description" : "An ordered list of short representations of Dynatrace entities.",
-            "items" : {
-              "$ref" : "#/components/schemas/EntityShortRepresentation"
-            }
-          }
-        },
-        "description" : "An ordered list of short representations of Dynatrace entities.",
-        "example" : {
-          "values" : [ {
-            "id" : "6a98d7bc-abb9-44f8-ae6a-73e68e71812a",
-            "name" : "Dynatrace entity 1",
-            "description" : "Dynatrace entity 1 for the REST API example"
-          }, {
-            "id" : "ee70f7d3-9a4e-4f5f-94d2-c9d6156f1618",
-            "name" : "Dynatrace entity 2"
-          }, {
-            "id" : "8cdabe77-9e1a-4be8-b3df-269dd6fa9d7f"
-          } ]
-        }
-      },
       "ConstraintViolation" : {
         "type" : "object",
         "properties" : {
@@ -11569,12 +11673,12 @@
               "$ref" : "#/components/schemas/ConstraintViolation"
             }
           },
+          "message" : {
+            "type" : "string"
+          },
           "code" : {
             "type" : "integer",
             "format" : "int32"
-          },
-          "message" : {
-            "type" : "string"
           }
         }
       },
@@ -11822,6 +11926,58 @@
           }
         },
         "description" : "A tag-based filter of monitored entities."
+      },
+      "EntityShortRepresentation" : {
+        "required" : [ "id" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the Dynatrace entity."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the Dynatrace entity.",
+            "readOnly" : true
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "A short description of the Dynatrace entity.",
+            "readOnly" : true
+          }
+        },
+        "description" : "The short representation of a Dynatrace entity.",
+        "example" : {
+          "id" : "6a98d7bc-abb9-44f8-ae6a-73e68e71812a",
+          "name" : "Dynatrace entity",
+          "description" : "Dynatrace entity for the REST API example"
+        }
+      },
+      "StubList" : {
+        "required" : [ "values" ],
+        "type" : "object",
+        "properties" : {
+          "values" : {
+            "type" : "array",
+            "description" : "An ordered list of short representations of Dynatrace entities.",
+            "items" : {
+              "$ref" : "#/components/schemas/EntityShortRepresentation"
+            }
+          }
+        },
+        "description" : "An ordered list of short representations of Dynatrace entities.",
+        "example" : {
+          "values" : [ {
+            "id" : "6a98d7bc-abb9-44f8-ae6a-73e68e71812a",
+            "name" : "Dynatrace entity 1",
+            "description" : "Dynatrace entity 1 for the REST API example"
+          }, {
+            "id" : "ee70f7d3-9a4e-4f5f-94d2-c9d6156f1618",
+            "name" : "Dynatrace entity 2"
+          }, {
+            "id" : "8cdabe77-9e1a-4be8-b3df-269dd6fa9d7f"
+          } ]
+        }
       },
       "ApplicationAnomalyDetectionConfig" : {
         "required" : [ "failureRateIncrease", "responseTimeDegradation", "trafficDrop", "trafficSpike" ],
@@ -13246,7 +13402,7 @@
         } ]
       },
       "MetricEvent" : {
-        "required" : [ "alertCondition", "dealertingSamples", "description", "enabled", "metricId", "name", "samples", "threshold", "violatingSamples" ],
+        "required" : [ "description", "enabled", "metricId", "monitoringStrategy", "name" ],
         "type" : "object",
         "properties" : {
           "metadata" : {
@@ -13285,35 +13441,6 @@
             "description" : "The type of the event to trigger on the threshold violation. \n\nThe `CUSTOM_ALERT` type is not correlated with other alerts.\nThe `INFO` type does not open a problem.",
             "enum" : [ "AVAILABILITY", "CUSTOM_ALERT", "ERROR", "INFO", "PERFORMANCE", "RESOURCE_CONTENTION" ]
           },
-          "alertCondition" : {
-            "type" : "string",
-            "description" : "The condition for the **threshold** value check: above or below.",
-            "enum" : [ "ABOVE", "BELOW" ]
-          },
-          "samples" : {
-            "maximum" : 60,
-            "minimum" : 3,
-            "type" : "integer",
-            "description" : "The number of one-minute samples that form sliding evaluation window.",
-            "format" : "int32"
-          },
-          "violatingSamples" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "description" : "The number of one-minute samples within the evaluation window that must violate the threshold to trigger an event",
-            "format" : "int32"
-          },
-          "dealertingSamples" : {
-            "minimum" : 3,
-            "type" : "integer",
-            "description" : "The number of one-minute samples within the evaluation window that must go back to normal to close the event.",
-            "format" : "int32"
-          },
-          "threshold" : {
-            "type" : "number",
-            "description" : "The value of the threshold.",
-            "format" : "double"
-          },
           "enabled" : {
             "type" : "boolean",
             "description" : "The metric event is enabled (`true`) or disabled (`false`)."
@@ -13332,10 +13459,8 @@
               "$ref" : "#/components/schemas/MetricEventDimensions"
             }
           },
-          "unit" : {
-            "type" : "string",
-            "description" : "The unit of the threshold, matching the metric definition.\n\nIf not set the metrics unit is picked.",
-            "enum" : [ "BIT", "BIT_PER_HOUR", "BIT_PER_MINUTE", "BIT_PER_SECOND", "BYTE", "BYTE_PER_HOUR", "BYTE_PER_MINUTE", "BYTE_PER_SECOND", "CORES", "COUNT", "GIBI_BYTE", "GIGA", "GIGA_BYTE", "HOUR", "KIBI_BYTE", "KIBI_BYTE_PER_HOUR", "KIBI_BYTE_PER_MINUTE", "KIBI_BYTE_PER_SECOND", "KILO", "KILO_BYTE", "KILO_BYTE_PER_HOUR", "KILO_BYTE_PER_MINUTE", "KILO_BYTE_PER_SECOND", "MEBI_BYTE", "MEBI_BYTE_PER_HOUR", "MEBI_BYTE_PER_MINUTE", "MEBI_BYTE_PER_SECOND", "MEGA", "MEGA_BYTE", "MEGA_BYTE_PER_HOUR", "MEGA_BYTE_PER_MINUTE", "MEGA_BYTE_PER_SECOND", "MICRO_SECOND", "MILLI_CORES", "MILLI_SECOND", "MILLI_SECOND_PER_MINUTE", "MINUTE", "NANO_SECOND", "NANO_SECOND_PER_MINUTE", "NOT_APPLICABLE", "PERCENT", "PER_HOUR", "PER_MINUTE", "PER_SECOND", "PROMILLE", "RATIO", "SECOND", "STATE", "UNSPECIFIED" ]
+          "monitoringStrategy" : {
+            "$ref" : "#/components/schemas/MetricEventMonitoringStrategy"
           }
         },
         "description" : "The configuration of the metric event.",
@@ -13349,11 +13474,6 @@
           "description" : "This is the description for my metric event.",
           "aggregationType" : "AVG",
           "severity" : "CUSTOM_ALERT",
-          "alertCondition" : "ABOVE",
-          "samples" : 5,
-          "violatingSamples" : 3,
-          "dealertingSamples" : 5,
-          "threshold" : 80.0,
           "alertingScope" : [ {
             "filterType" : "ENTITY_ID",
             "entityId" : "HOST-000000000001E240"
@@ -13375,7 +13495,15 @@
             }
           } ],
           "enabled" : true,
-          "unit" : "KILO_BYTE_PER_SECOND"
+          "monitoringStrategy" : {
+            "type" : "STATIC_THRESHOLD",
+            "alertCondition" : "ABOVE",
+            "samples" : 5,
+            "violatingSamples" : 3,
+            "dealertingSamples" : 5,
+            "threshold" : 80.0,
+            "unit" : "KILO_BYTE_PER_SECOND"
+          }
         }
       },
       "MetricEventAlertingScope" : {
@@ -13428,6 +13556,67 @@
           "properties" : {
             "nameFilter" : {
               "$ref" : "#/components/schemas/MetricEventTextFilterMetricEventDimensionsFilterOperatorDto"
+            }
+          }
+        } ]
+      },
+      "MetricEventMonitoringStrategy" : {
+        "required" : [ "type" ],
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "description" : "Defines the actual set of fields depending on the value. See one of the following objects: \n\n* `STATIC_THRESHOLD` -> MetricEventStaticThresholdMonitoringStrategy \n",
+            "enum" : [ "STATIC_THRESHOLD" ]
+          }
+        },
+        "description" : "A monitoring strategy for a metric event config.\n\nThis is the base version of the monitoring strategy, depending on the type, \nthe actual JSON may contain additional fields.",
+        "discriminator" : {
+          "propertyName" : "type"
+        }
+      },
+      "MetricEventStaticThresholdMonitoringStrategy" : {
+        "required" : [ "alertCondition", "dealertingSamples", "samples", "threshold", "type", "unit", "violatingSamples" ],
+        "type" : "object",
+        "description" : "A static threshold monitoring strategy to alert on hard limits within a given metric. An example is the violation of a critical memory limit.",
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/MetricEventMonitoringStrategy"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "samples" : {
+              "maximum" : 60,
+              "minimum" : 3,
+              "type" : "integer",
+              "description" : "The number of one-minute samples that form the sliding evaluation window.",
+              "format" : "int32"
+            },
+            "violatingSamples" : {
+              "minimum" : 1,
+              "type" : "integer",
+              "description" : "The number of one-minute samples within the evaluation window that must violate the threshold to trigger an event",
+              "format" : "int32"
+            },
+            "dealertingSamples" : {
+              "minimum" : 3,
+              "type" : "integer",
+              "description" : "The number of one-minute samples within the evaluation window that must go back to normal to close the event.",
+              "format" : "int32"
+            },
+            "alertCondition" : {
+              "type" : "string",
+              "description" : "The condition for the **threshold** value check: above or below.",
+              "enum" : [ "ABOVE", "BELOW" ]
+            },
+            "threshold" : {
+              "type" : "number",
+              "description" : "The value of the static threshold based on the specified unit.",
+              "format" : "double"
+            },
+            "unit" : {
+              "type" : "string",
+              "description" : "The unit of the threshold, matching the metric definition.",
+              "enum" : [ "BIT", "BIT_PER_HOUR", "BIT_PER_MINUTE", "BIT_PER_SECOND", "BYTE", "BYTE_PER_HOUR", "BYTE_PER_MINUTE", "BYTE_PER_SECOND", "CORES", "COUNT", "GIBI_BYTE", "GIGA", "GIGA_BYTE", "HOUR", "KIBI_BYTE", "KIBI_BYTE_PER_HOUR", "KIBI_BYTE_PER_MINUTE", "KIBI_BYTE_PER_SECOND", "KILO", "KILO_BYTE", "KILO_BYTE_PER_HOUR", "KILO_BYTE_PER_MINUTE", "KILO_BYTE_PER_SECOND", "MEBI_BYTE", "MEBI_BYTE_PER_HOUR", "MEBI_BYTE_PER_MINUTE", "MEBI_BYTE_PER_SECOND", "MEGA", "MEGA_BYTE", "MEGA_BYTE_PER_HOUR", "MEGA_BYTE_PER_MINUTE", "MEGA_BYTE_PER_SECOND", "MICRO_SECOND", "MILLI_CORES", "MILLI_SECOND", "MILLI_SECOND_PER_MINUTE", "MINUTE", "NANO_SECOND", "NANO_SECOND_PER_MINUTE", "NOT_APPLICABLE", "PERCENT", "PER_HOUR", "PER_MINUTE", "PER_SECOND", "PROMILLE", "RATIO", "SECOND", "STATE", "UNSPECIFIED" ]
             }
           }
         } ]
@@ -13543,6 +13732,42 @@
             }
           }
         } ]
+      },
+      "AnomalyDetectionPG" : {
+        "type" : "object",
+        "properties" : {
+          "availabilityMonitoring" : {
+            "$ref" : "#/components/schemas/AvailabilityMonitoringPG"
+          }
+        },
+        "description" : "Configuration of anomaly detection for the process group.",
+        "example" : {
+          "availabilityMonitoring" : {
+            "method" : "MINIMUM_THRESHOLD",
+            "minimumThreshold" : 5
+          }
+        }
+      },
+      "AvailabilityMonitoringPG" : {
+        "required" : [ "method" ],
+        "type" : "object",
+        "properties" : {
+          "method" : {
+            "type" : "string",
+            "description" : "How to monitor the availability of the process group: \n\n* `PROCESS_IMPACT`: Alert if any process of the group becomes unavailable. \n* `MINIMUM_THRESHOLD`: Alert if the number of active processes in the group falls below the specified threshold. \n* `OFF`: Availability monitoring is disabled.",
+            "enum" : [ "MINIMUM_THRESHOLD", "OFF", "PROCESS_IMPACT" ]
+          },
+          "minimumThreshold" : {
+            "type" : "integer",
+            "description" : "Alert if the number of active processes in the group is lower than this value.",
+            "format" : "int32"
+          }
+        },
+        "description" : "Configuration of the availability monitoring for the process group.",
+        "example" : {
+          "method" : "MINIMUM_THRESHOLD",
+          "minimumThreshold" : 5
+        }
       },
       "ServiceAnomalyDetectionConfig" : {
         "required" : [ "failureRateIncrease", "responseTimeDegradation" ],
@@ -14320,7 +14545,7 @@
           "type" : {
             "type" : "string",
             "description" : "The type of the meta data to capture.",
-            "enum" : [ "COOKIE", "CSS_SELECTOR", "JAVA_SCRIPT_VARIABLE", "META_TAG" ]
+            "enum" : [ "COOKIE", "CSS_SELECTOR", "JAVA_SCRIPT_FUNCTION", "JAVA_SCRIPT_VARIABLE", "META_TAG", "QUERY_STRING" ]
           },
           "capturingName" : {
             "type" : "string",
@@ -14335,6 +14560,10 @@
             "type" : "integer",
             "description" : "The unique id of the meta data to capture.",
             "format" : "int32"
+          },
+          "publicMetadata" : {
+            "type" : "boolean",
+            "description" : "True if this metadata should be captured regardless of the privacy settings"
           }
         },
         "description" : "Configuration to capture meta data with the JavaScript agent."
@@ -14466,6 +14695,24 @@
           }
         },
         "description" : "Settings for resource timings capture."
+      },
+      "SessionReplaySetting" : {
+        "required" : [ "costControlPercentage", "enabled" ],
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean",
+            "description" : "SessionReplay Enabled."
+          },
+          "costControlPercentage" : {
+            "maximum" : 100,
+            "minimum" : 0,
+            "type" : "integer",
+            "description" : "Session replay sampling rating in percentage.",
+            "format" : "int32"
+          }
+        },
+        "description" : "Session replay settings"
       },
       "TimeoutSettings" : {
         "required" : [ "temporaryActionLimit", "temporaryActionTotalTimeout", "timedActionSupport" ],
@@ -14797,6 +15044,9 @@
             "description" : "The key performance metric of load actions.",
             "enum" : [ "ACTION_DURATION", "DOM_INTERACTIVE", "LOAD_EVENT_END", "LOAD_EVENT_START", "RESPONSE_END", "RESPONSE_START", "SPEED_INDEX", "VISUALLY_COMPLETE" ]
           },
+          "sessionReplayConfig" : {
+            "$ref" : "#/components/schemas/SessionReplaySetting"
+          },
           "xhrActionKeyPerformanceMetric" : {
             "type" : "string",
             "description" : "The key performance metric of XHR actions.",
@@ -14844,6 +15094,10 @@
           "name" : "application name",
           "type" : "AUTO_INJECTED",
           "realUserMonitoringEnabled" : true,
+          "sessionReplayConfig" : {
+            "costControlPercentage" : 100,
+            "enabled" : true
+          },
           "costControlUserSessionPercentage" : 100,
           "loadActionKeyPerformanceMetric" : "VISUALLY_COMPLETE",
           "xhrActionKeyPerformanceMetric" : "ACTION_DURATION",
@@ -15128,6 +15382,9 @@
             "type" : "string",
             "description" : "How to handle browsers' \"Do Not Track\": `IGNORE_DO_NOT_TRACK`, or `CAPTURE_ANONYMIZED`, or `DO_NOT_CAPTURE`.",
             "enum" : [ "CAPTURE_ANONYMIZED", "DO_NOT_CAPTURE", "IGNORE_DO_NOT_TRACK" ]
+          },
+          "sessionReplayConfig" : {
+            "$ref" : "#/components/schemas/SessionReplaySetting"
           }
         },
         "description" : "Data privacy settings of the application."
@@ -15492,7 +15749,7 @@
           "attribute" : {
             "type" : "string",
             "description" : "The attribute to be used for comparision.",
-            "enum" : [ "APPMON_SERVER_NAME", "APPMON_SYSTEM_PROFILE_NAME", "AWS_ACCOUNT_ID", "AWS_ACCOUNT_NAME", "AWS_APPLICATION_LOAD_BALANCER_NAME", "AWS_APPLICATION_LOAD_BALANCER_TAGS", "AWS_AUTO_SCALING_GROUP_NAME", "AWS_AUTO_SCALING_GROUP_TAGS", "AWS_AVAILABILITY_ZONE_NAME", "AWS_CLASSIC_LOAD_BALANCER_BACKEND_PORTS", "AWS_CLASSIC_LOAD_BALANCER_FRONTEND_PORTS", "AWS_CLASSIC_LOAD_BALANCER_NAME", "AWS_CLASSIC_LOAD_BALANCER_TAGS", "AWS_NETWORK_LOAD_BALANCER_NAME", "AWS_NETWORK_LOAD_BALANCER_TAGS", "AWS_RELATIONAL_DATABASE_SERVICE_DB_NAME", "AWS_RELATIONAL_DATABASE_SERVICE_ENDPOINT", "AWS_RELATIONAL_DATABASE_SERVICE_ENGINE", "AWS_RELATIONAL_DATABASE_SERVICE_INSTANCE_CLASS", "AWS_RELATIONAL_DATABASE_SERVICE_NAME", "AWS_RELATIONAL_DATABASE_SERVICE_PORT", "AWS_RELATIONAL_DATABASE_SERVICE_TAGS", "AZURE_ENTITY_NAME", "AZURE_ENTITY_TAGS", "AZURE_MGMT_GROUP_NAME", "AZURE_MGMT_GROUP_UUID", "AZURE_REGION_NAME", "AZURE_SCALE_SET_NAME", "AZURE_SUBSCRIPTION_NAME", "AZURE_SUBSCRIPTION_UUID", "AZURE_TENANT_NAME", "AZURE_TENANT_UUID", "AZURE_VM_NAME", "BROWSER_MONITOR_NAME", "BROWSER_MONITOR_TAGS", "CLOUD_APPLICATION_NAME", "CLOUD_APPLICATION_NAMESPACE_NAME", "CLOUD_FOUNDRY_FOUNDATION_NAME", "CLOUD_FOUNDRY_ORG_NAME", "CUSTOM_APPLICATION_NAME", "CUSTOM_APPLICATION_PLATFORM", "CUSTOM_APPLICATION_TAGS", "CUSTOM_APPLICATION_TYPE", "CUSTOM_DEVICE_DETECTED_NAME", "CUSTOM_DEVICE_DNS_ADDRESS", "CUSTOM_DEVICE_GROUP_NAME", "CUSTOM_DEVICE_GROUP_TAGS", "CUSTOM_DEVICE_IP_ADDRESS", "CUSTOM_DEVICE_METADATA", "CUSTOM_DEVICE_NAME", "CUSTOM_DEVICE_PORT", "CUSTOM_DEVICE_TAGS", "CUSTOM_DEVICE_TECHNOLOGY", "DATA_CENTER_SERVICE_DECODER_TYPE", "DATA_CENTER_SERVICE_IP_ADDRESS", "DATA_CENTER_SERVICE_METADATA", "DATA_CENTER_SERVICE_NAME", "DATA_CENTER_SERVICE_PORT", "DATA_CENTER_SERVICE_TAGS", "DOCKER_CONTAINER_NAME", "DOCKER_FULL_IMAGE_NAME", "DOCKER_IMAGE_VERSION", "DOCKER_STRIPPED_IMAGE_NAME", "EC2_INSTANCE_AMI_ID", "EC2_INSTANCE_AWS_INSTANCE_TYPE", "EC2_INSTANCE_AWS_SECURITY_GROUP", "EC2_INSTANCE_BEANSTALK_ENV_NAME", "EC2_INSTANCE_ID", "EC2_INSTANCE_NAME", "EC2_INSTANCE_PRIVATE_HOST_NAME", "EC2_INSTANCE_PUBLIC_HOST_NAME", "EC2_INSTANCE_TAGS", "ENTERPRISE_APPLICATION_DECODER_TYPE", "ENTERPRISE_APPLICATION_IP_ADDRESS", "ENTERPRISE_APPLICATION_METADATA", "ENTERPRISE_APPLICATION_NAME", "ENTERPRISE_APPLICATION_PORT", "ENTERPRISE_APPLICATION_TAGS", "ESXI_HOST_CLUSTER_NAME", "ESXI_HOST_HARDWARE_MODEL", "ESXI_HOST_HARDWARE_VENDOR", "ESXI_HOST_NAME", "ESXI_HOST_PRODUCT_NAME", "ESXI_HOST_PRODUCT_VERSION", "ESXI_HOST_TAGS", "EXTERNAL_MONITOR_ENGINE_DESCRIPTION", "EXTERNAL_MONITOR_ENGINE_NAME", "EXTERNAL_MONITOR_ENGINE_TYPE", "EXTERNAL_MONITOR_NAME", "EXTERNAL_MONITOR_TAGS", "GEOLOCATION_SITE_NAME", "GOOGLE_CLOUD_PLATFORM_ZONE_NAME", "GOOGLE_COMPUTE_INSTANCE_ID", "GOOGLE_COMPUTE_INSTANCE_MACHINE_TYPE", "GOOGLE_COMPUTE_INSTANCE_NAME", "GOOGLE_COMPUTE_INSTANCE_PROJECT", "GOOGLE_COMPUTE_INSTANCE_PROJECT_ID", "GOOGLE_COMPUTE_INSTANCE_PUBLIC_IP_ADDRESSES", "HOST_AIX_LOGICAL_CPU_COUNT", "HOST_AIX_SIMULTANEOUS_THREADS", "HOST_AIX_VIRTUAL_CPU_COUNT", "HOST_ARCHITECTURE", "HOST_AWS_NAME_TAG", "HOST_AZURE_COMPUTE_MODE", "HOST_AZURE_SKU", "HOST_AZURE_WEB_APPLICATION_HOST_NAMES", "HOST_AZURE_WEB_APPLICATION_SITE_NAMES", "HOST_BITNESS", "HOST_BOSH_AVAILABILITY_ZONE", "HOST_BOSH_DEPLOYMENT_ID", "HOST_BOSH_INSTANCE_ID", "HOST_BOSH_INSTANCE_NAME", "HOST_BOSH_NAME", "HOST_BOSH_STEMCELL_VERSION", "HOST_CLOUD_TYPE", "HOST_CPU_CORES", "HOST_CUSTOM_METADATA", "HOST_DETECTED_NAME", "HOST_GROUP_ID", "HOST_GROUP_NAME", "HOST_HYPERVISOR_TYPE", "HOST_IP_ADDRESS", "HOST_KUBERNETES_LABELS", "HOST_LOGICAL_CPU_CORES", "HOST_NAME", "HOST_ONEAGENT_CUSTOM_HOST_NAME", "HOST_OS_TYPE", "HOST_OS_VERSION", "HOST_PAAS_MEMORY_LIMIT", "HOST_PAAS_TYPE", "HOST_TAGS", "HOST_TECHNOLOGY", "HTTP_MONITOR_NAME", "HTTP_MONITOR_TAGS", "KUBERNETES_CLUSTER_NAME", "KUBERNETES_NODE_NAME", "MOBILE_APPLICATION_NAME", "MOBILE_APPLICATION_PLATFORM", "MOBILE_APPLICATION_TAGS", "NAME_OF_COMPUTE_NODE", "OPENSTACK_ACCOUNT_NAME", "OPENSTACK_ACCOUNT_PROJECT_NAME", "OPENSTACK_AVAILABILITY_ZONE_NAME", "OPENSTACK_PROJECT_NAME", "OPENSTACK_REGION_NAME", "OPENSTACK_VM_INSTANCE_TYPE", "OPENSTACK_VM_NAME", "OPENSTACK_VM_SECURITY_GROUP", "PROCESS_GROUP_AZURE_HOST_NAME", "PROCESS_GROUP_AZURE_SITE_NAME", "PROCESS_GROUP_CUSTOM_METADATA", "PROCESS_GROUP_DETECTED_NAME", "PROCESS_GROUP_ID", "PROCESS_GROUP_INSTANCE_CUSTOM_METADATA", "PROCESS_GROUP_LISTEN_PORT", "PROCESS_GROUP_NAME", "PROCESS_GROUP_PREDEFINED_METADATA", "PROCESS_GROUP_TAGS", "PROCESS_GROUP_TECHNOLOGY", "PROCESS_GROUP_TECHNOLOGY_EDITION", "PROCESS_GROUP_TECHNOLOGY_VERSION", "SERVICE_AKKA_ACTOR_SYSTEM", "SERVICE_CTG_SERVICE_NAME", "SERVICE_DATABASE_HOST_NAME", "SERVICE_DATABASE_NAME", "SERVICE_DATABASE_TOPOLOGY", "SERVICE_DATABASE_VENDOR", "SERVICE_DETECTED_NAME", "SERVICE_ESB_APPLICATION_NAME", "SERVICE_IBM_CTG_GATEWAY_URL", "SERVICE_IIB_APPLICATION_NAME", "SERVICE_MESSAGING_LISTENER_CLASS_NAME", "SERVICE_NAME", "SERVICE_PORT", "SERVICE_PUBLIC_DOMAIN_NAME", "SERVICE_REMOTE_ENDPOINT", "SERVICE_REMOTE_SERVICE_NAME", "SERVICE_TAGS", "SERVICE_TECHNOLOGY", "SERVICE_TECHNOLOGY_EDITION", "SERVICE_TECHNOLOGY_VERSION", "SERVICE_TOPOLOGY", "SERVICE_TYPE", "SERVICE_WEB_APPLICATION_ID", "SERVICE_WEB_CONTEXT_ROOT", "SERVICE_WEB_SERVER_ENDPOINT", "SERVICE_WEB_SERVER_NAME", "SERVICE_WEB_SERVICE_NAME", "SERVICE_WEB_SERVICE_NAMESPACE", "VMWARE_DATACENTER_NAME", "VMWARE_VM_NAME", "WEB_APPLICATION_NAME", "WEB_APPLICATION_NAME_PATTERN", "WEB_APPLICATION_TAGS", "WEB_APPLICATION_TYPE" ]
+            "enum" : [ "APPMON_SERVER_NAME", "APPMON_SYSTEM_PROFILE_NAME", "AWS_ACCOUNT_ID", "AWS_ACCOUNT_NAME", "AWS_APPLICATION_LOAD_BALANCER_NAME", "AWS_APPLICATION_LOAD_BALANCER_TAGS", "AWS_AUTO_SCALING_GROUP_NAME", "AWS_AUTO_SCALING_GROUP_TAGS", "AWS_AVAILABILITY_ZONE_NAME", "AWS_CLASSIC_LOAD_BALANCER_NAME", "AWS_CLASSIC_LOAD_BALANCER_TAGS", "AWS_NETWORK_LOAD_BALANCER_NAME", "AWS_NETWORK_LOAD_BALANCER_TAGS", "AWS_RELATIONAL_DATABASE_SERVICE_DB_NAME", "AWS_RELATIONAL_DATABASE_SERVICE_ENDPOINT", "AWS_RELATIONAL_DATABASE_SERVICE_ENGINE", "AWS_RELATIONAL_DATABASE_SERVICE_INSTANCE_CLASS", "AWS_RELATIONAL_DATABASE_SERVICE_NAME", "AWS_RELATIONAL_DATABASE_SERVICE_PORT", "AWS_RELATIONAL_DATABASE_SERVICE_TAGS", "AZURE_ENTITY_NAME", "AZURE_ENTITY_TAGS", "AZURE_MGMT_GROUP_NAME", "AZURE_MGMT_GROUP_UUID", "AZURE_REGION_NAME", "AZURE_SCALE_SET_NAME", "AZURE_SUBSCRIPTION_NAME", "AZURE_SUBSCRIPTION_UUID", "AZURE_TENANT_NAME", "AZURE_TENANT_UUID", "AZURE_VM_NAME", "BROWSER_MONITOR_NAME", "BROWSER_MONITOR_TAGS", "CLOUD_APPLICATION_NAME", "CLOUD_APPLICATION_NAMESPACE_NAME", "CLOUD_FOUNDRY_FOUNDATION_NAME", "CLOUD_FOUNDRY_ORG_NAME", "CUSTOM_APPLICATION_NAME", "CUSTOM_APPLICATION_PLATFORM", "CUSTOM_APPLICATION_TAGS", "CUSTOM_APPLICATION_TYPE", "CUSTOM_DEVICE_DETECTED_NAME", "CUSTOM_DEVICE_DNS_ADDRESS", "CUSTOM_DEVICE_GROUP_NAME", "CUSTOM_DEVICE_GROUP_TAGS", "CUSTOM_DEVICE_IP_ADDRESS", "CUSTOM_DEVICE_METADATA", "CUSTOM_DEVICE_NAME", "CUSTOM_DEVICE_PORT", "CUSTOM_DEVICE_TAGS", "CUSTOM_DEVICE_TECHNOLOGY", "DATA_CENTER_SERVICE_DECODER_TYPE", "DATA_CENTER_SERVICE_IP_ADDRESS", "DATA_CENTER_SERVICE_METADATA", "DATA_CENTER_SERVICE_NAME", "DATA_CENTER_SERVICE_PORT", "DATA_CENTER_SERVICE_TAGS", "DOCKER_CONTAINER_NAME", "DOCKER_FULL_IMAGE_NAME", "DOCKER_IMAGE_VERSION", "DOCKER_STRIPPED_IMAGE_NAME", "EC2_INSTANCE_AMI_ID", "EC2_INSTANCE_AWS_INSTANCE_TYPE", "EC2_INSTANCE_AWS_SECURITY_GROUP", "EC2_INSTANCE_BEANSTALK_ENV_NAME", "EC2_INSTANCE_ID", "EC2_INSTANCE_NAME", "EC2_INSTANCE_PRIVATE_HOST_NAME", "EC2_INSTANCE_PUBLIC_HOST_NAME", "EC2_INSTANCE_TAGS", "ENTERPRISE_APPLICATION_DECODER_TYPE", "ENTERPRISE_APPLICATION_IP_ADDRESS", "ENTERPRISE_APPLICATION_METADATA", "ENTERPRISE_APPLICATION_NAME", "ENTERPRISE_APPLICATION_PORT", "ENTERPRISE_APPLICATION_TAGS", "ESXI_HOST_CLUSTER_NAME", "ESXI_HOST_HARDWARE_MODEL", "ESXI_HOST_HARDWARE_VENDOR", "ESXI_HOST_NAME", "ESXI_HOST_PRODUCT_NAME", "ESXI_HOST_PRODUCT_VERSION", "ESXI_HOST_TAGS", "EXTERNAL_MONITOR_ENGINE_DESCRIPTION", "EXTERNAL_MONITOR_ENGINE_NAME", "EXTERNAL_MONITOR_ENGINE_TYPE", "EXTERNAL_MONITOR_NAME", "EXTERNAL_MONITOR_TAGS", "GEOLOCATION_SITE_NAME", "GOOGLE_CLOUD_PLATFORM_ZONE_NAME", "GOOGLE_COMPUTE_INSTANCE_ID", "GOOGLE_COMPUTE_INSTANCE_MACHINE_TYPE", "GOOGLE_COMPUTE_INSTANCE_NAME", "GOOGLE_COMPUTE_INSTANCE_PROJECT", "GOOGLE_COMPUTE_INSTANCE_PROJECT_ID", "GOOGLE_COMPUTE_INSTANCE_PUBLIC_IP_ADDRESSES", "HOST_AIX_LOGICAL_CPU_COUNT", "HOST_AIX_SIMULTANEOUS_THREADS", "HOST_AIX_VIRTUAL_CPU_COUNT", "HOST_ARCHITECTURE", "HOST_AWS_NAME_TAG", "HOST_AZURE_COMPUTE_MODE", "HOST_AZURE_SKU", "HOST_AZURE_WEB_APPLICATION_HOST_NAMES", "HOST_AZURE_WEB_APPLICATION_SITE_NAMES", "HOST_BITNESS", "HOST_BOSH_AVAILABILITY_ZONE", "HOST_BOSH_DEPLOYMENT_ID", "HOST_BOSH_INSTANCE_ID", "HOST_BOSH_INSTANCE_NAME", "HOST_BOSH_NAME", "HOST_BOSH_STEMCELL_VERSION", "HOST_CLOUD_TYPE", "HOST_CPU_CORES", "HOST_CUSTOM_METADATA", "HOST_DETECTED_NAME", "HOST_GROUP_ID", "HOST_GROUP_NAME", "HOST_HYPERVISOR_TYPE", "HOST_IP_ADDRESS", "HOST_KUBERNETES_LABELS", "HOST_LOGICAL_CPU_CORES", "HOST_NAME", "HOST_ONEAGENT_CUSTOM_HOST_NAME", "HOST_OS_TYPE", "HOST_OS_VERSION", "HOST_PAAS_MEMORY_LIMIT", "HOST_PAAS_TYPE", "HOST_TAGS", "HOST_TECHNOLOGY", "HTTP_MONITOR_NAME", "HTTP_MONITOR_TAGS", "KUBERNETES_CLUSTER_NAME", "KUBERNETES_NODE_NAME", "MOBILE_APPLICATION_NAME", "MOBILE_APPLICATION_PLATFORM", "MOBILE_APPLICATION_TAGS", "NAME_OF_COMPUTE_NODE", "OPENSTACK_ACCOUNT_NAME", "OPENSTACK_ACCOUNT_PROJECT_NAME", "OPENSTACK_AVAILABILITY_ZONE_NAME", "OPENSTACK_PROJECT_NAME", "OPENSTACK_REGION_NAME", "OPENSTACK_VM_INSTANCE_TYPE", "OPENSTACK_VM_NAME", "OPENSTACK_VM_SECURITY_GROUP", "PROCESS_GROUP_AZURE_HOST_NAME", "PROCESS_GROUP_AZURE_SITE_NAME", "PROCESS_GROUP_CUSTOM_METADATA", "PROCESS_GROUP_DETECTED_NAME", "PROCESS_GROUP_ID", "PROCESS_GROUP_LISTEN_PORT", "PROCESS_GROUP_NAME", "PROCESS_GROUP_PREDEFINED_METADATA", "PROCESS_GROUP_TAGS", "PROCESS_GROUP_TECHNOLOGY", "PROCESS_GROUP_TECHNOLOGY_EDITION", "PROCESS_GROUP_TECHNOLOGY_VERSION", "SERVICE_AKKA_ACTOR_SYSTEM", "SERVICE_CTG_SERVICE_NAME", "SERVICE_DATABASE_HOST_NAME", "SERVICE_DATABASE_NAME", "SERVICE_DATABASE_TOPOLOGY", "SERVICE_DATABASE_VENDOR", "SERVICE_DETECTED_NAME", "SERVICE_ESB_APPLICATION_NAME", "SERVICE_IBM_CTG_GATEWAY_URL", "SERVICE_IIB_APPLICATION_NAME", "SERVICE_MESSAGING_LISTENER_CLASS_NAME", "SERVICE_NAME", "SERVICE_PORT", "SERVICE_PUBLIC_DOMAIN_NAME", "SERVICE_REMOTE_ENDPOINT", "SERVICE_REMOTE_SERVICE_NAME", "SERVICE_TAGS", "SERVICE_TECHNOLOGY", "SERVICE_TECHNOLOGY_EDITION", "SERVICE_TECHNOLOGY_VERSION", "SERVICE_TOPOLOGY", "SERVICE_TYPE", "SERVICE_WEB_APPLICATION_ID", "SERVICE_WEB_CONTEXT_ROOT", "SERVICE_WEB_SERVER_ENDPOINT", "SERVICE_WEB_SERVER_NAME", "SERVICE_WEB_SERVICE_NAME", "SERVICE_WEB_SERVICE_NAMESPACE", "VMWARE_DATACENTER_NAME", "VMWARE_VM_NAME", "WEB_APPLICATION_NAME", "WEB_APPLICATION_NAME_PATTERN", "WEB_APPLICATION_TAGS", "WEB_APPLICATION_TYPE" ]
           },
           "type" : {
             "type" : "string",
@@ -18202,7 +18459,7 @@
           "type" : {
             "type" : "string",
             "description" : "The type of Dynatrace entities the management zone can be applied to.",
-            "enum" : [ "APPMON_SERVER", "APPMON_SYSTEM_PROFILE", "AWS_ACCOUNT", "AWS_APPLICATION_LOAD_BALANCER", "AWS_AUTO_SCALING_GROUP", "AWS_CLASSIC_LOAD_BALANCER", "AWS_NETWORK_LOAD_BALANCER", "AWS_RELATIONAL_DATABASE_SERVICE", "AZURE", "BROWSER_MONITOR", "CLOUD_APPLICATION", "CLOUD_APPLICATION_NAMESPACE", "CLOUD_FOUNDRY_FOUNDATION", "CUSTOM_APPLICATION", "CUSTOM_DEVICE", "CUSTOM_DEVICE_GROUP", "DATA_CENTER_SERVICE", "ENTERPRISE_APPLICATION", "ESXI_HOST", "EXTERNAL_MONITOR", "HOST", "HTTP_MONITOR", "KUBERNETES_CLUSTER", "KUBERNETES_NODE", "MOBILE_APPLICATION", "OPENSTACK_ACCOUNT", "PROCESS_GROUP", "SERVICE", "WEB_APPLICATION" ]
+            "enum" : [ "APPMON_SERVER", "APPMON_SYSTEM_PROFILE", "AWS_ACCOUNT", "AWS_APPLICATION_LOAD_BALANCER", "AWS_AUTO_SCALING_GROUP", "AWS_CLASSIC_LOAD_BALANCER", "AWS_NETWORK_LOAD_BALANCER", "AWS_RELATIONAL_DATABASE_SERVICE", "AZURE", "BROWSER_MONITOR", "CLOUD_APPLICATION", "CLOUD_APPLICATION_NAMESPACE", "CLOUD_FOUNDRY_FOUNDATION", "CUSTOM_APPLICATION", "CUSTOM_DEVICE", "CUSTOM_DEVICE_GROUP", "DATA_CENTER_SERVICE", "ENTERPRISE_APPLICATION", "ESXI_HOST", "EXTERNAL_MONITOR", "HOST", "HOST_GROUP", "HTTP_MONITOR", "KUBERNETES_CLUSTER", "KUBERNETES_NODE", "MOBILE_APPLICATION", "OPENSTACK_ACCOUNT", "PROCESS_GROUP", "SERVICE", "WEB_APPLICATION" ]
           },
           "enabled" : {
             "type" : "boolean",
@@ -18345,67 +18602,48 @@
           } ]
         }
       },
-      "MobileDimensionDefinition" : {
-        "required" : [ "dimension", "topX" ],
-        "type" : "object",
-        "properties" : {
-          "topX" : {
-            "maximum" : 200,
-            "minimum" : 1,
-            "type" : "integer",
-            "description" : "The number of top values to be calculated.",
-            "format" : "int32"
-          },
-          "dimension" : {
-            "type" : "string",
-            "description" : "The dimension of this metric.",
-            "enum" : [ "APP_VERSION", "DEVICE", "ERROR_CONTEXT", "GEOLOCATION", "MANUFACTURER", "OS" ]
-          }
-        },
-        "description" : "Defines a dimension of the metric"
-      },
-      "MobileMetric" : {
+      "CalculatedMobileMetric" : {
         "required" : [ "applicationIdentifier", "enabled", "metricKey", "metricType", "name" ],
         "type" : "object",
         "properties" : {
           "applicationIdentifier" : {
             "type" : "string",
-            "description" : "The application identifier of the application where this MobileMetric should belong to"
+            "description" : "The Dynatrace entity ID of the application to which the metric belongs."
           },
           "name" : {
             "maxLength" : 100,
             "minLength" : 0,
             "type" : "string",
-            "description" : "The name of the MobileMetric config"
+            "description" : "The name of the metric, displayed in the UI."
           },
           "metricKey" : {
             "pattern" : "^calc:apps\\..*",
             "type" : "string",
-            "description" : "The unique key of this MobileMetric. Has to start with \"calc:apps.\""
+            "description" : "The unique key of the metric. \n\n The key must have the `calc:apps` prefix."
           },
           "enabled" : {
             "type" : "boolean",
-            "description" : "MobileMetric enabled/disabled"
+            "description" : "The metric is enabled (`true`) or disabled (`false`)."
           },
           "metricType" : {
             "type" : "string",
-            "description" : "Specifies the metric type for this MobileMetric.",
+            "description" : "The type of the metric.",
             "enum" : [ "REPORTED_ERROR_COUNT", "USER_ACTION_DURATION", "WEB_REQUEST_COUNT", "WEB_REQUEST_ERROR_COUNT" ]
           },
           "dimensions" : {
             "maxItems" : 2,
             "minItems" : 0,
             "type" : "array",
-            "description" : "Specifies the optional dimensions for this MobileMetric.",
+            "description" : "A list of metric dimensions.",
             "items" : {
-              "$ref" : "#/components/schemas/MobileDimensionDefinition"
+              "$ref" : "#/components/schemas/CalculatedMobileMetricDimension"
             }
           },
           "userActionFilter" : {
-            "$ref" : "#/components/schemas/MobileUserActionFilter"
+            "$ref" : "#/components/schemas/CalculatedMobileMetricUserActionFilter"
           }
         },
-        "description" : "Configuration of a mobile metric",
+        "description" : "Definition of the calculated metric for mobile or custom app.",
         "example" : {
           "enabled" : true,
           "name" : "MyMetric",
@@ -18423,79 +18661,98 @@
           } ]
         }
       },
-      "MobileUserActionFilter" : {
+      "CalculatedMobileMetricDimension" : {
+        "required" : [ "dimension", "topX" ],
+        "type" : "object",
+        "properties" : {
+          "topX" : {
+            "maximum" : 200,
+            "minimum" : 1,
+            "type" : "integer",
+            "description" : "The number of top values to be calculated.",
+            "format" : "int32"
+          },
+          "dimension" : {
+            "type" : "string",
+            "description" : "The dimension of the metric.",
+            "enum" : [ "APP_VERSION", "DEVICE", "ERROR_CONTEXT", "GEOLOCATION", "MANUFACTURER", "OS" ]
+          }
+        },
+        "description" : "Dimension of the calculated mobile metric."
+      },
+      "CalculatedMobileMetricUserActionFilter" : {
         "type" : "object",
         "properties" : {
           "hasReportedError" : {
             "type" : "boolean",
-            "writeOnly" : true
+            "description" : "The error status of the actions to be included in the metric calculation: \n\n* `true`: Only actions with reported errors are included. \n\n * `false`: All actions are included."
           },
           "hasHttpError" : {
             "type" : "boolean",
-            "writeOnly" : true
+            "description" : "The HTTP error status of the actions to be included in the metric calculation: \n\n* `true`: Only actions with HTTP errors are included. \n\n * `false`: All actions are included."
           },
           "userActionName" : {
             "type" : "string",
-            "description" : "Filter by user action name"
+            "description" : "Only actions with this name are included in the metric calculation. \n\n The EQUALS operator applies."
           },
           "appVersion" : {
             "type" : "string",
-            "description" : "Filter by app version"
+            "description" : "Only actions coming from this app version are included in the metric calculation. \n\n The EQUALS operator applies."
           },
           "device" : {
             "type" : "string",
-            "description" : "Filter by device name"
+            "description" : "Only actions coming from this app version are included in the metric calculation. \n\n The EQUALS operator applies."
           },
           "manufacturer" : {
             "type" : "string",
-            "description" : "Filter by manufacturer"
+            "description" : "Only actions coming from devices of this manufacturer are included in the metric calculation. \n\n The EQUALS operator applies."
           },
           "apdex" : {
             "type" : "string",
-            "description" : "Filter by Apdex",
+            "description" : "Only actions with the specified Apdex score are included in the metric calculation.",
             "enum" : [ "Frustrated", "Satisfied", "Tolerating", "Unknown" ]
           },
           "osFamily" : {
             "type" : "string",
-            "description" : "Filter by OS family"
+            "description" : "Only actions coming from this OS family are included in the metric calculation. \n\n Specify the OS ID here."
           },
           "osVersion" : {
             "type" : "string",
-            "description" : "Filter by OS version"
+            "description" : "Only actions coming from this OS version are included in the metric calculation. \n\n Specify the OS ID here."
           },
           "city" : {
             "type" : "string",
-            "description" : "Filter by city"
+            "description" : "Only actions of users from this city are included in the metric calculation. \n\n Specify geolocation ID here."
           },
           "continent" : {
             "type" : "string",
-            "description" : "Filter by continent"
+            "description" : "Only actions of users from this continent are included in the metric calculation. \n\n Specify geolocation ID here."
           },
           "country" : {
             "type" : "string",
-            "description" : "Filter by country"
+            "description" : "Only actions of users from this country are included in the metric calculation. \n\n Specify geolocation ID here."
           },
           "region" : {
             "type" : "string",
-            "description" : "Filter by region"
+            "description" : "Only actions of users from this region are included in the metric calculation. \n\n Specify geolocation ID here."
           },
           "actionDurationFromMilliseconds" : {
             "type" : "integer",
-            "description" : "Filter by user actions with an action duration >= this value",
+            "description" : "Only actions with a duration more than or equal to this value (in milliseconds) are included in the metric calculation.",
             "format" : "int32"
           },
           "actionDurationToMilliseconds" : {
             "type" : "integer",
-            "description" : "Filter by user actions with an action duration <= this value",
+            "description" : "Only actions with a duration less than or equal to this value (in milliseconds) are included in the metric calculation.",
             "format" : "int32"
           },
           "carrier" : {
             "type" : "string",
-            "description" : "Filter by carrier"
+            "description" : "Only actions coming from this carrier type are included in the metric calculation."
           },
           "connectionType" : {
             "type" : "string",
-            "description" : "Filter by connection type",
+            "description" : "Only actions coming from this connection type are included in the metric calculation.",
             "enum" : [ "LAN", "MOBILE", "OFFLINE", "UNKNOWN", "WIFI" ]
           },
           "networkTechnology" : {
@@ -18504,30 +18761,30 @@
           },
           "isp" : {
             "type" : "string",
-            "description" : "Filter by ISP"
+            "description" : "Only actions coming from this internet service provider are included in the metric calculation. \n\n  The EQUALS operator applies."
           },
           "orientation" : {
             "type" : "string",
-            "description" : "Filter by orientation",
+            "description" : "Only actions coming from devices with this display orientation are included in the metric calculation.",
             "enum" : [ "LANDSCAPE", "PORTRAIT", "UNKNOWN" ]
           },
           "resolution" : {
             "type" : "string",
-            "description" : "Filter by display resolution",
+            "description" : "Only actions coming from devices with this display resolution are included in the metric calculation.",
             "enum" : [ "CGA", "DCI2K", "DCI4K", "DVGA", "FHD", "FWVGA", "FWXGA", "GHDPlus", "HD", "HQVGA", "HQVGA2", "HSXGA", "HUXGA", "HVGA", "HXGA", "NTSC", "PAL", "QHD", "QQVGA", "QSXGA", "QUXGA", "QVGA", "QWXGA", "QXGA", "SVGA", "SXGA", "SXGAMinus", "SXGAPlus", "UGA", "UHD16K", "UHD4K", "UHD8K", "UHDPlus", "UNKNOWN", "UWQHD", "UXGA", "VGA", "WHSXGA", "WHUXGA", "WHXGA", "WQSXGA", "WQUXGA", "WQVGA", "WQVGA2", "WQVGA3", "WQXGA", "WQXGA2", "WSVGA", "WSVGA2", "WSXGA", "WSXGAPlus", "WUXGA", "WVGA", "WVGA2", "WXGA", "WXGA2", "WXGA3", "WXGAPlus", "XGA", "XGAPLUS", "_1280x854", "nHD", "qHD" ]
           }
         },
-        "description" : "Define "
+        "description" : "User actions filter of the calculated metric for mobile or custom app."
       },
-      "MobileMetricUpdate" : {
+      "CalculatedMobileMetricUpdate" : {
         "type" : "object",
         "properties" : {
           "enabled" : {
             "type" : "boolean",
-            "description" : "If the MobileMetric should be enabled/disabled"
+            "description" : "The metric is enabled (`true`) or disabled (`false`)."
           }
         },
-        "description" : "Update an existing mobile metric"
+        "description" : "Update of the calculated mobile or custom metric."
       },
       "RumDimensionDefinition" : {
         "required" : [ "dimension", "topX" ],
@@ -19449,47 +19706,47 @@
           }
         } ]
       },
-      "SyntheticMetric" : {
+      "CalculatedSyntheticMetric" : {
         "required" : [ "enabled", "metric", "metricKey", "monitorIdentifier", "name" ],
         "type" : "object",
         "properties" : {
           "monitorIdentifier" : {
             "type" : "string",
-            "description" : "The identifier of the monitor this SyntheticMetric should belong to"
+            "description" : "The Dynatrace entity ID of the synthetic monitor to which the metric belongs."
           },
           "name" : {
             "maxLength" : 100,
             "minLength" : 0,
             "type" : "string",
-            "description" : "The name of the SyntheticMetric config"
+            "description" : "The name of the metric, displayed in the UI."
           },
           "metricKey" : {
             "type" : "string",
-            "description" : "The unique key of this SyntheticMetric. Has to start with \"calc:synthetic.\""
+            "description" : "The unique key of the metric. \n\n The key must have the `calc:synthetic` prefix."
           },
           "enabled" : {
             "type" : "boolean",
-            "description" : "SyntheticMetric enabled/disabled"
+            "description" : "The metric is enabled (`true`) or disabled (`false`)."
           },
           "metric" : {
             "type" : "string",
-            "description" : "Specifies the metric for this SyntheticMetric.",
+            "description" : "The type of the synthetic metric.",
             "enum" : [ "ApplicationCache", "Callback", "DNSLookup", "DOMComplete", "DOMContentLoaded", "DOMInteractive", "FailedRequestsResources", "HTMLDownloaded", "HttpErrors", "JavaScriptErrors", "LoadEventEnd", "LoadEventStart", "NavigationStart", "OnDOMContentLoaded", "OnLoad", "Processing", "RedirectTime", "Request", "RequestStart", "ResourceCount", "Response", "SecureConnect", "SpeedIndex", "TCPConnect", "TimeToFirstByte", "TotalDuration", "TransferSize", "UserActionDuration", "VisuallyComplete" ]
           },
           "dimensions" : {
             "maxItems" : 2,
             "minItems" : 0,
             "type" : "array",
-            "description" : "A list of optional dimensions for this SyntheticMetric.",
+            "description" : "A list of metric dimensions.",
             "items" : {
-              "$ref" : "#/components/schemas/SyntheticMetricDimensionDefinition"
+              "$ref" : "#/components/schemas/SyntheticMetricDimension"
             }
           },
           "filter" : {
             "$ref" : "#/components/schemas/SyntheticMetricFilter"
           }
         },
-        "description" : "Configuration of a synthetic metric.",
+        "description" : "Definition of the calculated synthetic metric.",
         "example" : {
           "enabled" : true,
           "name" : "MyMetric",
@@ -19505,7 +19762,7 @@
           } ]
         }
       },
-      "SyntheticMetricDimensionDefinition" : {
+      "SyntheticMetricDimension" : {
         "required" : [ "dimension" ],
         "type" : "object",
         "properties" : {
@@ -19518,48 +19775,49 @@
           },
           "dimension" : {
             "type" : "string",
-            "description" : "A dimension of this metric.",
+            "description" : "The dimension of the metric.",
             "enum" : [ "Event", "Location", "ResourceOrigin" ]
           }
         },
-        "description" : "Contains a dimension of the metric and the number of top values to be calculated."
+        "description" : "Dimension of the calculated synthetic metric."
       },
       "SyntheticMetricFilter" : {
         "type" : "object",
         "properties" : {
           "actionType" : {
             "type" : "string",
-            "description" : "Filter by user actions with the given action type",
+            "description" : "Only user actions of the specified type are included in the metric calculation.",
             "enum" : [ "Custom", "Load", "Xhr" ]
           },
           "hasError" : {
             "type" : "boolean",
-            "description" : "Filter executions which fail"
+            "description" : "The execution status of the monitors to be included in the metric calculation: \n\n* `true`: Only failed executions are included. \n\n * `false`: All executions are included."
           },
           "errorCode" : {
             "type" : "integer",
-            "description" : "Filter executions which finish with given error code",
+            "description" : "Only executions finished with the specified error code are included in the metric calculation.",
             "format" : "int32"
           },
           "event" : {
             "type" : "string",
-            "description" : "Filter by user actions which belong to given event"
+            "description" : "Only the specified browser clickpath event is included in the metric calculation. \n\n Specify the Dynatrace entity ID of the event here. You can fetch the list of clickpath events of the monitor with the [GET a synthetic monitor](https://www.dynatrace.com/support/help/shortlink/api-synthetic-monitors-get-monitor) request from the Environment API"
           },
           "location" : {
             "type" : "string",
-            "description" : "Filter executions from given location"
+            "description" : "Only executions from the specified location are included in the metric calculation. \n\n Specify the Dynatrace entity ID of the location here. You can fetch the list of locations the monitor is running from with the [GET a synthetic monitor](https://www.dynatrace.com/support/help/shortlink/api-synthetic-monitors-get-monitor) request from the Environment API."
           }
         },
-        "description" : "Filter for matching only certain executions, events or user actions."
+        "description" : "Filter of the calculated synthetic metric."
       },
       "SyntheticMetricUpdate" : {
         "type" : "object",
         "properties" : {
           "enabled" : {
-            "type" : "boolean"
+            "type" : "boolean",
+            "description" : "The metric is enabled (`true`) or disabled (`false`)."
           }
         },
-        "description" : "Contains an enabled field for enabling/disabling the metric"
+        "description" : "The update of the calculated synthetic metric."
       },
       "NotificationConfigStub" : {
         "required" : [ "id" ],
@@ -20314,21 +20572,15 @@
         "required" : [ "displayName", "uri" ],
         "type" : "object",
         "properties" : {
-          "token" : {
-            "type" : "string",
-            "description" : "The API token granting access to the remote environment. \n\nThe token must have the **Fetch data from a remote environment** (`RestRequestForwarding`) scope. You can create such a token only via [Tokens API](https://www.dynatrace.com/support/help/shortlink/api-tokens-post-new). \n\nFor security reasons, GET requests return this field as `null`."
-          },
           "networkScope" : {
             "type" : "string",
             "description" : "The network scope of the remote environment:\n* `EXTERNAL`: The remote environment is located in an another network. \n* `INTERNAL`: The remote environment is located in the same network. \n* `CLUSTER`: The remote environment is located in the same cluster. \n\nDynatrace SaaS can only use `EXTERNAL`.\n\nIf not set, `EXTERNAL` is used.",
             "example" : "EXTERNAL",
             "enum" : [ "CLUSTER", "EXTERNAL", "INTERNAL" ]
           },
-          "uri" : {
-            "maxLength" : 1000,
-            "minLength" : 1,
+          "token" : {
             "type" : "string",
-            "description" : "The URI of the remote environment."
+            "description" : "The API token granting access to the remote environment. \n\nThe token must have the **Fetch data from a remote environment** (`RestRequestForwarding`) scope. You can create such a token only via [Tokens API](https://www.dynatrace.com/support/help/shortlink/api-tokens-post-new). \n\nFor security reasons, GET requests return this field as `null`."
           },
           "id" : {
             "type" : "string",
@@ -20337,6 +20589,12 @@
           "displayName" : {
             "type" : "string",
             "description" : "The display name of the remote environment."
+          },
+          "uri" : {
+            "maxLength" : 1000,
+            "minLength" : 1,
+            "type" : "string",
+            "description" : "The URI of the remote environment."
           }
         }
       },
@@ -20349,17 +20607,17 @@
             "description" : "The network scope of the remote environment:\n* `EXTERNAL`: The remote environment is located in an another network. \n* `INTERNAL`: The remote environment is located in the same network. \n* `CLUSTER`: The remote environment is located in the same cluster. \n\nDynatrace SaaS can only use `EXTERNAL`.\n\nIf not set, `EXTERNAL` is used.",
             "enum" : [ "CLUSTER", "EXTERNAL", "INTERNAL" ]
           },
-          "uri" : {
-            "maxLength" : 1000,
-            "minLength" : 1,
-            "type" : "string",
-            "description" : "The display name of the remote environment."
-          },
           "name" : {
             "type" : "string"
           },
           "id" : {
             "type" : "string"
+          },
+          "uri" : {
+            "maxLength" : 1000,
+            "minLength" : 1,
+            "type" : "string",
+            "description" : "The display name of the remote environment."
           }
         },
         "description" : "The short representation of a remote environment."

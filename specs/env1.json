@@ -102,6 +102,100 @@
         } ]
       }
     },
+    "/deployment/installer/agent/connectioninfo/endpoints" : {
+      "get" : {
+        "tags" : [ "Deployment" ],
+        "summary" : "Gets the list of the ActiveGate-Endpoints to be used for Agents ordered by networkzone-priorities. | maturity=EARLY_ADOPTER",
+        "description" : "Highest priority first, separated by a semicolon.If no network zone provided the default zone is used. Responds with 404 if network zone is not known.",
+        "operationId" : "getAgentInstallerConnectionInfoEndpoints",
+        "parameters" : [ {
+          "name" : "networkZone",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          }
+        },
+        "security" : [ {
+          "InstallerDownload" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/deployment/installer/agent/{osType}/{installerType}/latest/metainfo" : {
+      "get" : {
+        "tags" : [ "Deployment" ],
+        "summary" : "Gets the latest available version of the OneAgent installer of the specified type",
+        "description" : "Returns the OneAgent version of the installer of the specified type. \n\nNon-required parameters are only applicable to the `paas` and `paas-sh` installer types.",
+        "operationId" : "getAgentInstallerMetaInfo",
+        "parameters" : [ {
+          "name" : "osType",
+          "in" : "path",
+          "description" : "The operating system of the installer.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "windows", "unix", "aix", "solaris" ]
+          }
+        }, {
+          "name" : "installerType",
+          "in" : "path",
+          "description" : "The type of the installer: \n\n* `default`: Self-extracting installer for manual installation. Downloads an `.exe` file for Windows or an `.sh` file for Unix. \n* `default-unattended`: Self-extracting installer for unattended installation. Windows only. Downloads a `.zip` archive, containing the `.msi` installer and the batch file. This option is deprecated with OneAgent version 1.173 \n* `paas`: Code modules installer. Downloads a `*.zip` archive, containing the `manifest.json` file with meta information. \n* `paas-sh`: Code modules installer. Downloads a self-extracting shell script with the embedded `tar.gz` archive.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "default", "default-unattended", "paas", "paas-sh" ]
+          }
+        }, {
+          "name" : "flavor",
+          "in" : "query",
+          "description" : "The flavor of your Linux distribution. \n\n Set `musl` for Linux distributions, which are using the musl C standard library, for example Alpine Linux. \n\n Only applicable to the `paas` and `paas-sh` installer types.",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "default", "musl" ],
+            "default" : "default"
+          }
+        }, {
+          "name" : "arch",
+          "in" : "query",
+          "description" : "The architecture of your OS: \n\n* `all`: Defaults to `ppc` for AIX or to `x86` for other OS types. \n* `x86`: x86 architecture.\n* `ppc`: PowerPC architecture, only supported for AIX and Linux.\n* `ppcle`: PowerPC Little Endian architecture, only supported for Linux.\n* `sparc`: Sparc architecture, only supported for Solaris. \n\n* `arm`: ARM architecture, only supported for Linux. \n\n* `s390`: S/390 architecture, only supported for Linux. \n\nOnly applicable to the `paas` and `paas-sh` installer types.",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "all", "arm", "ppc", "ppcle", "s390", "sparc", "x86" ],
+            "default" : "all"
+          }
+        }, {
+          "name" : "bitness",
+          "in" : "query",
+          "description" : "The bitness of your OS. Must be supported by the OS. \n\n Only applicable to the `paas` and `paas-sh` installer types.",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "32", "64", "all" ],
+            "default" : "all"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstallerMetaInfoDto"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "InstallerDownload" : [ ]
+        } ]
+      }
+    },
     "/deployment/installer/agent/{osType}/{installerType}/latest" : {
       "get" : {
         "tags" : [ "Deployment" ],
@@ -579,109 +673,6 @@
         } ]
       }
     },
-    "/deployment/installer/agent/{osType}/{installerType}/latest/metainfo" : {
-      "get" : {
-        "tags" : [ "Deployment" ],
-        "summary" : "Gets the latest available version of the OneAgent installer of the specified type",
-        "description" : "Returns the OneAgent version of the installer of the specified type. \n\nNon-required parameters are only applicable to the `paas` and `paas-sh` installer types.",
-        "operationId" : "getAgentInstallerMetaInfo",
-        "parameters" : [ {
-          "name" : "osType",
-          "in" : "path",
-          "description" : "The operating system of the installer.",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "windows", "unix", "aix", "solaris" ]
-          }
-        }, {
-          "name" : "installerType",
-          "in" : "path",
-          "description" : "The type of the installer: \n\n* `default`: Self-extracting installer for manual installation. Downloads an `.exe` file for Windows or an `.sh` file for Unix. \n* `default-unattended`: Self-extracting installer for unattended installation. Windows only. Downloads a `.zip` archive, containing the `.msi` installer and the batch file. This option is deprecated with OneAgent version 1.173 \n* `paas`: Code modules installer. Downloads a `*.zip` archive, containing the `manifest.json` file with meta information. \n* `paas-sh`: Code modules installer. Downloads a self-extracting shell script with the embedded `tar.gz` archive.",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "default", "default-unattended", "paas", "paas-sh" ]
-          }
-        }, {
-          "name" : "flavor",
-          "in" : "query",
-          "description" : "The flavor of your Linux distribution. \n\n Set `musl` for Linux distributions, which are using the musl C standard library, for example Alpine Linux. \n\n Only applicable to the `paas` and `paas-sh` installer types.",
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "default", "musl" ],
-            "default" : "default"
-          }
-        }, {
-          "name" : "arch",
-          "in" : "query",
-          "description" : "The architecture of your OS: \n\n* `all`: Defaults to `ppc` for AIX or to `x86` for other OS types. \n* `x86`: x86 architecture.\n* `ppc`: PowerPC architecture, only supported for AIX and Linux.\n* `ppcle`: PowerPC Little Endian architecture, only supported for Linux.\n* `sparc`: Sparc architecture, only supported for Solaris. \n\n* `arm`: ARM architecture, only supported for Linux. \n\n* `s390`: S/390 architecture, only supported for Linux. \n\nOnly applicable to the `paas` and `paas-sh` installer types.",
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "all", "arm", "ppc", "ppcle", "s390", "sparc", "x86" ],
-            "default" : "all"
-          }
-        }, {
-          "name" : "bitness",
-          "in" : "query",
-          "description" : "The bitness of your OS. Must be supported by the OS. \n\n Only applicable to the `paas` and `paas-sh` installer types.",
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "32", "64", "all" ],
-            "default" : "all"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InstallerMetaInfoDto"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "InstallerDownload" : [ ]
-        } ]
-      }
-    },
-    "/anonymize/anonymizationJobs/{requestId}" : {
-      "get" : {
-        "tags" : [ "Anonymization" ],
-        "summary" : "Shows the progress of the specified anonymization job",
-        "operationId" : "getStatus",
-        "parameters" : [ {
-          "name" : "requestId",
-          "in" : "path",
-          "description" : "The ID of the required anonymization job.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success. The response body contains the status of the anonymization job.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/AnonymizationProgressResult"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid. See the response body for details."
-          }
-        },
-        "security" : [ {
-          "UserSessionAnonymizationToken" : [ ]
-        } ]
-      }
-    },
     "/anonymize/anonymizationJobs" : {
       "put" : {
         "tags" : [ "Anonymization" ],
@@ -759,91 +750,37 @@
         } ]
       }
     },
-    "/userSessionQueryLanguage/tree" : {
+    "/anonymize/anonymizationJobs/{requestId}" : {
       "get" : {
-        "tags" : [ "User sessions" ],
-        "summary" : "Returns the result of the query as a tree structure",
-        "description" : "To get a proper tree structure, you need to specify grouping in the query.",
-        "operationId" : "getDTAQLResultAsTree",
+        "tags" : [ "Anonymization" ],
+        "summary" : "Shows the progress of the specified anonymization job",
+        "operationId" : "getStatus",
         "parameters" : [ {
-          "name" : "query",
-          "in" : "query",
-          "description" : "The user session query to be executed. See the [USQL help page](https://www.dynatrace.com/support/help/shortlink/usql-info) for syntax details. \n\n You can find the available columns of the **usersession** table in the `UserSession` object. \n\n Here is an example of the query: `SELECT country, city, COUNT(*) FROM usersession GROUP BY country, city`.",
+          "name" : "requestId",
+          "in" : "path",
+          "description" : "The ID of the required anonymization job.",
           "required" : true,
           "schema" : {
             "type" : "string"
           }
-        }, {
-          "name" : "startTimestamp",
-          "in" : "query",
-          "description" : "The start timestamp of the query, in UTC milliseconds. \n\nIf not set or set as `0`, 2 hours behind the current time is used.\n\n If the exact times are important, set the timeframe in the query itself (**query** parameter).",
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "name" : "endTimestamp",
-          "in" : "query",
-          "description" : "The end timestamp of the query, in UTC milliseconds. \n\nIf not set or set as `0`, the current timestamp is used.\n\n If the exact times are important, set the timeframe in the query itself (**query** parameter).",
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "name" : "offsetUTC",
-          "in" : "query",
-          "description" : "Optional offset of local time to UTC time in minutes. Offset will be applied to Date fields encountered in the query. \n\nCan be positive or negative. E.g. if the local time is UTC+02:00, the timeOffset is 120. If it is UTC-05:00, timeOffset is -300.",
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }, {
-          "name" : "addDeepLinkFields",
-          "in" : "query",
-          "description" : "Add (`true`) to enable deep linking of additional fields in the query. \n\nIf not set, then `false` is used",
-          "schema" : {
-            "type" : "boolean",
-            "default" : false
-          }
-        }, {
-          "name" : "explain",
-          "in" : "query",
-          "description" : "Add (`true`) or don't add (`false`) some additional information about the result to the response. \n\nIt helps to understand the query and how the result was calculated. \n\nIf not set, then `false` is used",
-          "schema" : {
-            "type" : "boolean",
-            "default" : false
-          }
         } ],
         "responses" : {
           "200" : {
-            "description" : "Success. The response contains the result of the query.",
+            "description" : "Success. The response body contains the status of the anonymization job.",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/DtaqlResultAsTree"
+                  "$ref" : "#/components/schemas/AnonymizationProgressResult"
                 }
               }
             }
           },
           "400" : {
-            "description" : "Failed. The query is missing."
-          },
-          "404" : {
-            "description" : "Failed. The query is invalid. See the response body for more information."
-          },
-          "999" : {
-            "description" : "The data structure of the user session. This response code is never returned.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/UserSession"
-                }
-              }
-            }
+            "description" : "Failed. The input is invalid. See the response body for details."
           }
         },
         "security" : [ {
-          "UserSessionQueryToken" : [ ]
+          "UserSessionAnonymizationToken" : [ ]
         } ]
       }
     },
@@ -925,6 +862,94 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/DtaqlResultAsTable"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failed. The query is missing."
+          },
+          "404" : {
+            "description" : "Failed. The query is invalid. See the response body for more information."
+          },
+          "999" : {
+            "description" : "The data structure of the user session. This response code is never returned.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserSession"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "UserSessionQueryToken" : [ ]
+        } ]
+      }
+    },
+    "/userSessionQueryLanguage/tree" : {
+      "get" : {
+        "tags" : [ "User sessions" ],
+        "summary" : "Returns the result of the query as a tree structure",
+        "description" : "To get a proper tree structure, you need to specify grouping in the query.",
+        "operationId" : "getDTAQLResultAsTree",
+        "parameters" : [ {
+          "name" : "query",
+          "in" : "query",
+          "description" : "The user session query to be executed. See the [USQL help page](https://www.dynatrace.com/support/help/shortlink/usql-info) for syntax details. \n\n You can find the available columns of the **usersession** table in the `UserSession` object. \n\n Here is an example of the query: `SELECT country, city, COUNT(*) FROM usersession GROUP BY country, city`.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "startTimestamp",
+          "in" : "query",
+          "description" : "The start timestamp of the query, in UTC milliseconds. \n\nIf not set or set as `0`, 2 hours behind the current time is used.\n\n If the exact times are important, set the timeframe in the query itself (**query** parameter).",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "endTimestamp",
+          "in" : "query",
+          "description" : "The end timestamp of the query, in UTC milliseconds. \n\nIf not set or set as `0`, the current timestamp is used.\n\n If the exact times are important, set the timeframe in the query itself (**query** parameter).",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "offsetUTC",
+          "in" : "query",
+          "description" : "Optional offset of local time to UTC time in minutes. Offset will be applied to Date fields encountered in the query. \n\nCan be positive or negative. E.g. if the local time is UTC+02:00, the timeOffset is 120. If it is UTC-05:00, timeOffset is -300.",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "addDeepLinkFields",
+          "in" : "query",
+          "description" : "Add (`true`) to enable deep linking of additional fields in the query. \n\nIf not set, then `false` is used",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "name" : "explain",
+          "in" : "query",
+          "description" : "Add (`true`) or don't add (`false`) some additional information about the result to the response. \n\nIt helps to understand the query and how the result was calculated. \n\nIf not set, then `false` is used",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success. The response contains the result of the query.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtaqlResultAsTree"
                 }
               }
             }
@@ -1083,17 +1108,17 @@
         } ]
       }
     },
-    "/synthetic/ext/stateModifications" : {
+    "/synthetic/ext/tests" : {
       "post" : {
         "tags" : [ "Synthetic - Third party" ],
-        "summary" : "Modifies the operation state of all third-party monitors",
-        "operationId" : "pushStateModification",
+        "summary" : "Pushes third-party synthetic monitors, locations, and results to Dynatrace",
+        "operationId" : "testResults",
         "requestBody" : {
-          "description" : "The JSON body of the request. Contains new operational status of third-party synthetic monitors.",
+          "description" : "The JSON body of the request. Contains third-party synthetic monitors, locations, and results.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/StateModification"
+                "$ref" : "#/components/schemas/3rdPartySyntheticTests"
               }
             }
           },
@@ -1101,7 +1126,7 @@
         },
         "responses" : {
           "204" : {
-            "description" : "Success. The state of third-party monitors has been changed."
+            "description" : "Success. The information is accepted and stored."
           },
           "400" : {
             "description" : "Failed. The input is invalid.",
@@ -1155,17 +1180,17 @@
         } ]
       }
     },
-    "/synthetic/ext/tests" : {
+    "/synthetic/ext/stateModifications" : {
       "post" : {
         "tags" : [ "Synthetic - Third party" ],
-        "summary" : "Pushes third-party synthetic monitors, locations, and results to Dynatrace",
-        "operationId" : "testResults",
+        "summary" : "Modifies the operation state of all third-party monitors",
+        "operationId" : "pushStateModification",
         "requestBody" : {
-          "description" : "The JSON body of the request. Contains third-party synthetic monitors, locations, and results.",
+          "description" : "The JSON body of the request. Contains new operational status of third-party synthetic monitors.",
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/3rdPartySyntheticTests"
+                "$ref" : "#/components/schemas/StateModification"
               }
             }
           },
@@ -1173,7 +1198,7 @@
         },
         "responses" : {
           "204" : {
-            "description" : "Success. The information is accepted and stored."
+            "description" : "Success. The state of third-party monitors has been changed."
           },
           "400" : {
             "description" : "Failed. The input is invalid.",
@@ -1420,7 +1445,7 @@
         }, {
           "name" : "tag",
           "in" : "query",
-          "description" : "Filters the resulting set of hosts by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The host has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags use following format: `[context]key:value`.",
+          "description" : "Filters the resulting set of hosts by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The host has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags, use the following format: `tag=[context]key:value`. For custom key-value tags, omit the context: `tag=key:value`.",
           "schema" : {
             "uniqueItems" : true,
             "type" : "array",
@@ -1696,7 +1721,7 @@
         }, {
           "name" : "tag",
           "in" : "query",
-          "description" : "Filters the resulting set of process groups by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The process group has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags use following format: `[context]key:value`.",
+          "description" : "Filters the resulting set of process groups by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The process group has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags, use the following format: `tag=[context]key:value`. For custom key-value tags, omit the context: `tag=key:value`.",
           "schema" : {
             "uniqueItems" : true,
             "type" : "array",
@@ -1918,7 +1943,7 @@
         }, {
           "name" : "tag",
           "in" : "query",
-          "description" : "Filters the resulting set of processes by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The process has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags use following format: `[context]key:value`.",
+          "description" : "Filters the resulting set of processes by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The process has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags, use the following format: `tag=[context]key:value`. For custom key-value tags, omit the context: `tag=key:value`.",
           "schema" : {
             "uniqueItems" : true,
             "type" : "array",
@@ -2197,7 +2222,7 @@
         }, {
           "name" : "tag",
           "in" : "query",
-          "description" : "Filters the resulting set of applications by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The application has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags use following format: `[context]key:value`.",
+          "description" : "Filters the resulting set of applications by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The application has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags, use the following format: `tag=[context]key:value`. For custom key-value tags, omit the context: `tag=key:value`.",
           "schema" : {
             "uniqueItems" : true,
             "type" : "array",
@@ -2334,144 +2359,6 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
-    "/entity/services" : {
-      "get" : {
-        "tags" : [ "Topology & Smartscape - Service" ],
-        "summary" : "Lists all available services in your environment",
-        "description" : "You can narrow down the output by specifying filtering parameters for the request. \n\nYou can additionally limit the output by using pagination: \n1. Specify the number of results per page in the **pageSize** query parameter. \n2. Then use the URL-encoded cursor from the **Next-Page-Key** response header in the **nextPageKey** query parameter to obtain subsequent pages.",
-        "operationId" : "getServices",
-        "parameters" : [ {
-          "name" : "startTimestamp",
-          "in" : "query",
-          "description" : "The start timestamp of the requested timeframe, in milliseconds (UTC). \n\nIf not set, then 72 hours behind from now is used.",
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "name" : "endTimestamp",
-          "in" : "query",
-          "description" : "The end timestamp of the requested timeframe, in milliseconds (UTC). \n\nIf not set, then the current timestamp is used. \n\nThe timeframe must not exceed 3 days.",
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "name" : "relativeTime",
-          "in" : "query",
-          "description" : "The relative timeframe, back from now.",
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "min", "5mins", "10mins", "15mins", "30mins", "hour", "2hours", "6hours", "day", "3days" ]
-          }
-        }, {
-          "name" : "tag",
-          "in" : "query",
-          "description" : "Filters the resulting set of services by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The service has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags use following format: `[context]key:value`.",
-          "schema" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          }
-        }, {
-          "name" : "entity",
-          "in" : "query",
-          "description" : "Filters result to the specified services only. \n\n To specify several services use the following format: `entity=ID1&entity=ID2`.",
-          "schema" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          }
-        }, {
-          "name" : "managementZone",
-          "in" : "query",
-          "description" : "Only return services that are part of the specified management zone.",
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "name" : "includeDetails",
-          "in" : "query",
-          "description" : "Includes (`true`) or excludes (`false`) details which are queried from related entities.\n\nExcluding details may make queries faster. \n\nIf not set, then `true` is used.",
-          "schema" : {
-            "type" : "boolean",
-            "default" : true
-          }
-        }, {
-          "name" : "pageSize",
-          "in" : "query",
-          "description" : "The number of services per result page. \n\n If not set, pagination is not used and the result contains all services fitting the specified filtering criteria.",
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }, {
-          "name" : "nextPageKey",
-          "in" : "query",
-          "description" : "The cursor for the next page of results. You can find it in the **Next-Page-Key** header of the previous response. \n\nIf you're using pagination, the first page is always returned without this cursor. \n\nYou must keep all other query parameters as they were in the first request to obtain subsequent pages.",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "headers" : {
-              "Total-Count" : {
-                "description" : "The estimated number of results.",
-                "style" : "simple",
-                "schema" : {
-                  "type" : "integer",
-                  "format" : "int32"
-                }
-              },
-              "Next-Page-Key" : {
-                "description" : "The cursor for the next page of results. Without it you'll get the first page again.\n\n The cursor must be URL-encoded.",
-                "style" : "simple",
-                "schema" : {
-                  "type" : "string"
-                }
-              },
-              "Page-Size" : {
-                "description" : "The maximum number of results per page.",
-                "style" : "simple",
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            },
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/Service"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Failed. The input is invalid.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "DataExportToken" : [ ]
-        } ]
-      }
-    },
     "/entity/services/{meIdentifier}" : {
       "get" : {
         "tags" : [ "Topology & Smartscape - Service" ],
@@ -2574,6 +2461,144 @@
           "DataExportToken" : [ ]
         } ],
         "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/entity/services" : {
+      "get" : {
+        "tags" : [ "Topology & Smartscape - Service" ],
+        "summary" : "Lists all available services in your environment",
+        "description" : "You can narrow down the output by specifying filtering parameters for the request. \n\nYou can additionally limit the output by using pagination: \n1. Specify the number of results per page in the **pageSize** query parameter. \n2. Then use the URL-encoded cursor from the **Next-Page-Key** response header in the **nextPageKey** query parameter to obtain subsequent pages.",
+        "operationId" : "getServices",
+        "parameters" : [ {
+          "name" : "startTimestamp",
+          "in" : "query",
+          "description" : "The start timestamp of the requested timeframe, in milliseconds (UTC). \n\nIf not set, then 72 hours behind from now is used.",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "endTimestamp",
+          "in" : "query",
+          "description" : "The end timestamp of the requested timeframe, in milliseconds (UTC). \n\nIf not set, then the current timestamp is used. \n\nThe timeframe must not exceed 3 days.",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "relativeTime",
+          "in" : "query",
+          "description" : "The relative timeframe, back from now.",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "min", "5mins", "10mins", "15mins", "30mins", "hour", "2hours", "6hours", "day", "3days" ]
+          }
+        }, {
+          "name" : "tag",
+          "in" : "query",
+          "description" : "Filters the resulting set of services by the specified tag. You can specify several tags in the following format: `tag=tag1&tag=tag2`. The service has to match **all** the specified tags. \n\nIn case of key-value tags, such as imported AWS or CloudFoundry tags, use the following format: `tag=[context]key:value`. For custom key-value tags, omit the context: `tag=key:value`.",
+          "schema" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }, {
+          "name" : "entity",
+          "in" : "query",
+          "description" : "Filters result to the specified services only. \n\n To specify several services use the following format: `entity=ID1&entity=ID2`.",
+          "schema" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }, {
+          "name" : "managementZone",
+          "in" : "query",
+          "description" : "Only return services that are part of the specified management zone.",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "includeDetails",
+          "in" : "query",
+          "description" : "Includes (`true`) or excludes (`false`) details which are queried from related entities.\n\nExcluding details may make queries faster. \n\nIf not set, then `true` is used.",
+          "schema" : {
+            "type" : "boolean",
+            "default" : true
+          }
+        }, {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "The number of services per result page. \n\n If not set, pagination is not used and the result contains all services fitting the specified filtering criteria.",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "nextPageKey",
+          "in" : "query",
+          "description" : "The cursor for the next page of results. You can find it in the **Next-Page-Key** header of the previous response. \n\nIf you're using pagination, the first page is always returned without this cursor. \n\nYou must keep all other query parameters as they were in the first request to obtain subsequent pages.",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "headers" : {
+              "Total-Count" : {
+                "description" : "The estimated number of results.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32"
+                }
+              },
+              "Next-Page-Key" : {
+                "description" : "The cursor for the next page of results. Without it you'll get the first page again.\n\n The cursor must be URL-encoded.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Page-Size" : {
+                "description" : "The maximum number of results per page.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Service"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "DataExportToken" : [ ]
+        } ]
       }
     },
     "/entity/infrastructure/hosts/{hostId}/logs" : {
@@ -3746,6 +3771,28 @@
         } ]
       }
     },
+    "/problem/status" : {
+      "get" : {
+        "tags" : [ "Problem" ],
+        "summary" : "Lists the number of open problems, split by impact level",
+        "operationId" : "getProblemStatus",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemStatusResultWrapper"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "DataExportToken" : [ ]
+        } ]
+      }
+    },
     "/problem/details/{problemId}/comments" : {
       "get" : {
         "tags" : [ "Problem" ],
@@ -3806,37 +3853,6 @@
               "application/json; charset=utf-8" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ProblemComment"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "DataExportToken" : [ ]
-        } ]
-      }
-    },
-    "/problem/details/{problemId}" : {
-      "get" : {
-        "tags" : [ "Problem" ],
-        "summary" : "Gets the properties of the specified problem",
-        "operationId" : "getDetails",
-        "parameters" : [ {
-          "name" : "problemId",
-          "in" : "path",
-          "description" : "The ID of the problem you're inquiring.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ProblemDetailsResultWrapper"
                 }
               }
             }
@@ -3997,28 +4013,6 @@
         } ]
       }
     },
-    "/problem/status" : {
-      "get" : {
-        "tags" : [ "Problem" ],
-        "summary" : "Lists the number of open problems, split by impact level",
-        "operationId" : "getProblemStatus",
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ProblemStatusResultWrapper"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "DataExportToken" : [ ]
-        } ]
-      }
-    },
     "/problem/feed" : {
       "get" : {
         "tags" : [ "Problem" ],
@@ -4099,6 +4093,37 @@
               "application/json; charset=utf-8" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ProblemFeedResultWrapper"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "DataExportToken" : [ ]
+        } ]
+      }
+    },
+    "/problem/details/{problemId}" : {
+      "get" : {
+        "tags" : [ "Problem" ],
+        "summary" : "Gets the properties of the specified problem",
+        "operationId" : "getDetails",
+        "parameters" : [ {
+          "name" : "problemId",
+          "in" : "path",
+          "description" : "The ID of the problem you're inquiring.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetailsResultWrapper"
                 }
               }
             }
@@ -4277,6 +4302,90 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
+    "/synthetic/monitors/{monitorId}" : {
+      "get" : {
+        "tags" : [ "Synthetic - Monitors" ],
+        "summary" : "Gets parameters of the specified synthetic monitor",
+        "operationId" : "getMonitor",
+        "parameters" : [ {
+          "name" : "monitorId",
+          "in" : "path",
+          "description" : "The ID of the required synthetic monitor",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SyntheticMonitor"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "DataExportToken" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Synthetic - Monitors" ],
+        "summary" : "Updates parameters of the specified synthetic monitor",
+        "operationId" : "replaceMonitor",
+        "parameters" : [ {
+          "name" : "monitorId",
+          "in" : "path",
+          "description" : "The ID of the synthetic monitor to be updated.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SyntheticMonitorUpdate"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Success. The synthetic monitor has been updated. The response doesn't have a body."
+          }
+        },
+        "security" : [ {
+          "DataExportToken" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Synthetic - Monitors" ],
+        "summary" : "Deletes the specified synthetic monitor",
+        "operationId" : "deleteMonitor",
+        "parameters" : [ {
+          "name" : "monitorId",
+          "in" : "path",
+          "description" : "The ID of the synthetic monitor to be deleted.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Success. The synthetic monitor has been deleted. The response doesn't have a body"
+          }
+        },
+        "security" : [ {
+          "DataExportToken" : [ ]
+        } ]
+      }
+    },
     "/synthetic/monitors" : {
       "get" : {
         "tags" : [ "Synthetic - Monitors" ],
@@ -4389,90 +4498,6 @@
                 }
               }
             }
-          }
-        },
-        "security" : [ {
-          "DataExportToken" : [ ]
-        } ]
-      }
-    },
-    "/synthetic/monitors/{monitorId}" : {
-      "get" : {
-        "tags" : [ "Synthetic - Monitors" ],
-        "summary" : "Gets parameters of the specified synthetic monitor",
-        "operationId" : "getMonitor",
-        "parameters" : [ {
-          "name" : "monitorId",
-          "in" : "path",
-          "description" : "The ID of the required synthetic monitor",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SyntheticMonitor"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "DataExportToken" : [ ]
-        } ]
-      },
-      "put" : {
-        "tags" : [ "Synthetic - Monitors" ],
-        "summary" : "Updates parameters of the specified synthetic monitor",
-        "operationId" : "replaceMonitor",
-        "parameters" : [ {
-          "name" : "monitorId",
-          "in" : "path",
-          "description" : "The ID of the synthetic monitor to be updated.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json; charset=utf-8" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/SyntheticMonitorUpdate"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "204" : {
-            "description" : "Success. The synthetic monitor has been updated. The response doesn't have a body."
-          }
-        },
-        "security" : [ {
-          "DataExportToken" : [ ]
-        } ]
-      },
-      "delete" : {
-        "tags" : [ "Synthetic - Monitors" ],
-        "summary" : "Deletes the specified synthetic monitor",
-        "operationId" : "deleteMonitor",
-        "parameters" : [ {
-          "name" : "monitorId",
-          "in" : "path",
-          "description" : "The ID of the synthetic monitor to be deleted.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "Success. The synthetic monitor has been deleted. The response doesn't have a body"
           }
         },
         "security" : [ {
@@ -4989,7 +5014,7 @@
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/UpdateTenantToken"
+                "$ref" : "#/components/schemas/UpdateToken"
               }
             }
           },
@@ -5100,7 +5125,7 @@
             "type" : "array",
             "items" : {
               "type" : "string",
-              "enum" : [ "AdvancedSyntheticIntegration", "AppMonIntegration", "CaptureRequestData", "DTAQLAccess", "DataExport", "DataImport", "DataPrivacy", "Davis", "DcrumIntegration", "DeploymentManagement", "DiagnosticExport", "DssFileManagement", "ExternalSyntheticIntegration", "InstallerDownload", "LogExport", "LogImport", "MemoryDump", "Mobile", "PluginUpload", "ReadAuditLogs", "ReadConfig", "ReadSyntheticData", "RestRequestForwarding", "RumBrowserExtension", "RumJavaScriptTagManagement", "SupportAlert", "TenantTokenManagement", "UserSessionAnonymization", "ViewDashboard", "WriteConfig", "WriteSyntheticData", "entities.read", "entities.write" ]
+              "enum" : [ "ActiveGateCertManagement", "AdvancedSyntheticIntegration", "AppMonIntegration", "CaptureRequestData", "DTAQLAccess", "DataExport", "DataImport", "DataPrivacy", "Davis", "DcrumIntegration", "DiagnosticExport", "DssFileManagement", "ExternalSyntheticIntegration", "InstallerDownload", "LogExport", "LogImport", "MemoryDump", "Mobile", "PluginUpload", "ReadAuditLogs", "ReadConfig", "ReadSyntheticData", "RestRequestForwarding", "RumBrowserExtension", "RumJavaScriptTagManagement", "SupportAlert", "TenantTokenManagement", "UserSessionAnonymization", "ViewDashboard", "ViewReport", "WriteConfig", "WriteSyntheticData", "entities.read", "entities.write", "networkZones.read", "networkZones.write" ]
             }
           }
         }, {
@@ -5146,7 +5171,7 @@
           "content" : {
             "application/json; charset=utf-8" : {
               "schema" : {
-                "$ref" : "#/components/schemas/CreateTenantToken"
+                "$ref" : "#/components/schemas/CreateToken"
               }
             }
           },
@@ -5263,6 +5288,14 @@
           }
         }
       },
+      "InstallerMetaInfoDto" : {
+        "type" : "object",
+        "properties" : {
+          "latestAgentVersion" : {
+            "type" : "string"
+          }
+        }
+      },
       "BoshReleaseChecksum" : {
         "type" : "object",
         "properties" : {
@@ -5280,8 +5313,7 @@
             "type" : "array",
             "description" : "A list of available OneAgent versions for BOSH release tarballs.",
             "items" : {
-              "type" : "string",
-              "description" : "A list of available OneAgent versions for BOSH release tarballs."
+              "type" : "string"
             }
           }
         },
@@ -5321,11 +5353,13 @@
         },
         "description" : "OneAgent connectivity information."
       },
-      "InstallerMetaInfoDto" : {
+      "AnonymizationIdResult" : {
         "type" : "object",
         "properties" : {
-          "latestAgentVersion" : {
-            "type" : "string"
+          "requestId" : {
+            "type" : "string",
+            "description" : "The ID of the newly created anonymization job.",
+            "example" : "-4013759873546847071"
           }
         }
       },
@@ -5340,17 +5374,7 @@
           }
         }
       },
-      "AnonymizationIdResult" : {
-        "type" : "object",
-        "properties" : {
-          "requestId" : {
-            "type" : "string",
-            "description" : "The ID of the newly created anonymization job.",
-            "example" : "-4013759873546847071"
-          }
-        }
-      },
-      "DtaqlResultAsTree" : {
+      "DtaqlResultAsTable" : {
         "type" : "object",
         "properties" : {
           "extrapolationLevel" : {
@@ -5383,39 +5407,29 @@
               "type" : "string"
             }
           },
-          "branchNames" : {
+          "columnNames" : {
             "type" : "array",
-            "description" : "A list of branches of the tree. \n\n Typically, these are fields from the `SELECT` clause, that have been used in the `GROUP BY` clause.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "leafNames" : {
-            "type" : "array",
-            "description" : "A list of leaves on each tree branch. \n\n Typically, these are fields from the `SELECT` clause, that have not been used in the `GROUP BY` clause.",
+            "description" : "A list of columns in the result table.",
             "items" : {
               "type" : "string"
             }
           },
           "values" : {
-            "type" : "object",
-            "description" : "The user session query result as a tree."
+            "type" : "array",
+            "description" : "A list of data rows. \n\n Each array element represents a row in the result table. \n\nThe size of each data row and the order of the elements correspond to the **columnNames** content.",
+            "items" : {
+              "type" : "array",
+              "items" : {
+                "type" : "object"
+              }
+            }
           }
         },
-        "description" : "The user session query result as a tree.",
+        "description" : "The user session query result as a table.",
         "example" : {
           "extrapolationLevel" : 1,
-          "branchNames" : [ "country", "city" ],
-          "leafNames" : [ "avg(duration)", "max(duration)" ],
-          "values" : {
-            "Austria" : {
-              "Klagenfurt" : [ "65996.75", "129940" ],
-              "Linz" : [ "57360.86", "222912" ]
-            },
-            "Poland" : {
-              "Gdansk" : [ "22482.2", "351263" ]
-            }
-          }
+          "columnNames" : [ "city", "avg(duration)", "max(duration)" ],
+          "values" : [ [ "Klagenfurt", "65996.75", "129940" ], [ "Linz", "57360.86", "222912" ], [ "Gdansk", "22482.2", "351263" ] ]
         }
       },
       "DateProperty" : {
@@ -6135,7 +6149,7 @@
         },
         "description" : "A user action. \n\n A user action is a single action performed by the user as part of a user session, for example a mouse click."
       },
-      "DtaqlResultAsTable" : {
+      "DtaqlResultAsTree" : {
         "type" : "object",
         "properties" : {
           "extrapolationLevel" : {
@@ -6168,238 +6182,40 @@
               "type" : "string"
             }
           },
-          "columnNames" : {
+          "branchNames" : {
             "type" : "array",
-            "description" : "A list of columns in the result table.",
+            "description" : "A list of branches of the tree. \n\n Typically, these are fields from the `SELECT` clause, that have been used in the `GROUP BY` clause.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "leafNames" : {
+            "type" : "array",
+            "description" : "A list of leaves on each tree branch. \n\n Typically, these are fields from the `SELECT` clause, that have not been used in the `GROUP BY` clause.",
             "items" : {
               "type" : "string"
             }
           },
           "values" : {
-            "type" : "array",
-            "description" : "A list of data rows. \n\n Each array element represents a row in the result table. \n\nThe size of each data row and the order of the elements correspond to the **columnNames** content.",
-            "items" : {
-              "type" : "array",
-              "items" : {
-                "type" : "object"
-              }
-            }
+            "type" : "object",
+            "description" : "The user session query result as a tree."
           }
         },
-        "description" : "The user session query result as a table.",
+        "description" : "The user session query result as a tree.",
         "example" : {
           "extrapolationLevel" : 1,
-          "columnNames" : [ "city", "avg(duration)", "max(duration)" ],
-          "values" : [ [ "Klagenfurt", "65996.75", "129940" ], [ "Linz", "57360.86", "222912" ], [ "Gdansk", "22482.2", "351263" ] ]
-        }
-      },
-      "EventStoreResult" : {
-        "type" : "object",
-        "properties" : {
-          "storedEventIds" : {
-            "type" : "array",
-            "description" : "List of event IDs for information-only-events. \n\n This field is provided for compatibility reasons. You should use the values from the **storedIds** field instead.",
-            "items" : {
-              "type" : "integer",
-              "format" : "int64"
-            }
-          },
-          "storedIds" : {
-            "type" : "array",
-            "description" : "List of **encoded** event IDs for information-only-events.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "storedCorrelationIds" : {
-            "type" : "array",
-            "description" : "List of correlation IDs for problem-opening-events.",
-            "items" : {
-              "type" : "string"
-            }
-          }
-        },
-        "description" : "Contains IDs of all custom events, created by an event push call."
-      },
-      "EventPushMessage" : {
-        "required" : [ "eventType", "source" ],
-        "type" : "object",
-        "properties" : {
-          "eventType" : {
-            "type" : "string",
-            "description" : "The type of event.",
-            "enum" : [ "AVAILABILITY_EVENT", "CUSTOM_ANNOTATION", "CUSTOM_CONFIGURATION", "CUSTOM_DEPLOYMENT", "CUSTOM_INFO", "ERROR_EVENT", "MARKED_FOR_TERMINATION", "PERFORMANCE_EVENT", "RESOURCE_CONTENTION" ]
-          },
-          "start" : {
-            "type" : "integer",
-            "description" : "The start timestamp of the event, in UTC milliseconds. \n\nIf not set, the current timestamp is used. \n\nYou can report information-only events up to **30 days** into the past. \n\nYou can report problem-opening events up to **60 minutes** into the past.",
-            "format" : "int64"
-          },
-          "end" : {
-            "type" : "integer",
-            "description" : "The end timestamp of the event, in UTC milliseconds. \n\nIf not set, the current time is used for information-only events. \n\nNot applicable to problem-opening events. Such an event stays open until it times out depending on the **timeoutMinutes** parameter.",
-            "format" : "int64"
-          },
-          "timeoutMinutes" : {
-            "type" : "integer",
-            "description" : "The timeout for problem-opening events in minutes. Not applicable to information-only events. \n\nIf not set, 15 minutes is used. The maximum allowed value is 120 minutes. \n\nYou can refresh the event by sending the same payload again.",
-            "format" : "int32"
-          },
-          "attachRules" : {
-            "$ref" : "#/components/schemas/PushEventAttachRules"
-          },
-          "customProperties" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "object",
-              "description" : "The set of any properties related to the event, in the *\"key\" : \"value\"* format."
+          "branchNames" : [ "country", "city" ],
+          "leafNames" : [ "avg(duration)", "max(duration)" ],
+          "values" : {
+            "Austria" : {
+              "Klagenfurt" : [ "65996.75", "129940" ],
+              "Linz" : [ "57360.86", "222912" ]
             },
-            "description" : "The set of any properties related to the event, in the *\"key\" : \"value\"* format."
-          },
-          "source" : {
-            "type" : "string",
-            "description" : "The name or ID of the external source of the event."
-          },
-          "annotationType" : {
-            "type" : "string",
-            "description" : "The type of the custom annotation, for example `DNS route has been changed`."
-          },
-          "annotationDescription" : {
-            "type" : "string",
-            "description" : "A detailed description of the custom annotation, for example `DNS route has been changed to x.mydomain.com`."
-          },
-          "description" : {
-            "type" : "string",
-            "description" : "The textual description of the configuration change."
-          },
-          "deploymentName" : {
-            "type" : "string",
-            "description" : "The ID of the triggered deployment."
-          },
-          "deploymentVersion" : {
-            "type" : "string",
-            "description" : "The version of the triggered deployment."
-          },
-          "timeseriesIds" : {
-            "type" : "array",
-            "description" : "A list of timeseries IDs, related to the event.",
-            "items" : {
-              "type" : "string"
+            "Poland" : {
+              "Gdansk" : [ "22482.2", "351263" ]
             }
-          },
-          "deploymentProject" : {
-            "type" : "string",
-            "description" : "The project name of the deployed package."
-          },
-          "ciBackLink" : {
-            "type" : "string",
-            "description" : "The link to the deployed artifact within the 3rd party system."
-          },
-          "remediationAction" : {
-            "type" : "string",
-            "description" : "The link to the deployment related remediation action within the external tool."
-          },
-          "original" : {
-            "type" : "string",
-            "description" : "The previous value of the configuration."
-          },
-          "changed" : {
-            "type" : "string",
-            "description" : "The new value of the configuration that has been set by the event."
-          },
-          "configuration" : {
-            "type" : "string",
-            "description" : "The ID or the name of the configuration that has been changed by the event."
-          },
-          "title" : {
-            "type" : "string",
-            "description" : "The title of the configuration that has been set by the event."
           }
-        },
-        "example" : {
-          "eventType" : "CUSTOM_ANNOTATION",
-          "start" : 1521042929000,
-          "end" : 1521542929000,
-          "timeoutMinutes" : 0,
-          "attachRules" : {
-            "entityIds" : [ "CUSTOM_DEVICE-0000000000000007" ],
-            "tagRule" : [ {
-              "meTypes" : [ "HOST" ],
-              "tags" : [ {
-                "context" : "CONTEXTLESS",
-                "key" : "customTag"
-              } ]
-            } ]
-          },
-          "source" : "OpsControl",
-          "annotationType" : "defect",
-          "annotationDescription" : "The coffee machine is broken"
         }
-      },
-      "PushEventAttachRules" : {
-        "type" : "object",
-        "properties" : {
-          "entityIds" : {
-            "type" : "array",
-            "description" : "The list of entity IDs to which the event should be attached.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "tagRule" : {
-            "type" : "array",
-            "description" : "An object defining a matching rule to dynamically pick up entities.",
-            "items" : {
-              "$ref" : "#/components/schemas/TagMatchRule"
-            }
-          }
-        },
-        "description" : "The set of rules defining Dynatrace entities to be associated with the event.\n\n You can specify tags to dynamically match Dynatrace entities or IDs of specific entities.  \n\nAt least one entity ID or tag is required."
-      },
-      "TagInfo" : {
-        "required" : [ "context", "key" ],
-        "type" : "object",
-        "properties" : {
-          "context" : {
-            "type" : "string",
-            "description" : "The origin of the tag, such as AWS or Cloud Foundry. \n\n Custom tags use the `CONTEXTLESS` value.",
-            "enum" : [ "AWS", "AWS_GENERIC", "AZURE", "CLOUD_FOUNDRY", "CONTEXTLESS", "ENVIRONMENT", "GOOGLE_CLOUD", "KUBERNETES" ]
-          },
-          "key" : {
-            "maxLength" : 2000,
-            "minLength" : 1,
-            "type" : "string",
-            "description" : "The key of the tag. \n\n Custom tags have the tag value here."
-          },
-          "value" : {
-            "maxLength" : 2000,
-            "minLength" : 0,
-            "type" : "string",
-            "description" : "The value of the tag. \n\n Not applicable to custom tags."
-          }
-        },
-        "description" : "Tag of a Dynatrace entity."
-      },
-      "TagMatchRule" : {
-        "type" : "object",
-        "properties" : {
-          "meTypes" : {
-            "type" : "array",
-            "description" : "The list of types of the Dynatrace entities, for example hosts or services, you want to pick up by matching.",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "APPLICATION", "APPLICATION_METHOD", "APPLICATION_METHOD_GROUP", "APPMON_SERVER", "APPMON_SYSTEM_PROFILE", "AUTO_SCALING_GROUP", "AUXILIARY_SYNTHETIC_TEST", "AWS_APPLICATION_LOAD_BALANCER", "AWS_AVAILABILITY_ZONE", "AWS_CREDENTIALS", "AWS_LAMBDA_FUNCTION", "AWS_NETWORK_LOAD_BALANCER", "AZURE_API_MANAGEMENT_SERVICE", "AZURE_APPLICATION_GATEWAY", "AZURE_COSMOS_DB", "AZURE_CREDENTIALS", "AZURE_EVENT_HUB", "AZURE_EVENT_HUB_NAMESPACE", "AZURE_FUNCTION_APP", "AZURE_IOT_HUB", "AZURE_LOAD_BALANCER", "AZURE_MGMT_GROUP", "AZURE_REDIS_CACHE", "AZURE_REGION", "AZURE_SERVICE_BUS_NAMESPACE", "AZURE_SERVICE_BUS_QUEUE", "AZURE_SERVICE_BUS_TOPIC", "AZURE_SQL_DATABASE", "AZURE_SQL_ELASTIC_POOL", "AZURE_SQL_SERVER", "AZURE_STORAGE_ACCOUNT", "AZURE_SUBSCRIPTION", "AZURE_TENANT", "AZURE_VM", "AZURE_VM_SCALE_SET", "AZURE_WEB_APP", "CF_APPLICATION", "CF_FOUNDATION", "CINDER_VOLUME", "CLOUD_APPLICATION", "CLOUD_APPLICATION_INSTANCE", "CLOUD_APPLICATION_NAMESPACE", "CONTAINER_GROUP", "CONTAINER_GROUP_INSTANCE", "CUSTOM_APPLICATION", "CUSTOM_DEVICE", "CUSTOM_DEVICE_GROUP", "DCRUM_APPLICATION", "DCRUM_SERVICE", "DCRUM_SERVICE_INSTANCE", "DEVICE_APPLICATION_METHOD", "DISK", "DOCKER_CONTAINER_GROUP", "DOCKER_CONTAINER_GROUP_INSTANCE", "DYNAMO_DB_TABLE", "EBS_VOLUME", "EC2_INSTANCE", "ELASTIC_LOAD_BALANCER", "ENVIRONMENT", "EXTERNAL_SYNTHETIC_TEST_STEP", "GCP_ZONE", "GEOLOCATION", "GEOLOC_SITE", "GOOGLE_COMPUTE_ENGINE", "HOST", "HOST_GROUP", "HTTP_CHECK", "HTTP_CHECK_STEP", "HYPERVISOR", "KUBERNETES_CLUSTER", "KUBERNETES_NODE", "MOBILE_APPLICATION", "NETWORK_INTERFACE", "NEUTRON_SUBNET", "OPENSTACK_PROJECT", "OPENSTACK_REGION", "OPENSTACK_VM", "OS", "PROCESS_GROUP", "PROCESS_GROUP_INSTANCE", "RELATIONAL_DATABASE_SERVICE", "SERVICE", "SERVICE_INSTANCE", "SERVICE_METHOD", "SERVICE_METHOD_GROUP", "SWIFT_CONTAINER", "SYNTHETIC_LOCATION", "SYNTHETIC_TEST", "SYNTHETIC_TEST_STEP", "VIRTUALMACHINE", "VMWARE_DATACENTER" ]
-            }
-          },
-          "tags" : {
-            "type" : "array",
-            "description" : "The list of tags you want to use for matching. At least one tag is required. \n\n You can use custom tags from the UI, AWS tags, Cloud Foundry tags, OpenShift/Kubernetes, and tags based on environment variables.",
-            "items" : {
-              "$ref" : "#/components/schemas/TagInfo"
-            }
-          }
-        },
-        "description" : "The list of tags to be used for matching Dynatrace entities."
       },
       "EventQueryResult" : {
         "type" : "object",
@@ -6599,6 +6415,214 @@
         },
         "description" : "The information about the event's impact."
       },
+      "TagInfo" : {
+        "required" : [ "context", "key" ],
+        "type" : "object",
+        "properties" : {
+          "context" : {
+            "type" : "string",
+            "description" : "The origin of the tag, such as AWS or Cloud Foundry. \n\n Custom tags use the `CONTEXTLESS` value.",
+            "enum" : [ "AWS", "AWS_GENERIC", "AZURE", "CLOUD_FOUNDRY", "CONTEXTLESS", "ENVIRONMENT", "GOOGLE_CLOUD", "KUBERNETES" ]
+          },
+          "key" : {
+            "maxLength" : 2000,
+            "minLength" : 1,
+            "type" : "string",
+            "description" : "The key of the tag. \n\n Custom tags have the tag value here."
+          },
+          "value" : {
+            "maxLength" : 2000,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The value of the tag. \n\n Not applicable to custom tags."
+          }
+        },
+        "description" : "Tag of a Dynatrace entity."
+      },
+      "EventStoreResult" : {
+        "type" : "object",
+        "properties" : {
+          "storedEventIds" : {
+            "type" : "array",
+            "description" : "List of event IDs for information-only-events. \n\n This field is provided for compatibility reasons. You should use the values from the **storedIds** field instead.",
+            "items" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          },
+          "storedIds" : {
+            "type" : "array",
+            "description" : "List of **encoded** event IDs for information-only-events.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "storedCorrelationIds" : {
+            "type" : "array",
+            "description" : "List of correlation IDs for problem-opening-events.",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "description" : "Contains IDs of all custom events, created by an event push call."
+      },
+      "EventPushMessage" : {
+        "required" : [ "eventType", "source" ],
+        "type" : "object",
+        "properties" : {
+          "eventType" : {
+            "type" : "string",
+            "description" : "The type of event.",
+            "enum" : [ "AVAILABILITY_EVENT", "CUSTOM_ANNOTATION", "CUSTOM_CONFIGURATION", "CUSTOM_DEPLOYMENT", "CUSTOM_INFO", "ERROR_EVENT", "MARKED_FOR_TERMINATION", "PERFORMANCE_EVENT", "RESOURCE_CONTENTION" ]
+          },
+          "start" : {
+            "type" : "integer",
+            "description" : "The start timestamp of the event, in UTC milliseconds. \n\nIf not set, the current timestamp is used. \n\nYou can report information-only events up to **30 days** into the past. \n\nYou can report problem-opening events up to **60 minutes** into the past.",
+            "format" : "int64"
+          },
+          "end" : {
+            "type" : "integer",
+            "description" : "The end timestamp of the event, in UTC milliseconds. \n\nIf not set, the current time is used for information-only events. \n\nNot applicable to problem-opening events. Such an event stays open until it times out depending on the **timeoutMinutes** parameter.",
+            "format" : "int64"
+          },
+          "timeoutMinutes" : {
+            "type" : "integer",
+            "description" : "The timeout for problem-opening events in minutes. Not applicable to information-only events. \n\nIf not set, 15 minutes is used. The maximum allowed value is 120 minutes. \n\nYou can refresh the event by sending the same payload again.",
+            "format" : "int32"
+          },
+          "attachRules" : {
+            "$ref" : "#/components/schemas/PushEventAttachRules"
+          },
+          "customProperties" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object",
+              "description" : "The set of any properties related to the event, in the *\"key\" : \"value\"* format."
+            },
+            "description" : "The set of any properties related to the event, in the *\"key\" : \"value\"* format."
+          },
+          "source" : {
+            "type" : "string",
+            "description" : "The name or ID of the external source of the event."
+          },
+          "annotationType" : {
+            "type" : "string",
+            "description" : "The type of the custom annotation, for example `DNS route has been changed`."
+          },
+          "annotationDescription" : {
+            "type" : "string",
+            "description" : "A detailed description of the custom annotation, for example `DNS route has been changed to x.mydomain.com`."
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "The textual description of the configuration change."
+          },
+          "deploymentName" : {
+            "type" : "string",
+            "description" : "The ID of the triggered deployment."
+          },
+          "deploymentVersion" : {
+            "type" : "string",
+            "description" : "The version of the triggered deployment."
+          },
+          "timeseriesIds" : {
+            "type" : "array",
+            "description" : "A list of timeseries IDs, related to the event.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "deploymentProject" : {
+            "type" : "string",
+            "description" : "The project name of the deployed package."
+          },
+          "ciBackLink" : {
+            "type" : "string",
+            "description" : "The link to the deployed artifact within the 3rd party system."
+          },
+          "remediationAction" : {
+            "type" : "string",
+            "description" : "The link to the deployment related remediation action within the external tool."
+          },
+          "original" : {
+            "type" : "string",
+            "description" : "The previous value of the configuration."
+          },
+          "changed" : {
+            "type" : "string",
+            "description" : "The new value of the configuration that has been set by the event."
+          },
+          "configuration" : {
+            "type" : "string",
+            "description" : "The ID or the name of the configuration that has been changed by the event."
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "The title of the configuration that has been set by the event."
+          }
+        },
+        "example" : {
+          "eventType" : "CUSTOM_ANNOTATION",
+          "start" : 1521042929000,
+          "end" : 1521542929000,
+          "timeoutMinutes" : 0,
+          "attachRules" : {
+            "entityIds" : [ "CUSTOM_DEVICE-0000000000000007" ],
+            "tagRule" : [ {
+              "meTypes" : [ "HOST" ],
+              "tags" : [ {
+                "context" : "CONTEXTLESS",
+                "key" : "customTag"
+              } ]
+            } ]
+          },
+          "source" : "OpsControl",
+          "annotationType" : "defect",
+          "annotationDescription" : "The coffee machine is broken"
+        }
+      },
+      "PushEventAttachRules" : {
+        "type" : "object",
+        "properties" : {
+          "entityIds" : {
+            "type" : "array",
+            "description" : "The list of entity IDs to which the event should be attached.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "tagRule" : {
+            "type" : "array",
+            "description" : "An object defining a matching rule to dynamically pick up entities.",
+            "items" : {
+              "$ref" : "#/components/schemas/TagMatchRule"
+            }
+          }
+        },
+        "description" : "The set of rules defining Dynatrace entities to be associated with the event.\n\n You can specify tags to dynamically match Dynatrace entities or IDs of specific entities.  \n\nAt least one entity ID or tag is required."
+      },
+      "TagMatchRule" : {
+        "type" : "object",
+        "properties" : {
+          "meTypes" : {
+            "type" : "array",
+            "description" : "The list of types of the Dynatrace entities, for example hosts or services, you want to pick up by matching.",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "APPLICATION", "APPLICATION_METHOD", "APPLICATION_METHOD_GROUP", "APPMON_SERVER", "APPMON_SYSTEM_PROFILE", "AUTO_SCALING_GROUP", "AUXILIARY_SYNTHETIC_TEST", "AWS_APPLICATION_LOAD_BALANCER", "AWS_AVAILABILITY_ZONE", "AWS_CREDENTIALS", "AWS_LAMBDA_FUNCTION", "AWS_NETWORK_LOAD_BALANCER", "AZURE_API_MANAGEMENT_SERVICE", "AZURE_APPLICATION_GATEWAY", "AZURE_COSMOS_DB", "AZURE_CREDENTIALS", "AZURE_EVENT_HUB", "AZURE_EVENT_HUB_NAMESPACE", "AZURE_FUNCTION_APP", "AZURE_IOT_HUB", "AZURE_LOAD_BALANCER", "AZURE_MGMT_GROUP", "AZURE_REDIS_CACHE", "AZURE_REGION", "AZURE_SERVICE_BUS_NAMESPACE", "AZURE_SERVICE_BUS_QUEUE", "AZURE_SERVICE_BUS_TOPIC", "AZURE_SQL_DATABASE", "AZURE_SQL_ELASTIC_POOL", "AZURE_SQL_SERVER", "AZURE_STORAGE_ACCOUNT", "AZURE_SUBSCRIPTION", "AZURE_TENANT", "AZURE_VM", "AZURE_VM_SCALE_SET", "AZURE_WEB_APP", "CF_APPLICATION", "CF_FOUNDATION", "CINDER_VOLUME", "CLOUD_APPLICATION", "CLOUD_APPLICATION_INSTANCE", "CLOUD_APPLICATION_NAMESPACE", "CONTAINER_GROUP", "CONTAINER_GROUP_INSTANCE", "CUSTOM_APPLICATION", "CUSTOM_DEVICE", "CUSTOM_DEVICE_GROUP", "DCRUM_APPLICATION", "DCRUM_SERVICE", "DCRUM_SERVICE_INSTANCE", "DEVICE_APPLICATION_METHOD", "DISK", "DOCKER_CONTAINER_GROUP", "DOCKER_CONTAINER_GROUP_INSTANCE", "DYNAMO_DB_TABLE", "EBS_VOLUME", "EC2_INSTANCE", "ELASTIC_LOAD_BALANCER", "ENVIRONMENT", "EXTERNAL_SYNTHETIC_TEST_STEP", "GCP_ZONE", "GEOLOCATION", "GEOLOC_SITE", "GOOGLE_COMPUTE_ENGINE", "HOST", "HOST_GROUP", "HTTP_CHECK", "HTTP_CHECK_STEP", "HYPERVISOR", "KUBERNETES_CLUSTER", "KUBERNETES_NODE", "MOBILE_APPLICATION", "NETWORK_INTERFACE", "NEUTRON_SUBNET", "OPENSTACK_PROJECT", "OPENSTACK_REGION", "OPENSTACK_VM", "OS", "PROCESS_GROUP", "PROCESS_GROUP_INSTANCE", "RELATIONAL_DATABASE_SERVICE", "SERVICE", "SERVICE_INSTANCE", "SERVICE_METHOD", "SERVICE_METHOD_GROUP", "SWIFT_CONTAINER", "SYNTHETIC_LOCATION", "SYNTHETIC_TEST", "SYNTHETIC_TEST_STEP", "VIRTUALMACHINE", "VMWARE_DATACENTER" ]
+            }
+          },
+          "tags" : {
+            "type" : "array",
+            "description" : "The list of tags you want to use for matching. At least one tag is required. \n\n You can use custom tags from the UI, AWS tags, Cloud Foundry tags, OpenShift/Kubernetes, and tags based on environment variables.",
+            "items" : {
+              "$ref" : "#/components/schemas/TagInfo"
+            }
+          }
+        },
+        "description" : "The list of tags to be used for matching Dynatrace entities."
+      },
       "ConstraintViolation" : {
         "type" : "object",
         "properties" : {
@@ -6626,12 +6650,12 @@
               "$ref" : "#/components/schemas/ConstraintViolation"
             }
           },
+          "message" : {
+            "type" : "string"
+          },
           "code" : {
             "type" : "integer",
             "format" : "int32"
-          },
-          "message" : {
-            "type" : "string"
           }
         }
       },
@@ -6642,104 +6666,6 @@
             "$ref" : "#/components/schemas/Error"
           }
         }
-      },
-      "StateModification" : {
-        "required" : [ "state" ],
-        "type" : "object",
-        "properties" : {
-          "state" : {
-            "type" : "string",
-            "description" : "The new operation state for all third-party Synthetic monitors.",
-            "enum" : [ "ACTIVE", "HIDDEN", "INACTIVE" ]
-          }
-        },
-        "description" : "Operation state to be set for all third-party Synthetic monitors"
-      },
-      "3rdPartyEventOpenNotification" : {
-        "required" : [ "reason" ],
-        "type" : "object",
-        "properties" : {
-          "testId" : {
-            "type" : "string",
-            "description" : "The ID of the third-party synthetic monitor."
-          },
-          "eventId" : {
-            "type" : "string",
-            "description" : "The unique ID of the event."
-          },
-          "name" : {
-            "type" : "string",
-            "description" : "The name of the event."
-          },
-          "eventType" : {
-            "type" : "string",
-            "description" : "The type of the event.",
-            "enum" : [ "testOutage", "testSlowdown" ]
-          },
-          "reason" : {
-            "type" : "string",
-            "description" : "The cause of the event."
-          },
-          "startTimestamp" : {
-            "type" : "integer",
-            "description" : "The start timestamp of the event, in UTC milliseconds.",
-            "format" : "int64"
-          },
-          "locationIds" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "description" : "The list of IDs of third-party synthetic locations where the event happens.",
-            "items" : {
-              "type" : "string"
-            }
-          }
-        },
-        "description" : "The open third-party synthetic event."
-      },
-      "3rdPartyEventResolvedNotification" : {
-        "type" : "object",
-        "properties" : {
-          "testId" : {
-            "type" : "string",
-            "description" : "The ID of the Synthetic test."
-          },
-          "eventId" : {
-            "type" : "string",
-            "description" : "The unique ID of the event."
-          },
-          "endTimestamp" : {
-            "type" : "integer",
-            "description" : "The end timestamp of the event, in UTC milliseconds.",
-            "format" : "int64"
-          }
-        },
-        "description" : "The closed third-party synthetic event."
-      },
-      "3rdPartySyntheticEvents" : {
-        "type" : "object",
-        "properties" : {
-          "syntheticEngineName" : {
-            "type" : "string",
-            "description" : "The type of the third-party synthetic monitor."
-          },
-          "open" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "description" : "The list of open third-party synthetic events.",
-            "items" : {
-              "$ref" : "#/components/schemas/3rdPartyEventOpenNotification"
-            }
-          },
-          "resolved" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "description" : "The list of closed third-party synthetic events.",
-            "items" : {
-              "$ref" : "#/components/schemas/3rdPartyEventResolvedNotification"
-            }
-          }
-        },
-        "description" : "The list of third-party synthetic events."
       },
       "3rdPartySyntheticLocation" : {
         "required" : [ "id", "name" ],
@@ -7009,6 +6935,104 @@
           }
         },
         "description" : "The step of a synthetic monitor."
+      },
+      "3rdPartyEventOpenNotification" : {
+        "required" : [ "reason" ],
+        "type" : "object",
+        "properties" : {
+          "testId" : {
+            "type" : "string",
+            "description" : "The ID of the third-party synthetic monitor."
+          },
+          "eventId" : {
+            "type" : "string",
+            "description" : "The unique ID of the event."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the event."
+          },
+          "eventType" : {
+            "type" : "string",
+            "description" : "The type of the event.",
+            "enum" : [ "testOutage", "testSlowdown" ]
+          },
+          "reason" : {
+            "type" : "string",
+            "description" : "The cause of the event."
+          },
+          "startTimestamp" : {
+            "type" : "integer",
+            "description" : "The start timestamp of the event, in UTC milliseconds.",
+            "format" : "int64"
+          },
+          "locationIds" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "The list of IDs of third-party synthetic locations where the event happens.",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "description" : "The open third-party synthetic event."
+      },
+      "3rdPartyEventResolvedNotification" : {
+        "type" : "object",
+        "properties" : {
+          "testId" : {
+            "type" : "string",
+            "description" : "The ID of the Synthetic test."
+          },
+          "eventId" : {
+            "type" : "string",
+            "description" : "The unique ID of the event."
+          },
+          "endTimestamp" : {
+            "type" : "integer",
+            "description" : "The end timestamp of the event, in UTC milliseconds.",
+            "format" : "int64"
+          }
+        },
+        "description" : "The closed third-party synthetic event."
+      },
+      "3rdPartySyntheticEvents" : {
+        "type" : "object",
+        "properties" : {
+          "syntheticEngineName" : {
+            "type" : "string",
+            "description" : "The type of the third-party synthetic monitor."
+          },
+          "open" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "The list of open third-party synthetic events.",
+            "items" : {
+              "$ref" : "#/components/schemas/3rdPartyEventOpenNotification"
+            }
+          },
+          "resolved" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "The list of closed third-party synthetic events.",
+            "items" : {
+              "$ref" : "#/components/schemas/3rdPartyEventResolvedNotification"
+            }
+          }
+        },
+        "description" : "The list of third-party synthetic events."
+      },
+      "StateModification" : {
+        "required" : [ "state" ],
+        "type" : "object",
+        "properties" : {
+          "state" : {
+            "type" : "string",
+            "description" : "The new operation state for all third-party Synthetic monitors.",
+            "enum" : [ "ACTIVE", "HIDDEN", "INACTIVE" ]
+          }
+        },
+        "description" : "Operation state to be set for all third-party Synthetic monitors"
       },
       "MaintenanceWindow" : {
         "required" : [ "schedule", "type" ],
@@ -7424,13 +7448,13 @@
           "toRelationships" : {
             "type" : "object",
             "properties" : {
-              "isSiteOf" : {
+              "isProcessOf" : {
                 "type" : "array",
                 "items" : {
                   "type" : "string"
                 }
               },
-              "isProcessOf" : {
+              "isSiteOf" : {
                 "type" : "array",
                 "items" : {
                   "type" : "string"
@@ -7450,42 +7474,112 @@
               }
             }
           },
-          "networkZoneId" : {
+          "boshStemcellVersion" : {
             "type" : "string",
-            "description" : "The ID of network zone the entity is in."
+            "description" : "The Cloud Foundry BOSH stemcell version."
+          },
+          "zosVirtualization" : {
+            "type" : "string",
+            "description" : "Type of virtualization on the mainframe."
+          },
+          "openstackSecurityGroups" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "osArchitecture" : {
+            "type" : "string",
+            "enum" : [ "ARM", "IA64", "PARISC", "PPC", "PPCLE", "S390", "SPARC", "X86", "ZOS" ]
+          },
+          "openstackProjectName" : {
+            "type" : "string"
           },
           "boshAvailabilityZone" : {
             "type" : "string",
             "description" : "The Cloud Foundry BOSH availability zone."
           },
-          "oneAgentCustomHostName" : {
-            "type" : "string",
-            "description" : "The custom name defined in OneAgent config."
-          },
           "zosCPUSerialNumber" : {
             "type" : "string",
             "description" : "The CPU serial number."
           },
-          "boshStemcellVersion" : {
-            "type" : "string",
-            "description" : "The Cloud Foundry BOSH stemcell version."
+          "simultaneousMultithreading" : {
+            "type" : "integer",
+            "description" : "The AIX instance simultaneous threads count.",
+            "format" : "int32"
           },
-          "openstackProjectName" : {
+          "localHostName" : {
             "type" : "string"
           },
-          "bitness" : {
+          "cpuCores" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "paasAgentVersions" : {
+            "type" : "array",
+            "description" : "The versions of the PaaS agents currently running on the entity.",
+            "items" : {
+              "$ref" : "#/components/schemas/AgentVersion"
+            }
+          },
+          "oneAgentCustomHostName" : {
             "type" : "string",
-            "enum" : [ "32bit", "64bit" ]
+            "description" : "The custom name defined in OneAgent config."
+          },
+          "beanstalkEnvironmentName" : {
+            "type" : "string"
+          },
+          "azureSku" : {
+            "type" : "string",
+            "enum" : [ "BASIC", "FREE", "PREMIUM", "SHARED", "STANDARD" ]
+          },
+          "kubernetesNode" : {
+            "type" : "string",
+            "description" : "The kubernetes node the entity is in."
+          },
+          "ipAddresses" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "gceMachineType" : {
+            "type" : "string",
+            "description" : "The Google Compute Engine machine type."
+          },
+          "gceProjectId" : {
+            "type" : "string",
+            "description" : "The Google Compute Engine numeric project ID."
+          },
+          "userLevel" : {
+            "type" : "string",
+            "enum" : [ "NON_SUPERUSER", "NON_SUPERUSER_STRICT", "SUPERUSER" ]
+          },
+          "vmwareName" : {
+            "type" : "string"
+          },
+          "paasMemoryLimit" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "logicalCpus" : {
+            "type" : "integer",
+            "description" : "The AIX instance logical CPU count.",
+            "format" : "int32"
           },
           "isMonitoringCandidate" : {
             "type" : "boolean"
           },
-          "osVersion" : {
-            "type" : "string"
-          },
-          "osType" : {
+          "zosCPUModelNumber" : {
             "type" : "string",
-            "enum" : [ "AIX", "DARWIN", "HPUX", "LINUX", "SOLARIS", "WINDOWS", "ZOS" ]
+            "description" : "The CPU model number."
+          },
+          "cloudType" : {
+            "type" : "string",
+            "enum" : [ "AZURE", "EC2", "GOOGLE_CLOUD_PLATFORM", "OPENSTACK", "ORACLE" ]
+          },
+          "amiId" : {
+            "type" : "string"
           },
           "azureHostNames" : {
             "type" : "array",
@@ -7493,24 +7587,47 @@
               "type" : "string"
             }
           },
+          "publicHostName" : {
+            "type" : "string"
+          },
+          "hostGroup" : {
+            "$ref" : "#/components/schemas/HostGroup"
+          },
+          "osVersion" : {
+            "type" : "string"
+          },
+          "scaleSetName" : {
+            "type" : "string"
+          },
+          "monitoringMode" : {
+            "type" : "string",
+            "enum" : [ "FULL_STACK", "INFRASTRUCTURE", "OFF" ]
+          },
+          "virtualCpus" : {
+            "type" : "integer",
+            "description" : "The AIX instance virtual CPU count.",
+            "format" : "int32"
+          },
+          "boshInstanceName" : {
+            "type" : "string",
+            "description" : "The Cloud Foundry BOSH instance name."
+          },
           "openstackComputeNodeName" : {
             "type" : "string"
           },
-          "osArchitecture" : {
+          "awsSecurityGroup" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "gcpZone" : {
             "type" : "string",
-            "enum" : [ "ARM", "IA64", "PARISC", "PPC", "PPCLE", "S390", "SPARC", "X86", "ZOS" ]
+            "description" : "The Google Cloud Platform Zone."
           },
           "paasType" : {
             "type" : "string",
             "enum" : [ "AWS_ECS_EC2", "AWS_ECS_FARGATE", "AWS_LAMBDA", "AZURE_WEBSITES", "CLOUD_FOUNDRY", "GOOGLE_APP_ENGINE", "HEROKU", "KUBERNETES", "OPENSHIFT" ]
-          },
-          "hypervisorType" : {
-            "type" : "string",
-            "enum" : [ "HYPERV", "KVM", "LPAR", "QEMU", "VIRTUALBOX", "VMWARE", "WPAR", "XEN" ]
-          },
-          "paasMemoryLimit" : {
-            "type" : "integer",
-            "format" : "int64"
           },
           "softwareTechnologies" : {
             "type" : "array",
@@ -7518,27 +7635,71 @@
               "$ref" : "#/components/schemas/TechnologyInfo"
             }
           },
-          "amiId" : {
+          "zosTotalZiipProcessors" : {
+            "type" : "integer",
+            "description" : "Number of assigned support processors for this LPAR.",
+            "format" : "int32"
+          },
+          "autoScalingGroup" : {
             "type" : "string"
+          },
+          "bitness" : {
+            "type" : "string",
+            "enum" : [ "32bit", "64bit" ]
+          },
+          "localIp" : {
+            "type" : "string"
+          },
+          "openstackVmName" : {
+            "type" : "string"
+          },
+          "openstackAvZone" : {
+            "type" : "string"
+          },
+          "boshDeploymentId" : {
+            "type" : "string",
+            "description" : "The Cloud Foundry BOSH deployment ID."
+          },
+          "awsNameTag" : {
+            "type" : "string",
+            "description" : "The name inherited from AWS."
+          },
+          "gceInstanceId" : {
+            "type" : "string",
+            "description" : "The Google Compute Engine instance ID."
           },
           "esxiHostName" : {
             "type" : "string"
           },
+          "boshInstanceId" : {
+            "type" : "string",
+            "description" : "The Cloud Foundry BOSH instance ID."
+          },
+          "boshName" : {
+            "type" : "string",
+            "description" : "The Cloud Foundry BOSH name."
+          },
+          "openStackInstaceType" : {
+            "type" : "string"
+          },
+          "azureVmName" : {
+            "type" : "string"
+          },
+          "zosTotalPhysicalMemory" : {
+            "type" : "integer",
+            "description" : "Memory assigned to the host (Terabyte).",
+            "format" : "int32"
+          },
+          "agentVersion" : {
+            "$ref" : "#/components/schemas/AgentVersion"
+          },
+          "gceInstanceName" : {
+            "type" : "string",
+            "description" : "The Google Compute Engine instance name."
+          },
           "kubernetesCluster" : {
             "type" : "string",
             "description" : "The kubernetes cluster the entity is in."
-          },
-          "zosCPUModelNumber" : {
-            "type" : "string",
-            "description" : "The CPU model number."
-          },
-          "hostGroup" : {
-            "$ref" : "#/components/schemas/HostGroup"
-          },
-          "zosTotalGeneralPurposeProcessors" : {
-            "type" : "integer",
-            "description" : "Number of assigned processors for this LPAR.",
-            "format" : "int32"
           },
           "azureSiteNames" : {
             "type" : "array",
@@ -7546,52 +7707,61 @@
               "type" : "string"
             }
           },
-          "boshInstanceId" : {
+          "gceProject" : {
             "type" : "string",
-            "description" : "The Cloud Foundry BOSH instance ID."
+            "description" : "The Google Compute Engine project."
+          },
+          "awsInstanceType" : {
+            "type" : "string"
+          },
+          "publicIp" : {
+            "type" : "string"
+          },
+          "osType" : {
+            "type" : "string",
+            "enum" : [ "AIX", "DARWIN", "HPUX", "LINUX", "SOLARIS", "WINDOWS", "ZOS" ]
+          },
+          "cloudPlatformVendorVersion" : {
+            "type" : "string",
+            "description" : "Defines the cloud platform vendor version."
           },
           "azureComputeModeName" : {
             "type" : "string",
             "enum" : [ "DEDICATED", "SHARED" ]
           },
+          "networkZoneId" : {
+            "type" : "string",
+            "description" : "The ID of network zone the entity is in."
+          },
+          "gcePublicIpAddresses" : {
+            "type" : "array",
+            "description" : "The public IP addresses of the Google Compute Engine.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "zosTotalGeneralPurposeProcessors" : {
+            "type" : "integer",
+            "description" : "Number of assigned processors for this LPAR.",
+            "format" : "int32"
+          },
           "consumedHostUnits" : {
             "type" : "string"
           },
-          "boshDeploymentId" : {
-            "type" : "string",
-            "description" : "The Cloud Foundry BOSH deployment ID."
-          },
-          "cloudType" : {
-            "type" : "string",
-            "enum" : [ "AZURE", "EC2", "GOOGLE_CLOUD_PLATFORM", "OPENSTACK", "ORACLE" ]
-          },
-          "zosTotalZiipProcessors" : {
+          "logicalCpuCores" : {
             "type" : "integer",
-            "description" : "Number of assigned support processors for this LPAR.",
             "format" : "int32"
           },
-          "vmwareName" : {
-            "type" : "string"
-          },
-          "openstackVmName" : {
-            "type" : "string"
-          },
-          "virtualCpus" : {
-            "type" : "integer",
-            "description" : "The AIX instance virtual CPU count.",
-            "format" : "int32"
-          },
-          "gceMachineType" : {
+          "hypervisorType" : {
             "type" : "string",
-            "description" : "The Google Compute Engine machine type."
+            "enum" : [ "HYPERV", "KVM", "LPAR", "QEMU", "VIRTUALBOX", "VMWARE", "WPAR", "XEN" ]
           },
-          "gceInstanceId" : {
-            "type" : "string",
-            "description" : "The Google Compute Engine instance ID."
-          },
-          "gcpZone" : {
-            "type" : "string",
-            "description" : "The Google Cloud Platform Zone."
+          "kubernetesLabels" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
+            },
+            "description" : "The kubernetes labels defined on the entity."
           },
           "managementZones" : {
             "type" : "array",
@@ -7601,200 +7771,6 @@
             }
           },
           "awsInstanceId" : {
-            "type" : "string"
-          },
-          "localHostName" : {
-            "type" : "string"
-          },
-          "logicalCpus" : {
-            "type" : "integer",
-            "description" : "The AIX instance logical CPU count.",
-            "format" : "int32"
-          },
-          "kubernetesNode" : {
-            "type" : "string",
-            "description" : "The kubernetes node the entity is in."
-          },
-          "autoScalingGroup" : {
-            "type" : "string"
-          },
-          "monitoringMode" : {
-            "type" : "string",
-            "enum" : [ "FULL_STACK", "INFRASTRUCTURE", "OFF" ]
-          },
-          "awsSecurityGroup" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "openstackAvZone" : {
-            "type" : "string"
-          },
-          "awsInstanceType" : {
-            "type" : "string"
-          },
-          "zosTotalPhysicalMemory" : {
-            "type" : "integer",
-            "description" : "Memory assigned to the host (Terabyte).",
-            "format" : "int32"
-          },
-          "publicIp" : {
-            "type" : "string"
-          },
-          "openstackSecurityGroups" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "boshInstanceName" : {
-            "type" : "string",
-            "description" : "The Cloud Foundry BOSH instance name."
-          },
-          "gceProject" : {
-            "type" : "string",
-            "description" : "The Google Compute Engine project."
-          },
-          "paasAgentVersions" : {
-            "type" : "array",
-            "description" : "The versions of the PaaS agents currently running on the entity.",
-            "items" : {
-              "$ref" : "#/components/schemas/AgentVersion"
-            }
-          },
-          "gcePublicIpAddresses" : {
-            "type" : "array",
-            "description" : "The public IP addresses of the Google Compute Engine.",
-            "items" : {
-              "type" : "object",
-              "properties" : {
-                "canonicalHostName" : {
-                  "type" : "string"
-                },
-                "multicastAddress" : {
-                  "type" : "boolean"
-                },
-                "anyLocalAddress" : {
-                  "type" : "boolean"
-                },
-                "loopbackAddress" : {
-                  "type" : "boolean"
-                },
-                "linkLocalAddress" : {
-                  "type" : "boolean"
-                },
-                "siteLocalAddress" : {
-                  "type" : "boolean"
-                },
-                "mcglobal" : {
-                  "type" : "boolean"
-                },
-                "mcnodeLocal" : {
-                  "type" : "boolean"
-                },
-                "mclinkLocal" : {
-                  "type" : "boolean"
-                },
-                "mcsiteLocal" : {
-                  "type" : "boolean"
-                },
-                "mcorgLocal" : {
-                  "type" : "boolean"
-                },
-                "address" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "string",
-                    "format" : "byte"
-                  }
-                },
-                "hostAddress" : {
-                  "type" : "string"
-                },
-                "hostName" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "userLevel" : {
-            "type" : "string",
-            "enum" : [ "NON_SUPERUSER", "NON_SUPERUSER_STRICT", "SUPERUSER" ]
-          },
-          "azureVmName" : {
-            "type" : "string"
-          },
-          "openStackInstaceType" : {
-            "type" : "string"
-          },
-          "ipAddresses" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "gceProjectId" : {
-            "type" : "string",
-            "description" : "The Google Compute Engine numeric project ID."
-          },
-          "cloudPlatformVendorVersion" : {
-            "type" : "string",
-            "description" : "Defines the cloud platform vendor version."
-          },
-          "agentVersion" : {
-            "$ref" : "#/components/schemas/AgentVersion"
-          },
-          "beanstalkEnvironmentName" : {
-            "type" : "string"
-          },
-          "simultaneousMultithreading" : {
-            "type" : "integer",
-            "description" : "The AIX instance simultaneous threads count.",
-            "format" : "int32"
-          },
-          "awsNameTag" : {
-            "type" : "string",
-            "description" : "The name inherited from AWS."
-          },
-          "azureSku" : {
-            "type" : "string",
-            "enum" : [ "BASIC", "FREE", "PREMIUM", "SHARED", "STANDARD" ]
-          },
-          "gceInstanceName" : {
-            "type" : "string",
-            "description" : "The Google Compute Engine instance name."
-          },
-          "localIp" : {
-            "type" : "string"
-          },
-          "scaleSetName" : {
-            "type" : "string"
-          },
-          "boshName" : {
-            "type" : "string",
-            "description" : "The Cloud Foundry BOSH name."
-          },
-          "logicalCpuCores" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "zosVirtualization" : {
-            "type" : "string",
-            "description" : "Type of virtualization on the mainframe."
-          },
-          "cpuCores" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "kubernetesLabels" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "$ref" : "#/components/schemas/EntityShortRepresentation"
-            },
-            "description" : "The kubernetes labels defined on the entity."
-          },
-          "publicHostName" : {
             "type" : "string"
           },
           "fromRelationships" : {
@@ -8545,13 +8521,6 @@
               }
             }
           },
-          "listenPorts" : {
-            "type" : "array",
-            "items" : {
-              "type" : "integer",
-              "format" : "int32"
-            }
-          },
           "azureHostName" : {
             "type" : "string"
           },
@@ -8569,6 +8538,13 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/TechnologyInfo"
+            }
+          },
+          "listenPorts" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
             }
           },
           "fromRelationships" : {
@@ -9294,21 +9270,11 @@
               }
             }
           },
-          "modules" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
+          "azureHostName" : {
+            "type" : "string"
           },
           "monitoringState" : {
             "$ref" : "#/components/schemas/MonitoringState"
-          },
-          "listenPorts" : {
-            "type" : "array",
-            "items" : {
-              "type" : "integer",
-              "format" : "int32"
-            }
           },
           "agentVersions" : {
             "type" : "array",
@@ -9317,18 +9283,9 @@
               "$ref" : "#/components/schemas/AgentVersion"
             }
           },
-          "versionedModules" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/ProcessGroupInstanceModule"
-            }
-          },
           "bitness" : {
             "type" : "string",
             "enum" : [ "32bit", "64bit" ]
-          },
-          "azureHostName" : {
-            "type" : "string"
           },
           "azureSiteName" : {
             "type" : "string"
@@ -9344,6 +9301,25 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/TechnologyInfo"
+            }
+          },
+          "listenPorts" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "modules" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "versionedModules" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProcessGroupInstanceModule"
             }
           },
           "fromRelationships" : {
@@ -9445,6 +9421,9 @@
             },
             "description" : "The list of incoming calls to the application."
           },
+          "ruleAppliedPattern" : {
+            "type" : "string"
+          },
           "ruleAppliedMatchType" : {
             "type" : "string",
             "enum" : [ "ALL_URLS_AND_DOMAINS", "CONTAINS", "ENDS", "EQUALS", "MATCHES", "STARTS" ]
@@ -9453,19 +9432,16 @@
             "type" : "string",
             "enum" : [ "DOMAIN", "URL" ]
           },
-          "applicationType" : {
-            "type" : "string",
-            "enum" : [ "AGENTLESS_MONITORING", "AMP", "AUTO_INJECTED", "DEFAULT", "SAAS_VENDOR" ]
-          },
-          "ruleAppliedPattern" : {
-            "type" : "string"
-          },
           "managementZones" : {
             "type" : "array",
             "description" : "The management zones that the entity is part of.",
             "items" : {
               "$ref" : "#/components/schemas/EntityShortRepresentation"
             }
+          },
+          "applicationType" : {
+            "type" : "string",
+            "enum" : [ "AGENTLESS_MONITORING", "AMP", "AUTO_INJECTED", "DEFAULT", "SAAS_VENDOR" ]
           }
         }
       },
@@ -9638,31 +9614,29 @@
               }
             }
           },
-          "remoteServiceName" : {
-            "type" : "string",
-            "description" : "The name of the remote service."
+          "databaseVendor" : {
+            "type" : "string"
           },
-          "akkaActorSystem" : {
+          "iibApplicationName" : {
             "type" : "string",
-            "description" : "The services of the akka actor system."
+            "description" : "The IIB application name."
           },
           "databaseName" : {
             "type" : "string"
           },
-          "databaseHostNames" : {
+          "ipAddresses" : {
             "type" : "array",
             "items" : {
               "type" : "string"
             }
           },
-          "webServerName" : {
+          "className" : {
             "type" : "string"
           },
-          "port" : {
-            "type" : "integer",
-            "format" : "int32"
+          "contextRoot" : {
+            "type" : "string"
           },
-          "ipAddresses" : {
+          "serviceTechnologyTypes" : {
             "type" : "array",
             "items" : {
               "type" : "string"
@@ -9672,55 +9646,45 @@
             "type" : "string",
             "description" : "The ESB application name."
           },
-          "webServiceNamespace" : {
+          "webServiceName" : {
             "type" : "string"
           },
-          "webApplicationId" : {
+          "webServerName" : {
             "type" : "string"
+          },
+          "remoteServiceName" : {
+            "type" : "string",
+            "description" : "The name of the remote service."
           },
           "ibmCtgServerName" : {
             "type" : "string",
             "description" : "The IBM CICS Transaction Gateway name."
           },
-          "ibmCtgGatewayUrl" : {
-            "type" : "string",
-            "description" : "The IBM CTG gateway URL."
-          },
-          "path" : {
-            "type" : "string"
-          },
-          "agentTechnologyType" : {
-            "type" : "string",
-            "enum" : [ "APACHE", "DOTNET", "DUMPPROC", "GO", "IIS", "JAVA", "LOG_ANALYTICS", "N/A", "NET", "NGINX", "NODEJS", "OPENTRACING", "OS", "PHP", "PLUGIN", "PROCESS", "PYTHON", "REMOTE_PLUGIN", "RUBY", "SDK", "UPDATER", "VARNISH", "WSMB", "Z" ]
-          },
-          "className" : {
-            "type" : "string"
-          },
           "serviceType" : {
             "type" : "string",
             "enum" : [ "AMP", "Cics", "CicsInteraction", "CustomApplication", "Database", "EnterpriseServiceBus", "External", "Ims", "ImsInteraction", "Messaging", "Method", "Mobile", "Process", "QueueInteraction", "QueueListener", "RemoteCall", "Rmi", "SaasVendor", "Unknown", "WebRequest", "WebService", "WebSite" ]
           },
-          "iibApplicationName" : {
-            "type" : "string",
-            "description" : "The IIB application name."
+          "port" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "serviceTechnologyTypes" : {
+          "databaseHostNames" : {
             "type" : "array",
             "items" : {
               "type" : "string"
             }
           },
-          "remoteEndpoint" : {
+          "akkaActorSystem" : {
             "type" : "string",
-            "description" : "The endpoint of the remote service."
+            "description" : "The services of the akka actor system."
           },
-          "contextRoot" : {
+          "webApplicationId" : {
             "type" : "string"
           },
-          "databaseVendor" : {
+          "webServiceNamespace" : {
             "type" : "string"
           },
-          "webServiceName" : {
+          "path" : {
             "type" : "string"
           },
           "managementZones" : {
@@ -9735,6 +9699,18 @@
             "items" : {
               "$ref" : "#/components/schemas/TechnologyInfo"
             }
+          },
+          "ibmCtgGatewayUrl" : {
+            "type" : "string",
+            "description" : "The IBM CTG gateway URL."
+          },
+          "agentTechnologyType" : {
+            "type" : "string",
+            "enum" : [ "APACHE", "DOTNET", "DUMPPROC", "GO", "IIS", "JAVA", "LOG_ANALYTICS", "N/A", "NET", "NGINX", "NODEJS", "OPENTRACING", "OS", "PHP", "PLUGIN", "PROCESS", "PYTHON", "REMOTE_PLUGIN", "RUBY", "SDK", "UPDATER", "VARNISH", "WSMB", "Z" ]
+          },
+          "remoteEndpoint" : {
+            "type" : "string",
+            "description" : "The endpoint of the remote service."
           },
           "fromRelationships" : {
             "type" : "object",
@@ -10128,6 +10104,51 @@
         },
         "description" : "Logs available on the Custom Device."
       },
+      "GlobalProblemStatus" : {
+        "type" : "object",
+        "properties" : {
+          "totalOpenProblemsCount" : {
+            "type" : "integer",
+            "description" : "The total number of open problems in your environment.",
+            "format" : "int32"
+          },
+          "openProblemCounts" : {
+            "type" : "object",
+            "properties" : {
+              "APPLICATION" : {
+                "type" : "integer",
+                "description" : "The count of impacted entities for the `APPLICATION` impact level.",
+                "format" : "int32"
+              },
+              "ENVIRONMENT" : {
+                "type" : "integer",
+                "description" : "The count of impacted entities for the `ENVIRONMENT` impact level.",
+                "format" : "int32"
+              },
+              "INFRASTRUCTURE" : {
+                "type" : "integer",
+                "description" : "The count of impacted entities for the `INFRASTRUCTURE` impact level.",
+                "format" : "int32"
+              },
+              "SERVICE" : {
+                "type" : "integer",
+                "description" : "The count of impacted entities for the `SERVICE` impact level.",
+                "format" : "int32"
+              }
+            },
+            "description" : "Numbers of open problems per impact level."
+          }
+        },
+        "description" : "The count of open problems in your environment."
+      },
+      "ProblemStatusResultWrapper" : {
+        "type" : "object",
+        "properties" : {
+          "result" : {
+            "$ref" : "#/components/schemas/GlobalProblemStatus"
+          }
+        }
+      },
       "ProblemComment" : {
         "type" : "object",
         "properties" : {
@@ -10155,18 +10176,51 @@
         },
         "description" : "The comment to the problem."
       },
-      "ProblemCommentList" : {
+      "PushProblemComment" : {
+        "required" : [ "comment", "user" ],
         "type" : "object",
         "properties" : {
-          "comments" : {
-            "type" : "array",
-            "description" : "The list of comments to the problem.",
-            "items" : {
-              "$ref" : "#/components/schemas/ProblemComment"
-            }
+          "comment" : {
+            "type" : "string",
+            "description" : "A comment on the problem."
+          },
+          "user" : {
+            "type" : "string",
+            "description" : "The author of the comment."
+          },
+          "context" : {
+            "type" : "string",
+            "description" : "The context of the comment. It can contain any additional information."
           }
         },
-        "description" : "The list of comments to the problem."
+        "description" : "A comment of a problem",
+        "example" : {
+          "comment" : "This is a comment!",
+          "user" : "user1",
+          "context" : "Slack"
+        }
+      },
+      "ProblemCloseResult" : {
+        "type" : "object",
+        "properties" : {
+          "problemId" : {
+            "type" : "string",
+            "description" : "The ID of the problem."
+          },
+          "comment" : {
+            "$ref" : "#/components/schemas/ProblemComment"
+          },
+          "closeTimestamp" : {
+            "type" : "integer",
+            "description" : "The timestamp when the closure was triggered.",
+            "format" : "int64"
+          },
+          "closing" : {
+            "type" : "boolean",
+            "description" : "The problem is in process of closing (`true`) or closed (`false`)."
+          }
+        },
+        "description" : "The result of closing a problem."
       },
       "Event" : {
         "type" : "object",
@@ -10523,105 +10577,6 @@
         },
         "description" : "The properties of a problem."
       },
-      "ProblemDetailsResultWrapper" : {
-        "type" : "object",
-        "properties" : {
-          "result" : {
-            "$ref" : "#/components/schemas/Problem"
-          }
-        }
-      },
-      "PushProblemComment" : {
-        "required" : [ "comment", "user" ],
-        "type" : "object",
-        "properties" : {
-          "comment" : {
-            "type" : "string",
-            "description" : "A comment on the problem."
-          },
-          "user" : {
-            "type" : "string",
-            "description" : "The author of the comment."
-          },
-          "context" : {
-            "type" : "string",
-            "description" : "The context of the comment. It can contain any additional information."
-          }
-        },
-        "description" : "A comment of a problem",
-        "example" : {
-          "comment" : "This is a comment!",
-          "user" : "user1",
-          "context" : "Slack"
-        }
-      },
-      "ProblemCloseResult" : {
-        "type" : "object",
-        "properties" : {
-          "problemId" : {
-            "type" : "string",
-            "description" : "The ID of the problem."
-          },
-          "comment" : {
-            "$ref" : "#/components/schemas/ProblemComment"
-          },
-          "closeTimestamp" : {
-            "type" : "integer",
-            "description" : "The timestamp when the closure was triggered.",
-            "format" : "int64"
-          },
-          "closing" : {
-            "type" : "boolean",
-            "description" : "The problem is in process of closing (`true`) or closed (`false`)."
-          }
-        },
-        "description" : "The result of closing a problem."
-      },
-      "GlobalProblemStatus" : {
-        "type" : "object",
-        "properties" : {
-          "totalOpenProblemsCount" : {
-            "type" : "integer",
-            "description" : "The total number of open problems in your environment.",
-            "format" : "int32"
-          },
-          "openProblemCounts" : {
-            "type" : "object",
-            "properties" : {
-              "APPLICATION" : {
-                "type" : "integer",
-                "description" : "The count of impacted entities for the `APPLICATION` impact level.",
-                "format" : "int32"
-              },
-              "ENVIRONMENT" : {
-                "type" : "integer",
-                "description" : "The count of impacted entities for the `ENVIRONMENT` impact level.",
-                "format" : "int32"
-              },
-              "INFRASTRUCTURE" : {
-                "type" : "integer",
-                "description" : "The count of impacted entities for the `INFRASTRUCTURE` impact level.",
-                "format" : "int32"
-              },
-              "SERVICE" : {
-                "type" : "integer",
-                "description" : "The count of impacted entities for the `SERVICE` impact level.",
-                "format" : "int32"
-              }
-            },
-            "description" : "Numbers of open problems per impact level."
-          }
-        },
-        "description" : "The count of open problems in your environment."
-      },
-      "ProblemStatusResultWrapper" : {
-        "type" : "object",
-        "properties" : {
-          "result" : {
-            "$ref" : "#/components/schemas/GlobalProblemStatus"
-          }
-        }
-      },
       "ProblemFeedQueryResult" : {
         "type" : "object",
         "properties" : {
@@ -10666,6 +10621,27 @@
         "properties" : {
           "result" : {
             "$ref" : "#/components/schemas/ProblemFeedQueryResult"
+          }
+        }
+      },
+      "ProblemCommentList" : {
+        "type" : "object",
+        "properties" : {
+          "comments" : {
+            "type" : "array",
+            "description" : "The list of comments to the problem.",
+            "items" : {
+              "$ref" : "#/components/schemas/ProblemComment"
+            }
+          }
+        },
+        "description" : "The list of comments to the problem."
+      },
+      "ProblemDetailsResultWrapper" : {
+        "type" : "object",
+        "properties" : {
+          "result" : {
+            "$ref" : "#/components/schemas/Problem"
           }
         }
       },
@@ -10739,6 +10715,44 @@
           } ]
         }
       },
+      "EntityIdDto" : {
+        "required" : [ "entityId" ],
+        "type" : "object",
+        "properties" : {
+          "entityId" : {
+            "type" : "string",
+            "description" : "Entity ID to be transferred"
+          }
+        },
+        "description" : "A DTO for entity ID."
+      },
+      "PrivateSyntheticLocation" : {
+        "required" : [ "entityId", "latitude", "longitude", "name", "nodes", "type" ],
+        "type" : "object",
+        "description" : "Configuration of a private synthetic location. \n\n Some fields are inherited from the base *SyntheticLocation* object.",
+        "example" : {
+          "type" : "PRIVATE",
+          "name" : "Linz Location",
+          "latitude" : 48.306351,
+          "longitude" : 14.287399,
+          "nodes" : [ "93302281" ],
+          "status" : "ENABLED"
+        },
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/SyntheticLocation"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "nodes" : {
+              "type" : "array",
+              "description" : "A list of synthetic nodes belonging to a location.",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        } ]
+      },
       "SyntheticLocationStatusUpdate" : {
         "required" : [ "status" ],
         "type" : "object",
@@ -10803,8 +10817,7 @@
               "type" : "array",
               "description" : "A list of synthetic nodes belonging to a location.",
               "items" : {
-                "type" : "string",
-                "description" : "A list of synthetic nodes belonging to a location."
+                "type" : "string"
               }
             },
             "name" : {
@@ -10837,44 +10850,6 @@
               "type" : "string",
               "description" : "The status of the location.\nENABLED = Location is shown as active in the UI. Monitors can be assigned to the location\nDISABLED = Location is shown as disabled in the UI. No monitors can be assigned to the location. Existing monitors will stay assigned and still be executed on the location.\nHIDDEN = Location is hidden from the UI. No monitors can be assigned to the location. Location can only be set to HIDDEN if no monitors are assigned to the location.",
               "enum" : [ "DISABLED", "ENABLED", "HIDDEN" ]
-            }
-          }
-        } ]
-      },
-      "EntityIdDto" : {
-        "required" : [ "entityId" ],
-        "type" : "object",
-        "properties" : {
-          "entityId" : {
-            "type" : "string",
-            "description" : "Entity ID to be transferred"
-          }
-        },
-        "description" : "A DTO for entity ID."
-      },
-      "PrivateSyntheticLocation" : {
-        "required" : [ "entityId", "latitude", "longitude", "name", "nodes", "type" ],
-        "type" : "object",
-        "description" : "Configuration of a private synthetic location. \n\n Some fields are inherited from the base *SyntheticLocation* object.",
-        "example" : {
-          "type" : "PRIVATE",
-          "name" : "Linz Location",
-          "latitude" : 48.306351,
-          "longitude" : 14.287399,
-          "nodes" : [ "93302281" ],
-          "status" : "ENABLED"
-        },
-        "allOf" : [ {
-          "$ref" : "#/components/schemas/SyntheticLocation"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "nodes" : {
-              "type" : "array",
-              "description" : "A list of synthetic nodes belonging to a location.",
-              "items" : {
-                "type" : "string"
-              }
             }
           }
         } ]
@@ -10995,27 +10970,64 @@
         },
         "description" : "The anomaly detection configuration."
       },
-      "BrowserSyntheticMonitorUpdate" : {
-        "required" : [ "enabled", "frequencyMin", "keyPerformanceMetrics", "locations", "manuallyAssignedApps", "name", "script", "tags", "type" ],
+      "BrowserSyntheticMonitor" : {
+        "required" : [ "automaticallyAssignedApps", "createdFrom", "enabled", "entityId", "frequencyMin", "locations", "managementZones", "manuallyAssignedApps", "name", "script", "tags", "type" ],
         "type" : "object",
-        "description" : "Browser synthetic monitor update. Some fields are inherited from base `SyntheticMonitorUpdate` model.",
+        "description" : "Browser synthetic monitor. Some fields are inherited from the base `SyntheticMonitor` model.",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/SyntheticMonitorUpdate"
+          "$ref" : "#/components/schemas/SyntheticMonitor"
         }, {
           "type" : "object",
           "properties" : {
             "keyPerformanceMetrics" : {
               "$ref" : "#/components/schemas/KeyPerformanceMetricsDto"
+            },
+            "events" : {
+              "type" : "array",
+              "description" : "A list of events for this monitor",
+              "items" : {
+                "$ref" : "#/components/schemas/EventDto"
+              }
             }
           }
         } ]
       },
-      "HttpSyntheticMonitorUpdate" : {
-        "required" : [ "enabled", "frequencyMin", "locations", "manuallyAssignedApps", "name", "script", "tags", "type" ],
+      "EventDto" : {
+        "required" : [ "entityId", "name", "sequenceNumber" ],
         "type" : "object",
-        "description" : "HTTP synthetic monitor update. Some fields are inherited from base `SyntheticMonitorUpdate` model.",
+        "properties" : {
+          "entityId" : {
+            "type" : "string",
+            "description" : "Event identifier"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Event name"
+          },
+          "sequenceNumber" : {
+            "type" : "integer",
+            "description" : "Event sequence number",
+            "format" : "int32"
+          }
+        }
+      },
+      "HttpSyntheticMonitor" : {
+        "required" : [ "automaticallyAssignedApps", "createdFrom", "enabled", "entityId", "frequencyMin", "locations", "managementZones", "manuallyAssignedApps", "name", "script", "tags", "type" ],
+        "type" : "object",
+        "description" : "HTTP synthetic monitor. Some fields are inherited from base `SyntheticMonitor` model.",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/SyntheticMonitorUpdate"
+          "$ref" : "#/components/schemas/SyntheticMonitor"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "requests" : {
+              "type" : "array",
+              "description" : "A list of events for this monitor",
+              "items" : {
+                "$ref" : "#/components/schemas/RequestDto"
+              }
+            }
+          }
         } ]
       },
       "KeyPerformanceMetricsDto" : {
@@ -11099,6 +11111,20 @@
         },
         "description" : "Local outage handling configuration. \n\n Alert if **affectedLocations** of locations are unable to access the web application **consecutiveRuns** times consecutively."
       },
+      "ManagementZoneDto" : {
+        "required" : [ "id", "name" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Tne ID of the management zone."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the management zone."
+          }
+        }
+      },
       "OutageHandlingPolicy" : {
         "required" : [ "globalOutage", "localOutage", "localOutagePolicy" ],
         "type" : "object",
@@ -11116,6 +11142,161 @@
           }
         },
         "description" : "Outage handling configuration."
+      },
+      "RequestDto" : {
+        "required" : [ "entityId", "name", "sequenceNumber" ],
+        "type" : "object",
+        "properties" : {
+          "entityId" : {
+            "type" : "string",
+            "description" : "Request identifier"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Request name"
+          },
+          "sequenceNumber" : {
+            "type" : "integer",
+            "description" : "Request sequence number",
+            "format" : "int32"
+          }
+        }
+      },
+      "SyntheticMonitor" : {
+        "required" : [ "automaticallyAssignedApps", "createdFrom", "enabled", "entityId", "frequencyMin", "locations", "managementZones", "manuallyAssignedApps", "name", "script", "tags", "type" ],
+        "type" : "object",
+        "properties" : {
+          "entityId" : {
+            "type" : "string",
+            "description" : "The entity ID of the monitor."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the monitor."
+          },
+          "frequencyMin" : {
+            "type" : "integer",
+            "description" : "The frequency of the monitor, in minutes. \n\n You can use one of the following values: `5`, `10`, `15`, `30`, and `60`.",
+            "format" : "int32"
+          },
+          "enabled" : {
+            "type" : "boolean",
+            "description" : "The monitor is enabled (`true`) or disabled (`false`)."
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "Defines the actual set of fields depending on the value. See one of the following objects: \n\n* `BROWSER` -> BrowserSyntheticMonitor \n* `HTTP` -> HttpSyntheticMonitor \n",
+            "enum" : [ "BROWSER", "HTTP" ]
+          },
+          "createdFrom" : {
+            "type" : "string",
+            "description" : "The origin of a monitor",
+            "enum" : [ "API", "GUI" ]
+          },
+          "script" : {
+            "type" : "object",
+            "description" : "The script of a [browser](https://www.dynatrace.com/support/help/shortlink/browser-monitor-script-mode) or HTTP monitor."
+          },
+          "locations" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "A list of locations from which the monitor is executed. \n\n To specify a location, use its entity ID.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "anomalyDetection" : {
+            "$ref" : "#/components/schemas/AnomalyDetection"
+          },
+          "tags" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "A set of tags assigned to the monitor.",
+            "items" : {
+              "$ref" : "#/components/schemas/TagWithSourceInfo"
+            }
+          },
+          "managementZones" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "A set of management zones to which the monitor belongs to.",
+            "items" : {
+              "$ref" : "#/components/schemas/ManagementZoneDto"
+            }
+          },
+          "automaticallyAssignedApps" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "A set of automatically assigned applications.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "manuallyAssignedApps" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "A set of manually assigned applications.",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "description" : "The synthetic monitor. This is a base object, the exact type depends on the value of the `type` field.",
+        "discriminator" : {
+          "propertyName" : "type"
+        }
+      },
+      "TagWithSourceInfo" : {
+        "required" : [ "context", "key" ],
+        "type" : "object",
+        "properties" : {
+          "source" : {
+            "type" : "string",
+            "description" : "The source of the tag, such as USER, RULE_BASED or AUTO",
+            "enum" : [ "AUTO", "RULE_BASED", "USER" ]
+          },
+          "context" : {
+            "type" : "string",
+            "description" : "The origin of the tag, such as AWS or Cloud Foundry. \n\n Custom tags use the `CONTEXTLESS` value.",
+            "enum" : [ "AWS", "AWS_GENERIC", "AZURE", "CLOUD_FOUNDRY", "CONTEXTLESS", "ENVIRONMENT", "GOOGLE_CLOUD", "KUBERNETES" ]
+          },
+          "key" : {
+            "maxLength" : 2000,
+            "minLength" : 1,
+            "type" : "string",
+            "description" : "The key of the tag. \n\n Custom tags have the tag value here."
+          },
+          "value" : {
+            "maxLength" : 2000,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The value of the tag. \n\n Not applicable to custom tags."
+          }
+        },
+        "description" : "Tag with source of a Dynatrace entity."
+      },
+      "BrowserSyntheticMonitorUpdate" : {
+        "required" : [ "enabled", "frequencyMin", "keyPerformanceMetrics", "locations", "manuallyAssignedApps", "name", "script", "tags", "type" ],
+        "type" : "object",
+        "description" : "Browser synthetic monitor update. Some fields are inherited from base `SyntheticMonitorUpdate` model.",
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/SyntheticMonitorUpdate"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "keyPerformanceMetrics" : {
+              "$ref" : "#/components/schemas/KeyPerformanceMetricsDto"
+            }
+          }
+        } ]
+      },
+      "HttpSyntheticMonitorUpdate" : {
+        "required" : [ "enabled", "frequencyMin", "locations", "manuallyAssignedApps", "name", "script", "tags", "type" ],
+        "type" : "object",
+        "description" : "HTTP synthetic monitor update. Some fields are inherited from base `SyntheticMonitorUpdate` model.",
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/SyntheticMonitorUpdate"
+        } ]
       },
       "SyntheticMonitorUpdate" : {
         "required" : [ "enabled", "frequencyMin", "locations", "manuallyAssignedApps", "name", "script", "tags", "type" ],
@@ -11222,212 +11403,6 @@
           "manuallyAssignedApps" : [ "APPLICATION-4ADF0EF407C7C545" ],
           "events" : [ ]
         },
-        "discriminator" : {
-          "propertyName" : "type"
-        }
-      },
-      "TagWithSourceInfo" : {
-        "required" : [ "context", "key" ],
-        "type" : "object",
-        "properties" : {
-          "source" : {
-            "type" : "string",
-            "description" : "The source of the tag, such as USER, RULE_BASED or AUTO",
-            "enum" : [ "AUTO", "RULE_BASED", "USER" ]
-          },
-          "context" : {
-            "type" : "string",
-            "description" : "The origin of the tag, such as AWS or Cloud Foundry. \n\n Custom tags use the `CONTEXTLESS` value.",
-            "enum" : [ "AWS", "AWS_GENERIC", "AZURE", "CLOUD_FOUNDRY", "CONTEXTLESS", "ENVIRONMENT", "GOOGLE_CLOUD", "KUBERNETES" ]
-          },
-          "key" : {
-            "maxLength" : 2000,
-            "minLength" : 1,
-            "type" : "string",
-            "description" : "The key of the tag. \n\n Custom tags have the tag value here."
-          },
-          "value" : {
-            "maxLength" : 2000,
-            "minLength" : 0,
-            "type" : "string",
-            "description" : "The value of the tag. \n\n Not applicable to custom tags."
-          }
-        },
-        "description" : "Tag with source of a Dynatrace entity."
-      },
-      "BrowserSyntheticMonitor" : {
-        "required" : [ "automaticallyAssignedApps", "createdFrom", "enabled", "entityId", "frequencyMin", "locations", "managementZones", "manuallyAssignedApps", "name", "script", "tags", "type" ],
-        "type" : "object",
-        "description" : "Browser synthetic monitor. Some fields are inherited from the base `SyntheticMonitor` model.",
-        "allOf" : [ {
-          "$ref" : "#/components/schemas/SyntheticMonitor"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "keyPerformanceMetrics" : {
-              "$ref" : "#/components/schemas/KeyPerformanceMetricsDto"
-            },
-            "events" : {
-              "type" : "array",
-              "description" : "A list of events for this monitor",
-              "items" : {
-                "$ref" : "#/components/schemas/EventDto"
-              }
-            }
-          }
-        } ]
-      },
-      "EventDto" : {
-        "required" : [ "entityId", "name", "sequenceNumber" ],
-        "type" : "object",
-        "properties" : {
-          "entityId" : {
-            "type" : "string",
-            "description" : "Event identifier"
-          },
-          "name" : {
-            "type" : "string",
-            "description" : "Event name"
-          },
-          "sequenceNumber" : {
-            "type" : "integer",
-            "description" : "Event sequence number",
-            "format" : "int32"
-          }
-        }
-      },
-      "HttpSyntheticMonitor" : {
-        "required" : [ "automaticallyAssignedApps", "createdFrom", "enabled", "entityId", "frequencyMin", "locations", "managementZones", "manuallyAssignedApps", "name", "script", "tags", "type" ],
-        "type" : "object",
-        "description" : "HTTP synthetic monitor. Some fields are inherited from base `SyntheticMonitor` model.",
-        "allOf" : [ {
-          "$ref" : "#/components/schemas/SyntheticMonitor"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "requests" : {
-              "type" : "array",
-              "description" : "A list of events for this monitor",
-              "items" : {
-                "$ref" : "#/components/schemas/RequestDto"
-              }
-            }
-          }
-        } ]
-      },
-      "ManagementZoneDto" : {
-        "required" : [ "id", "name" ],
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "description" : "Tne ID of the management zone."
-          },
-          "name" : {
-            "type" : "string",
-            "description" : "The name of the management zone."
-          }
-        }
-      },
-      "RequestDto" : {
-        "required" : [ "entityId", "name", "sequenceNumber" ],
-        "type" : "object",
-        "properties" : {
-          "entityId" : {
-            "type" : "string",
-            "description" : "Request identifier"
-          },
-          "name" : {
-            "type" : "string",
-            "description" : "Request name"
-          },
-          "sequenceNumber" : {
-            "type" : "integer",
-            "description" : "Request sequence number",
-            "format" : "int32"
-          }
-        }
-      },
-      "SyntheticMonitor" : {
-        "required" : [ "automaticallyAssignedApps", "createdFrom", "enabled", "entityId", "frequencyMin", "locations", "managementZones", "manuallyAssignedApps", "name", "script", "tags", "type" ],
-        "type" : "object",
-        "properties" : {
-          "entityId" : {
-            "type" : "string",
-            "description" : "The entity ID of the monitor."
-          },
-          "name" : {
-            "type" : "string",
-            "description" : "The name of the monitor."
-          },
-          "frequencyMin" : {
-            "type" : "integer",
-            "description" : "The frequency of the monitor, in minutes. \n\n You can use one of the following values: `5`, `10`, `15`, `30`, and `60`.",
-            "format" : "int32"
-          },
-          "enabled" : {
-            "type" : "boolean",
-            "description" : "The monitor is enabled (`true`) or disabled (`false`)."
-          },
-          "type" : {
-            "type" : "string",
-            "description" : "Defines the actual set of fields depending on the value. See one of the following objects: \n\n* `BROWSER` -> BrowserSyntheticMonitor \n* `HTTP` -> HttpSyntheticMonitor \n",
-            "enum" : [ "BROWSER", "HTTP" ]
-          },
-          "createdFrom" : {
-            "type" : "string",
-            "description" : "The origin of a monitor",
-            "enum" : [ "API", "GUI" ]
-          },
-          "script" : {
-            "type" : "object",
-            "description" : "The script of a [browser](https://www.dynatrace.com/support/help/shortlink/browser-monitor-script-mode) or HTTP monitor."
-          },
-          "locations" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "description" : "A list of locations from which the monitor is executed. \n\n To specify a location, use its entity ID.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "anomalyDetection" : {
-            "$ref" : "#/components/schemas/AnomalyDetection"
-          },
-          "tags" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "description" : "A set of tags assigned to the monitor.",
-            "items" : {
-              "$ref" : "#/components/schemas/TagWithSourceInfo"
-            }
-          },
-          "managementZones" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "description" : "A set of management zones to which the monitor belongs to.",
-            "items" : {
-              "$ref" : "#/components/schemas/ManagementZoneDto"
-            }
-          },
-          "automaticallyAssignedApps" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "description" : "A set of automatically assigned applications.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "manuallyAssignedApps" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "description" : "A set of manually assigned applications.",
-            "items" : {
-              "type" : "string"
-            }
-          }
-        },
-        "description" : "The synthetic monitor. This is a base object, the exact type depends on the value of the `type` field.",
         "discriminator" : {
           "propertyName" : "type"
         }
@@ -12110,7 +12085,7 @@
           "types" : [ "coffee machine" ]
         }
       },
-      "UpdateTenantToken" : {
+      "UpdateToken" : {
         "type" : "object",
         "properties" : {
           "revoked" : {
@@ -12124,18 +12099,12 @@
           "scopes" : {
             "uniqueItems" : true,
             "type" : "array",
-            "description" : "The list of permissions assigned to the token. \n\nApart from the new permissions, you need to submit the existing permissions you want to keep, too. Any existing permission, missing in the payload, is revoked. \n\n* `DeploymentManagement`: Deployment management. \n* `AdvancedSyntheticIntegration`: Synthetic Classic integration. \n* `AppMonIntegration`: AppMon integration for hybrid deployments. \n* `CaptureRequestData`: Capture request data. \n* `DTAQLAccess`: User sessions. \n* `DataExport`: Access problem and event feed, metrics, and topology. \n* `DataImport`: Import data and events from external sources. \n* `DataPrivacy`: Change data privacy settings. \n* `Davis`: Davis assistant integration. \n* `DcrumIntegration`: Dynatrace NAM integration. \n* `DssFileManagement`: Mobile symbolication file management. \n* `ExternalSyntheticIntegration`: Create and read synthetic monitors, locations, and nodes. \n* `InstallerDownload`: Download Dynatrace OneAgent. \n* `LogExport`: Read log content. \n* `LogImport`: Log import. \n* `PluginUpload`: Upload extensions using the command line. \n* `ReadAuditLogs`: Read audit log. \n* `ReadConfig`: Read configuration. \n* `ReadSyntheticData`: Read synthetic monitors, locations, and nodes. \n* `RestRequestForwarding`: Fetch data from a remote environment.* `RumJavaScriptTagManagement`: Real user monitoring JavaScript tag management. \n* `SupportAlert`: Create support alerts. \n* `TenantTokenManagement`: Token management. \n* `UserSessionAnonymization`: Anonymize user session data for data privacy reasons. \n* `WriteConfig `: Write configuration.",
+            "description" : "The list of permissions assigned to the token. \n\nApart from the new permissions, you need to submit the existing permissions you want to keep, too. Any existing permission, missing in the payload, is revoked.\n\n* `InstallerDownload`: PaaS integration - Installer download. \n* `DataExport`: Access problem and event feed, metrics, and topology. \n* `PluginUpload`: Upload Extension. \n* `SupportAlert`: PaaS integration - Support alert. \n* `DcrumIntegration`: Dynatrace module integration - NAM. \n* `AdvancedSyntheticIntegration`: Dynatrace module integration - Synthetic Classic. \n* `MaintenanceWindows`: Deprecated: Configure maintenance windows. \n* `ExternalSyntheticIntegration`: Create and read synthetic monitors, locations, and nodes. \n* `AppMonIntegration`: Dynatrace module integration - AppMon. \n* `LogExport`: Read log content. \n* `ReadConfig`: Read configuration. \n* `WriteConfig`: Write configuration. \n* `DTAQLAccess`: User sessions. \n* `UserSessionAnonymization`: Anonymize user session data for data privacy reasons. \n* `DataPrivacy`: Change data privacy settings. \n* `CaptureRequestData`: Capture request data. \n* `Davis`: Dynatrace module integration - Davis. \n* `DssFileManagement`: Mobile symbolication file management. \n* `LogImport`: Log import. \n* `RumJavaScriptTagManagement`: Real user monitoring JavaScript tag management. \n* `TenantTokenManagement`: Token management. \n* `ActiveGateCertManagement`: ActiveGate certificate management. \n* `RestRequestForwarding`: Fetch data from a remote environment. \n* `ReadSyntheticData`: Read synthetic monitors, locations, and nodes. \n* `DataImport`: Data ingest, e.g.: metrics and events. \n* `ReadAuditLogs`: Read audit logs. \n* `entities.read`: Read entities using API V2. \n* `entities.write`: Write entities using API V2. \n* `networkZones.read`: Read network zones using API V2. \n* `networkZones.write`: Write network zones using API V2. \n* `activeGates.read`: Read ActiveGates using API V2. \n* `activeGates.write`: Write ActiveGates using API V2. \n",
             "items" : {
               "type" : "string",
-              "enum" : [ "AdvancedSyntheticIntegration", "AppMonIntegration", "CaptureRequestData", "DTAQLAccess", "DataExport", "DataImport", "DataPrivacy", "Davis", "DcrumIntegration", "DeploymentManagement", "DssFileManagement", "EntitiesRead", "EntitiesWrite", "ExternalSyntheticIntegration", "InstallerDownload", "LogExport", "LogImport", "PluginUpload", "ReadAuditLogs", "ReadConfig", "ReadSyntheticData", "RestRequestForwarding", "RumJavaScriptTagManagement", "SupportAlert", "TenantTokenManagement", "UserSessionAnonymization", "WriteConfig" ]
+              "enum" : [ "ActiveGateCertManagement", "AdvancedSyntheticIntegration", "AppMonIntegration", "CaptureRequestData", "DTAQLAccess", "DataExport", "DataImport", "DataPrivacy", "Davis", "DcrumIntegration", "DiagnosticExport", "DssFileManagement", "ExternalSyntheticIntegration", "InstallerDownload", "LogExport", "LogImport", "MemoryDump", "Mobile", "PluginUpload", "ReadAuditLogs", "ReadConfig", "ReadSyntheticData", "RestRequestForwarding", "RumBrowserExtension", "RumJavaScriptTagManagement", "SupportAlert", "TenantTokenManagement", "UserSessionAnonymization", "ViewDashboard", "ViewReport", "WriteConfig", "WriteSyntheticData", "entities.read", "entities.write", "networkZones.read", "networkZones.write" ]
             }
           }
-        },
-        "description" : "Update of an existing token.",
-        "example" : {
-          "revoked" : "true",
-          "name" : "updated token",
-          "scopes" : [ "ReadConfig", "WriteConfig" ]
         }
       },
       "Token" : {
@@ -12151,7 +12120,7 @@
           "token" : "abcdefjhij1234567890"
         }
       },
-      "CreateTenantToken" : {
+      "CreateToken" : {
         "required" : [ "name", "scopes" ],
         "type" : "object",
         "properties" : {
@@ -12163,22 +12132,14 @@
             "$ref" : "#/components/schemas/Duration"
           },
           "scopes" : {
+            "minItems" : 1,
             "uniqueItems" : true,
             "type" : "array",
-            "description" : "The list of permissions to be assigned to the token. \n\n* `DeploymentManagement`: Deployment management. \n* `AdvancedSyntheticIntegration`: Synthetic Classic integration. \n* `AppMonIntegration`: AppMon integration for hybrid deployments. \n* `CaptureRequestData`: Capture request data. \n* `DTAQLAccess`: User sessions. \n* `DataExport`: Access problem and event feed, metrics, and topology. \n* `DataImport`: Import data and events from external sources. \n* `DataPrivacy`: Change data privacy settings. \n* `Davis`: Davis assistant integration. \n* `DcrumIntegration`: Dynatrace NAM integration. \n* `DssFileManagement`: Mobile symbolication file management. \n* `ExternalSyntheticIntegration`: Create and read synthetic monitors, locations, and nodes. \n* `InstallerDownload`: Download Dynatrace OneAgent. \n* `LogExport`: Read log content. \n* `LogImport`: Log import. \n* `PluginUpload`: Upload extensions using the command line. \n* `ReadAuditLogs`: Read audit log. \n* `ReadConfig`: Read configuration. \n* `ReadSyntheticData`: Read synthetic monitors, locations, and nodes. \n* `RestRequestForwarding`: Fetch data from a remote environment.* `RumJavaScriptTagManagement`: Real user monitoring JavaScript tag management. \n* `SupportAlert`: Create support alerts. \n* `TenantTokenManagement`: Token management. \n* `UserSessionAnonymization`: Anonymize user session data for data privacy reasons. \n* `WriteConfig `: Write configuration.",
+            "description" : "The list of permissions to be assigned to the token.\n\n* `InstallerDownload`: PaaS integration - Installer download. \n* `DataExport`: Access problem and event feed, metrics, and topology. \n* `PluginUpload`: Upload Extension. \n* `SupportAlert`: PaaS integration - Support alert. \n* `DcrumIntegration`: Dynatrace module integration - NAM. \n* `AdvancedSyntheticIntegration`: Dynatrace module integration - Synthetic Classic. \n* `MaintenanceWindows`: Deprecated: Configure maintenance windows. \n* `ExternalSyntheticIntegration`: Create and read synthetic monitors, locations, and nodes. \n* `AppMonIntegration`: Dynatrace module integration - AppMon. \n* `LogExport`: Read log content. \n* `ReadConfig`: Read configuration. \n* `WriteConfig`: Write configuration. \n* `DTAQLAccess`: User sessions. \n* `UserSessionAnonymization`: Anonymize user session data for data privacy reasons. \n* `DataPrivacy`: Change data privacy settings. \n* `CaptureRequestData`: Capture request data. \n* `Davis`: Dynatrace module integration - Davis. \n* `DssFileManagement`: Mobile symbolication file management. \n* `LogImport`: Log import. \n* `RumJavaScriptTagManagement`: Real user monitoring JavaScript tag management. \n* `TenantTokenManagement`: Token management. \n* `ActiveGateCertManagement`: ActiveGate certificate management. \n* `RestRequestForwarding`: Fetch data from a remote environment. \n* `ReadSyntheticData`: Read synthetic monitors, locations, and nodes. \n* `DataImport`: Data ingest, e.g.: metrics and events. \n* `ReadAuditLogs`: Read audit logs. \n* `entities.read`: Read entities using API V2. \n* `entities.write`: Write entities using API V2. \n* `networkZones.read`: Read network zones using API V2. \n* `networkZones.write`: Write network zones using API V2. \n* `activeGates.read`: Read ActiveGates using API V2. \n* `activeGates.write`: Write ActiveGates using API V2. \n",
             "items" : {
               "type" : "string",
-              "enum" : [ "AdvancedSyntheticIntegration", "AppMonIntegration", "CaptureRequestData", "DTAQLAccess", "DataExport", "DataImport", "DataPrivacy", "Davis", "DcrumIntegration", "DeploymentManagement", "DssFileManagement", "EntitiesRead", "EntitiesWrite", "ExternalSyntheticIntegration", "InstallerDownload", "LogExport", "LogImport", "PluginUpload", "ReadAuditLogs", "ReadConfig", "ReadSyntheticData", "RestRequestForwarding", "RumJavaScriptTagManagement", "SupportAlert", "TenantTokenManagement", "UserSessionAnonymization", "WriteConfig" ]
+              "enum" : [ "ActiveGateCertManagement", "AdvancedSyntheticIntegration", "AppMonIntegration", "CaptureRequestData", "DTAQLAccess", "DataExport", "DataImport", "DataPrivacy", "Davis", "DcrumIntegration", "DiagnosticExport", "DssFileManagement", "ExternalSyntheticIntegration", "InstallerDownload", "LogExport", "LogImport", "MemoryDump", "Mobile", "PluginUpload", "ReadAuditLogs", "ReadConfig", "ReadSyntheticData", "RestRequestForwarding", "RumBrowserExtension", "RumJavaScriptTagManagement", "SupportAlert", "TenantTokenManagement", "UserSessionAnonymization", "ViewDashboard", "ViewReport", "WriteConfig", "WriteSyntheticData", "entities.read", "entities.write", "networkZones.read", "networkZones.write" ]
             }
-          }
-        },
-        "description" : "Parameters of a new token.",
-        "example" : {
-          "name" : "My Tenant Token",
-          "scopes" : [ "ReadConfig", "WriteConfig", "DataPrivacy" ],
-          "expiresIn" : {
-            "value" : 3600,
-            "unit" : "SECONDS"
           }
         }
       },
@@ -12268,7 +12229,7 @@
             "description" : "The list of permissions, assigned to the token.",
             "items" : {
               "type" : "string",
-              "enum" : [ "AdvancedSyntheticIntegration", "AppMonIntegration", "CaptureRequestData", "DTAQLAccess", "DataExport", "DataImport", "DataPrivacy", "Davis", "DcrumIntegration", "DeploymentManagement", "DiagnosticExport", "DssFileManagement", "ExternalSyntheticIntegration", "InstallerDownload", "LogExport", "LogImport", "MemoryDump", "Mobile", "PluginUpload", "ReadAuditLogs", "ReadConfig", "ReadSyntheticData", "RestRequestForwarding", "RumBrowserExtension", "RumJavaScriptTagManagement", "SupportAlert", "TenantTokenManagement", "UserSessionAnonymization", "ViewDashboard", "WriteConfig", "WriteSyntheticData", "entities.read", "entities.write" ]
+              "enum" : [ "ActiveGateCertManagement", "AdvancedSyntheticIntegration", "AppMonIntegration", "CaptureRequestData", "DTAQLAccess", "DataExport", "DataImport", "DataPrivacy", "Davis", "DcrumIntegration", "DiagnosticExport", "DssFileManagement", "ExternalSyntheticIntegration", "InstallerDownload", "LogExport", "LogImport", "MemoryDump", "Mobile", "PluginUpload", "ReadAuditLogs", "ReadConfig", "ReadSyntheticData", "RestRequestForwarding", "RumBrowserExtension", "RumJavaScriptTagManagement", "SupportAlert", "TenantTokenManagement", "UserSessionAnonymization", "ViewDashboard", "ViewReport", "WriteConfig", "WriteSyntheticData", "entities.read", "entities.write", "networkZones.read", "networkZones.write" ]
             }
           }
         },

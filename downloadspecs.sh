@@ -3,13 +3,13 @@
 # You need BASH version 4+ to execute this script properly since we are using arrays with key-values.
 
 # Tenant https://abcd.live.dynatrace.com/
-TENANT="https://abdc.live.dynatrace.com"
+TENANT="https://blr06292.live.dynatrace.com"
 
 # Copy the cookies in format cookies="Cookie: key=value; key2=value2; "
 # You need SRV, b925d32c & apmsessionid
 # A request that don't have those together and match the server values, will reset the apmsessionid and cut the response.
 #b925d32c=xx;
-cookies="Cookie: SRV=xxx; b925d32c=xxx ; apmsessionid=xxx; "
+cookies="Cookie: SRV=server4; b925d32c=AN4HOYIHFWD3J2CBSAARHH2IIU ; apmsessionid=node01bfoduovdlyauhtwdy2v6pzdl4978.node0; "
 contentType="Content-Type: application/json"
 
 declare -A spec
@@ -52,6 +52,29 @@ parse_specs(){
 download_specs
 parse_specs
 
-echo "Now import the specs in Postman and add the Authorization at Collection level"
+echo "Now import the specs in Postman  add the following \n authorization at Collection level as Query Parameter and export them"
+echo "Just export them and add the authorization element after the \"variable\" element of the exported json collection"
+echo " \ 
+	\"auth\": {
+		\"type\": \"apikey\",
+		\"apikey\": [
+			{
+				\"key\": \"in\",
+				\"value\": \"query\",
+				\"type\": \"string\"
+			},
+			{
+				\"key\": \"value\",
+				\"value\": \"{{apiToken}}\",
+				\"type\": \"string\"
+			},
+			{
+				\"key\": \"key\",
+				\"value\": \"Api-Token\",
+				\"type\": \"string\"
+			}
+		]
+	}
+"
 exit
 # Api-Token

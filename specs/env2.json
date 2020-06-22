@@ -2,7 +2,7 @@
   "openapi" : "3.0.1",
   "info" : {
     "title" : "Dynatrace Environment API",
-    "description" : "\nDocumentation of the Dynatrace Environment API v2. Resources here generally supersede those in v1. The process of migrating resources from v1 is still in progress. If you miss a resource, consider using the Dynatrace Environment API v1. Refer to the [help page](https://www.dynatrace.com/support/help/shortlink/section-api) to read about use-cases and examples.\n\nNotes about compatibility:\n* Operations marked as early adopter or preview may be changed in non-compatible ways, although we try to avoid this.\n* We may add new enum constants without incrementing the API version; thus, clients need to handle unknown enum constants gracefully.",
+    "description" : "\nDocumentation of the Dynatrace Environment API v2. Resources here generally supersede those in v1. Migration of resources from v1 is in progress. If you miss a resource, consider using the Dynatrace Environment API v1. Refer to the [help page](https://www.dynatrace.com/support/help/shortlink/env-api) to read about use cases and examples.\n\nNotes about compatibility:\n* Operations marked as early adopter or preview may be changed in non-compatible ways, although we try to avoid this.\n* We may add new enum constants without incrementing the API version; thus, clients need to handle unknown enum constants gracefully.",
     "version" : "2.0"
   },
   "servers" : [ {
@@ -15,63 +15,17 @@
   }, {
     "name" : "Audit logs",
     "description" : "Read audit logs"
+  }, {
+    "name" : "Network zones",
+    "description" : "Manage network zones"
+  }, {
+    "name" : "Monitored entities",
+    "description" : "Manage monitored entities"
+  }, {
+    "name" : "Monitored entities - Custom tags",
+    "description" : "Manage custom tags of monitored entities"
   } ],
   "paths" : {
-    "/auditlogs/{id}" : {
-      "get" : {
-        "tags" : [ "Audit logs" ],
-        "summary" : "Gets the specified entry of the audit log | maturity=EARLY_ADOPTER",
-        "operationId" : "getLog",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "The ID of the required log entry.",
-          "required" : true,
-          "schema" : {
-            "maxLength" : 19,
-            "minLength" : 0,
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/AuditLogEntry"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not found",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Failed. Invalid ID format.",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "ReadAuditLogs" : [ ]
-        } ],
-        "x-feature-flag" : "AUDIT_LOG_REST_API_V2",
-        "x-maturity" : "EARLY_ADOPTER"
-      }
-    },
     "/auditlogs" : {
       "get" : {
         "tags" : [ "Audit logs" ],
@@ -143,6 +97,293 @@
         "x-maturity" : "EARLY_ADOPTER"
       }
     },
+    "/auditlogs/{id}" : {
+      "get" : {
+        "tags" : [ "Audit logs" ],
+        "summary" : "Gets the specified entry of the audit log | maturity=EARLY_ADOPTER",
+        "operationId" : "getLog",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the required log entry.",
+          "required" : true,
+          "schema" : {
+            "maxLength" : 19,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuditLogEntry"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not found",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failed. Invalid ID format.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadAuditLogs" : [ ]
+        } ],
+        "x-feature-flag" : "AUDIT_LOG_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/entityTypes/{type}" : {
+      "get" : {
+        "tags" : [ "Monitored entities" ],
+        "summary" : "Gets a list of properties for the specified entity type | maturity=EARLY_ADOPTER",
+        "operationId" : "getEntityType",
+        "parameters" : [ {
+          "name" : "type",
+          "in" : "path",
+          "description" : "The required entity type.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntityType"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failed. The requested monitored entity type is not exportable or doesn't exist."
+          }
+        },
+        "security" : [ {
+          "entities.read" : [ ]
+        } ],
+        "x-feature-flag" : "ENTITY_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/entityTypes" : {
+      "get" : {
+        "tags" : [ "Monitored entities" ],
+        "summary" : "Gets a list of properties for all entity types | maturity=EARLY_ADOPTER",
+        "description" : "You can limit the output by using pagination: \n1. Specify the number of results per page in the **pageSize** query parameter. \n2. Use the cursor from the **nextPageKey** field of the previous response in the **nextPageKey** query parameter to obtain subsequent pages.",
+        "operationId" : "getEntityTypes",
+        "parameters" : [ {
+          "name" : "nextPageKey",
+          "in" : "query",
+          "description" : "The cursor for the next page of results. You can find it in the **nextPageKey** field of the previous response. \n\nThe first page is always returned if you don't specify the **nextPageKey** query parameter. \n\nWhen the **nextPageKey** is set to obtain subsequent pages, you must omit all other query parameters. ",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "The desired amount of entity types in a single response payload. \n\nThe maximal allowed page size is`500`. \n\nIf not set, `50` is used.",
+          "schema" : {
+            "maximum" : 500,
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntityTypeList"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failed. There are no more entity types to export."
+          }
+        },
+        "security" : [ {
+          "entities.read" : [ ]
+        } ],
+        "x-feature-flag" : "ENTITY_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/entities/custom" : {
+      "post" : {
+        "tags" : [ "Monitored entities" ],
+        "summary" : "Creates or updates a custom device | maturity=EARLY_ADOPTER",
+        "operationId" : "pushCustomDevice",
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains parameters of a custom device.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CustomDeviceCreation"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomDeviceCreationResult"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "Success"
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid."
+          }
+        },
+        "security" : [ {
+          "entities.write" : [ ]
+        } ],
+        "x-feature-flag" : "ENTITY_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/entities" : {
+      "get" : {
+        "tags" : [ "Monitored entities" ],
+        "summary" : "Gets the information about monitored entities | maturity=EARLY_ADOPTER",
+        "description" : "Lists entities observed within the specified timeframe along with their properties. \n\nYou can limit the output by using pagination: \n1. Specify the number of results per page in the **pageSize** query parameter. \n2. Use the cursor from the **nextPageKey** field of the previous response in the **nextPageKey** query parameter to obtain subsequent pages.",
+        "operationId" : "getEntities",
+        "parameters" : [ {
+          "name" : "entitySelector",
+          "in" : "query",
+          "description" : "Defines the scope of the query. Only entities matching the specified criteria are included into response. \n\nYou can set one or several of the following criteria: \n\n* Entity type (required): `type(\"value\")`. \n* Tag: `tag(\"value\")`. Tags in `[context]key:value`, `key:value`, and `value` formats are detected and parsed automatically. If a value-only tag has a colon (`:`) in it, you must escape the colon with a backslash(`\\`). Otherwise, the tag will be parsed as a `key:value` tag.  \n* Management zone ID: `mzId(\"ID\")` \n* Management zone name: `mzName(\"value\")`. Management zone names are case-sensitive. \n* Health state (HEALTHY,UNHEALTHY): `healthState(\"HEALTHY\")` \n* Dynatrace entity ID: `entityId(\"id\")`. You can specify several IDs, separated by a comma (`entityId(\"id-1\",\"id-2\")`). \n* Dynatrace entity name: `entityName(\"value\")`. You can specify several entity names, separated by a comma (`entityName(\"name-1\",\"name-2\")`). \n\nTo set several criteria, separate them with a comma (`,`). For example, `type(\"HOST\"),healthState(\"HEALTHY\")`. Only results matching **all** criteria are included in response. \n\nThe length of the string is limited to 10,000 characters. \n\nThe field is **required** when you're querying the first page of results.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "nextPageKey",
+          "in" : "query",
+          "description" : "The cursor for the next page of results. You can find it in the **nextPageKey** field of the previous response. \n\nThe first page is always returned if you don't specify the **nextPageKey** query parameter. \n\nWhen the **nextPageKey** is set to obtain subsequent pages, you must omit all other query parameters. ",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "from",
+          "in" : "query",
+          "description" : "The start of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds. \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the relative timeframe of two weeks is used (`now-2w`).",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "The end of the requested timeframe. \n\nYou can use one of the following formats: \n* Timestamp in UTC milliseconds. \n* Human-readable format of `2019-12-21T05:57:01.123+01:00`. If no time zone is specified, UTC is used. You can use a space character instead of the `T`. Seconds and fractions of a second are optional. \n* Relative timeframe, back from now. The format is `now-NU/A`, where `N` is the amount of time, `U` is the unit of time, and `A` is an alignment. For example, `now-1y/w` is one year back, aligned by a week. The alignment rounds to the past. \nSupported time units for the relative timeframe are: \n* `m`: minutes \n* `h`: hours \n* `d`: days \n* `w`: weeks \n* `M`: months \n* `y`: years \n\nIf not set, the current timestamp is used.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "The desired amount of entities in a single response payload. \n\nThe maximal allowed page size is configurable per environment``. \n\nIf not set, `50` is used.",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "fields",
+          "in" : "query",
+          "description" : "Defines the list of entity properties included in the response. The ID and the name of an entity are **always** included to the response. \n\nTo add properties, list them with leading plus `+`. You can specify several properties, separated by a comma (for example `fields=+lastSeenTms,properties.BITNESS`). \n\nUse the [GET /entityTypes/{type}](https://www.dynatrace.com/support/help/shortlink/api-entities-v2-get-entity-type) request to fetch the list of properties available for your entity type. Fields from the **properties** object must be specified in the `properties.FIELD` format (for example, `properties.BITNESS`).",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntitiesList"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "entities.read" : [ ]
+        } ],
+        "x-feature-flag" : "ENTITY_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/entities/{entityId}" : {
+      "get" : {
+        "tags" : [ "Monitored entities" ],
+        "summary" : "Gets the properties of the specified monitored entity | maturity=EARLY_ADOPTER",
+        "operationId" : "getEntity",
+        "parameters" : [ {
+          "name" : "entityId",
+          "in" : "path",
+          "description" : "The ID of the required entity.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "fields",
+          "in" : "query",
+          "description" : "Defines the list of entity properties included in the response. The ID and the name of an entity are **always** included to the response. \n\nTo add properties, list them with leading plus `+`. You can specify several properties, separated by a comma (for example `fields=+lastSeenTms,properties.BITNESS`). \n\nUse the [GET /entityTypes/{type}](https://www.dynatrace.com/support/help/shortlink/api-entities-v2-get-entity-type) request to fetch the list of properties available for your entity type. Fields from the **properties** object must be specified in the `properties.FIELD` format (for example, `properties.BITNESS`).",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Entity"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "entities.read" : [ ]
+        } ],
+        "x-feature-flag" : "ENTITY_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
     "/metrics" : {
       "get" : {
         "tags" : [ "Metrics" ],
@@ -209,53 +450,6 @@
           },
           "400" : {
             "description" : "Syntax or validation error. **metricSelector** or **fields** have syntactic or semantic errors."
-          },
-          "404" : {
-            "description" : "Not found. The requested resource is not found or the query is incorrect."
-          },
-          "406" : {
-            "description" : "Not acceptable. The requested media type is not supported. Check the **Accept** header of your request."
-          }
-        },
-        "security" : [ {
-          "DataExport" : [ ]
-        } ]
-      }
-    },
-    "/metrics/{metricId}" : {
-      "get" : {
-        "tags" : [ "Metrics" ],
-        "summary" : "Gets the descriptor of the specified metric",
-        "operationId" : "getSchema_1",
-        "parameters" : [ {
-          "name" : "metricId",
-          "in" : "path",
-          "description" : "The key of the required metric. \n\nYou can set additional transformation operators, separated by a colon (`:`). See the [Metrics API - selector transformations help page](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) for additional information on available result transformations.\n\n The length of the string is limited to 1,000 characters.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MetricDescriptor"
-                }
-              },
-              "text/csv; header=present; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MetricDescriptor"
-                }
-              },
-              "text/csv; header=absent; charset=utf-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MetricDescriptor"
-                }
-              }
-            }
           },
           "404" : {
             "description" : "Not found. The requested resource is not found or the query is incorrect."
@@ -364,6 +558,366 @@
           "DataExport" : [ ]
         } ]
       }
+    },
+    "/metrics/{metricId}" : {
+      "get" : {
+        "tags" : [ "Metrics" ],
+        "summary" : "Gets the descriptor of the specified metric",
+        "operationId" : "getSchema_1",
+        "parameters" : [ {
+          "name" : "metricId",
+          "in" : "path",
+          "description" : "The key of the required metric. \n\nYou can set additional transformation operators, separated by a colon (`:`). See the [Metrics API - selector transformations help page](https://www.dynatrace.com/support/help/shortlink/api-metrics-v2-selector) for additional information on available result transformations.\n\n The length of the string is limited to 1,000 characters.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricDescriptor"
+                }
+              },
+              "text/csv; header=present; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricDescriptor"
+                }
+              },
+              "text/csv; header=absent; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricDescriptor"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not found. The requested resource is not found or the query is incorrect."
+          },
+          "406" : {
+            "description" : "Not acceptable. The requested media type is not supported. Check the **Accept** header of your request."
+          }
+        },
+        "security" : [ {
+          "DataExport" : [ ]
+        } ]
+      }
+    },
+    "/networkZones" : {
+      "get" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Lists all existing network zones | maturity=EARLY_ADOPTER",
+        "operationId" : "getAllNetworkZones",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NetworkZoneList"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "networkZones.read" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/networkZones/{id}" : {
+      "get" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Gets parameters of the specified network zone | maturity=EARLY_ADOPTER",
+        "operationId" : "getSingleNetworkZone",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the required network zone.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NetworkZone"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "networkZones.read" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Updates an existing network zone or creates a new one | maturity=EARLY_ADOPTER",
+        "description" : "If the network zone with the specified ID does not exist, a new network zone is created. \n\n The ID is not case sensitive. Dynatrace stores the ID in lowercase.",
+        "operationId" : "createOrUpdateNetworkZone",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the network zone to be updated. \n\n If you set the ID in the body as well, it must match this ID. \n\n The ID is not case sensitive. Dynatrace stores the ID in lowercase.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains parameters of the network zone.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NetworkZone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Success. The new network zone has been created. The response body contains the ID of the new network zone.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntityShortRepresentation"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "Success. The network zone has been updated. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "networkZones.write" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Deletes the specified network zone | maturity=EARLY_ADOPTER",
+        "description" : "You can only delete an empty network zone (a zone that no ActiveGate or OneAgent is using). \n\n If the network zone is used as an alternative zone for any OneAgent, it will be automatically removed from the list of possible alternatives.",
+        "operationId" : "deleteNetworkZone",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the network zone to be deleted.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Deleted. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. See error message in the response body for details.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "networkZones.write" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/networkZoneSettings" : {
+      "get" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Gets the global configuration of network zones | maturity=EARLY_ADOPTER",
+        "operationId" : "getNetworkZoneSettings",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NetworkZoneSettings"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "networkZones.read" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Updates the global configuration of network zones | maturity=EARLY_ADOPTER",
+        "operationId" : "updateNetworkZoneSettings",
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains global configuration of network zones.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NetworkZoneSettings"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Success. The global network zones configuration has been updated. Response doesn't have a body."
+          }
+        },
+        "security" : [ {
+          "networkZones.write" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/tags" : {
+      "get" : {
+        "tags" : [ "Monitored entities - Custom tags" ],
+        "summary" : "Gets a list of custom tags applied to the specified entities | maturity=EARLY_ADOPTER",
+        "description" : "Automatically applied tags and imported tags are not included.",
+        "operationId" : "getTags",
+        "parameters" : [ {
+          "name" : "entitySelector",
+          "in" : "query",
+          "description" : "Specifies the entities where you want to read tags. \n\nYou can set one or several of the following criteria: \n\n* Entity type (required): `type(\"value\")`. \n* Tag: `tag(\"value\")`. Tags in `[context]key:value`, `key:value`, and `value` formats are detected and parsed automatically. If a value-only tag has a colon (`:`) in it, you must escape the colon with a backslash(`\\`). Otherwise, the tag will be parsed as a `key:value` tag.  \n* Management zone ID: `mzId(\"ID\")` \n* Management zone name: `mzName(\"value\")`. Management zone names are case-sensitive. \n* Health state (HEALTHY,UNHEALTHY): `healthState(\"HEALTHY\")` \n* Dynatrace entity ID: `entityId(\"id\")`. You can specify several IDs, separated by a comma (`entityId(\"id-1\",\"id-2\")`). \n* Dynatrace entity name: `entityName(\"value\")`. You can specify several entity names, separated by a comma (`entityName(\"name-1\",\"name-2\")`). \n\nTo set several criteria, separate them with a comma (`,`). For example, `type(\"HOST\"),healthState(\"HEALTHY\")`. Only results matching **all** criteria are included in response. \n\nThe length of the string is limited to 10,000 characters. \n\n",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomEntityTags"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "entities.read" : [ ]
+        } ],
+        "x-feature-flag" : "TAGS_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "post" : {
+        "tags" : [ "Monitored entities - Custom tags" ],
+        "summary" : "Adds custom tags to the specified entities | maturity=EARLY_ADOPTER",
+        "description" : "All existing tags remain unaffected.",
+        "operationId" : "postTags",
+        "parameters" : [ {
+          "name" : "entitySelector",
+          "in" : "query",
+          "description" : "Specifies the entities where you want to update tags. \n\nYou can set one or several of the following criteria: \n\n* Entity type (required): `type(\"value\")`. \n* Tag: `tag(\"value\")`. Tags in `[context]key:value`, `key:value`, and `value` formats are detected and parsed automatically. If a value-only tag has a colon (`:`) in it, you must escape the colon with a backslash(`\\`). Otherwise, the tag will be parsed as a `key:value` tag.  \n* Management zone ID: `mzId(\"ID\")` \n* Management zone name: `mzName(\"value\")`. Management zone names are case-sensitive. \n* Health state (HEALTHY,UNHEALTHY): `healthState(\"HEALTHY\")` \n* Dynatrace entity ID: `entityId(\"id\")`. You can specify several IDs, separated by a comma (`entityId(\"id-1\",\"id-2\")`). \n* Dynatrace entity name: `entityName(\"value\")`. You can specify several entity names, separated by a comma (`entityName(\"name-1\",\"name-2\")`). \n\nTo set several criteria, separate them with a comma (`,`). For example, `type(\"HOST\"),healthState(\"HEALTHY\")`. Only results matching **all** criteria are included in response. \n\nThe length of the string is limited to 10,000 characters. \n\n",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains tags to be added to the matching entities.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddEntityTags"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddedEntityTags"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Failed. Couldn't update tags on some entities. Try again later."
+          }
+        },
+        "security" : [ {
+          "entities.write" : [ ]
+        } ],
+        "x-feature-flag" : "TAGS_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Monitored entities - Custom tags" ],
+        "summary" : "Deletes the specified tag from the specified entities | maturity=EARLY_ADOPTER",
+        "operationId" : "deleteTags",
+        "parameters" : [ {
+          "name" : "tag",
+          "in" : "query",
+          "description" : "The tag to be deleted.",
+          "schema" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        }, {
+          "name" : "entitySelector",
+          "in" : "query",
+          "description" : "Specifies the entities where you want to delete tags. \n\nYou can set one or several of the following criteria: \n\n* Entity type (required): `type(\"value\")`. \n* Tag: `tag(\"value\")`. Tags in `[context]key:value`, `key:value`, and `value` formats are detected and parsed automatically. If a value-only tag has a colon (`:`) in it, you must escape the colon with a backslash(`\\`). Otherwise, the tag will be parsed as a `key:value` tag.  \n* Management zone ID: `mzId(\"ID\")` \n* Management zone name: `mzName(\"value\")`. Management zone names are case-sensitive. \n* Health state (HEALTHY,UNHEALTHY): `healthState(\"HEALTHY\")` \n* Dynatrace entity ID: `entityId(\"id\")`. You can specify several IDs, separated by a comma (`entityId(\"id-1\",\"id-2\")`). \n* Dynatrace entity name: `entityName(\"value\")`. You can specify several entity names, separated by a comma (`entityName(\"name-1\",\"name-2\")`). \n\nTo set several criteria, separate them with a comma (`,`). For example, `type(\"HOST\"),healthState(\"HEALTHY\")`. Only results matching **all** criteria are included in response. \n\nThe length of the string is limited to 10,000 characters. \n\n",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeletedEntityTags"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "entities.write" : [ ]
+        } ],
+        "x-feature-flag" : "TAGS_REST_API_V2",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
     }
   },
   "components" : {
@@ -395,12 +949,12 @@
               "$ref" : "#/components/schemas/ConstraintViolation"
             }
           },
+          "message" : {
+            "type" : "string"
+          },
           "code" : {
             "type" : "integer",
             "format" : "int32"
-          },
-          "message" : {
-            "type" : "string"
           }
         }
       },
@@ -410,6 +964,209 @@
           "error" : {
             "$ref" : "#/components/schemas/Error"
           }
+        }
+      },
+      "Entity" : {
+        "type" : "object",
+        "properties" : {
+          "firstSeenTms" : {
+            "type" : "integer",
+            "description" : "The timestamp at which the entity was first seen, in UTC milliseconds.",
+            "format" : "int64"
+          },
+          "fromRelationships" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "description" : "A list of relationships where the entity occupies the FROM position.",
+              "items" : {
+                "$ref" : "#/components/schemas/EntityId"
+              }
+            },
+            "description" : "A list of relationships where the entity occupies the FROM position."
+          },
+          "managementZones" : {
+            "type" : "array",
+            "description" : "A list of management zones to which the entity belongs.",
+            "items" : {
+              "$ref" : "#/components/schemas/ManagementZone"
+            }
+          },
+          "lastSeenTms" : {
+            "type" : "integer",
+            "description" : "The timestamp at which the entity was last seen, in UTC milliseconds.",
+            "format" : "int64"
+          },
+          "toRelationships" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "description" : "A list of relationships where the entity occupies the TO position.",
+              "items" : {
+                "$ref" : "#/components/schemas/EntityId"
+              }
+            },
+            "description" : "A list of relationships where the entity occupies the TO position."
+          },
+          "entityId" : {
+            "type" : "string",
+            "description" : "The ID of the entity."
+          },
+          "tags" : {
+            "type" : "array",
+            "description" : "A list of tags assigned to the entity.",
+            "items" : {
+              "$ref" : "#/components/schemas/METag"
+            }
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object",
+              "description" : "A list of additional properties of the entity."
+            },
+            "description" : "A list of additional properties of the entity."
+          },
+          "displayName" : {
+            "type" : "string",
+            "description" : "The name of the entity, displayed in the UI."
+          }
+        },
+        "description" : "The properties of a monitored entity.",
+        "example" : {
+          "entityId" : "HOST-06F288EE2A930951",
+          "displayName" : "my host",
+          "firstSeenTms" : 1574697667547,
+          "lastSeenTms" : 1588242361417,
+          "properties" : {
+            "bitness" : 64,
+            "monitoringMode" : "FULL_STACK",
+            "osType" : "LINUX",
+            "osArchitecture" : "X86",
+            "networkZoneId" : "aws.us.east01",
+            "cpuCores" : 8
+          },
+          "tags" : [ {
+            "context" : "CONTEXTLESS",
+            "key" : "architecture",
+            "value" : "x86",
+            "stringRepresentation" : "architecture:x86"
+          }, {
+            "context" : "ENVIRONMENT",
+            "key" : "Infrastructure",
+            "value" : "Linux",
+            "stringRepresentation" : "[ENVIRONMENT]Infrastructure:Linux"
+          } ],
+          "managementZones" : [ {
+            "id" : "6239538939987181652",
+            "name" : "main app"
+          } ],
+          "fromRelationships" : {
+            "isInstanceOf" : [ {
+              "id" : "HOST_GROUP-0E489369D663A4BF",
+              "type" : "HOST_GROUP"
+            } ]
+          },
+          "toRelationships" : {
+            "isDiskOf" : [ {
+              "id" : "DISK-0393340DCA3853B0",
+              "type" : "DISK"
+            } ]
+          }
+        }
+      },
+      "EntityId" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the entity."
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "The type of the entity."
+          }
+        },
+        "description" : "A short representation of a monitored entity."
+      },
+      "METag" : {
+        "type" : "object",
+        "properties" : {
+          "stringRepresentation" : {
+            "type" : "string",
+            "description" : "The string representation of the tag."
+          },
+          "value" : {
+            "type" : "string",
+            "description" : "The value of the tag. \n\n Not applicable to custom tags."
+          },
+          "key" : {
+            "type" : "string",
+            "description" : "The key of the tag. \n\n Custom tags have the tag value here."
+          },
+          "context" : {
+            "type" : "string",
+            "description" : "The origin of the tag, such as AWS or Cloud Foundry. \n\n Custom tags use the `CONTEXTLESS` value."
+          }
+        },
+        "description" : "The tag of a monitored entity."
+      },
+      "ManagementZone" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the management zone."
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the management zone."
+          }
+        },
+        "description" : "A short representation of a management zone."
+      },
+      "AuditLog" : {
+        "type" : "object",
+        "properties" : {
+          "totalCount" : {
+            "type" : "integer",
+            "description" : "The total number of log entities in the result.",
+            "format" : "int64"
+          },
+          "nextPageKey" : {
+            "type" : "string",
+            "description" : "The cursor for the next page of results. Without it, you'll get the first page again."
+          },
+          "auditLogs" : {
+            "type" : "array",
+            "description" : "A list of audit log entries ordered by the creation timestamp.",
+            "items" : {
+              "$ref" : "#/components/schemas/AuditLogEntry"
+            }
+          }
+        },
+        "description" : "The audit log of your environment.",
+        "example" : {
+          "totalCount" : 10,
+          "nextPageKey" : "___a7acX3q0AAAAAACJidWlsdGluOnNlcnZpY2lUVEJCUzBaNVIxVjJOSGt6Y3oyLTcwMUZWRkxlclH__9rtpxferQ",
+          "auditLogs" : [ {
+            "logId" : "197425568800060000",
+            "eventType" : "UPDATE",
+            "category" : "CONFIG",
+            "entityId" : "MOBILE_RUM: MOBILE_APPLICATION-752C223D59734CD2",
+            "environmentId" : "prod-env-13",
+            "user" : "test.user@company.com",
+            "userType" : "USER_NAME",
+            "userOrigin" : "webui (192.168.0.2)",
+            "timestamp" : 1974255688445,
+            "success" : true,
+            "patch" : [ {
+              "op" : "replace",
+              "path" : "/refreshTimeIntervalMillis",
+              "value" : 30000,
+              "oldValue" : 20000
+            } ]
+          } ]
         }
       },
       "AuditLogEntry" : {
@@ -503,49 +1260,293 @@
           } ]
         }
       },
-      "AuditLog" : {
+      "EntityType" : {
+        "type" : "object",
+        "properties" : {
+          "fromRelationships" : {
+            "type" : "array",
+            "description" : "A list of possible relationships where the monitored entity type occupies the FROM position",
+            "items" : {
+              "$ref" : "#/components/schemas/ToPosition"
+            }
+          },
+          "managementZones" : {
+            "type" : "string",
+            "description" : "The placeholder for the list of management zones of an actual entity."
+          },
+          "toRelationships" : {
+            "type" : "array",
+            "description" : "A list of possible relationships where the monitored entity type occupies the TO position.",
+            "items" : {
+              "$ref" : "#/components/schemas/FromPosition"
+            }
+          },
+          "tags" : {
+            "type" : "string",
+            "description" : "The placeholder for the list of tags of an actual entity."
+          },
+          "properties" : {
+            "type" : "array",
+            "description" : "A list of additional properties of the monitored entity type.",
+            "items" : {
+              "$ref" : "#/components/schemas/EntityTypePropertyDto"
+            }
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "The type of the monitored entity."
+          }
+        },
+        "description" : "A list of properties of the monitored entity type.",
+        "example" : {
+          "type" : "HOST",
+          "properties" : [ {
+            "id" : "BITNESS",
+            "type" : "Enum"
+          }, {
+            "id" : "CPU_CORES",
+            "type" : "Number"
+          } ],
+          "tags" : "placeholder for tags",
+          "managementZones" : "placeholder for management zones",
+          "fromRelationships" : [ {
+            "id" : "RUNS_ON_RESOURCE",
+            "toTypes" : [ "CUSTOM_DEVICE" ]
+          }, {
+            "id" : "IS_NETWORK_CLIENT_OF_HOST",
+            "toTypes" : [ "HOST", "CUSTOM_DEVICE" ]
+          } ],
+          "toRelationships" : [ {
+            "id" : "IS_DISK_OF",
+            "fromTypes" : [ "DISK" ]
+          }, {
+            "id" : "IS_SITE_OF",
+            "fromTypes" : [ "VMWARE_DATACENTER", "GEOLOC_SITE" ]
+          } ]
+        }
+      },
+      "EntityTypePropertyDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the property.",
+            "example" : "cpuCores"
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "The type of the property.",
+            "example" : "Number"
+          }
+        },
+        "description" : "The property of a monitored entity."
+      },
+      "FromPosition" : {
+        "type" : "object",
+        "properties" : {
+          "fromTypes" : {
+            "type" : "array",
+            "description" : "A list of monitored entity types that can occupy the FROM position.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the relationship."
+          }
+        },
+        "description" : "The FROM position of a relationship."
+      },
+      "ToPosition" : {
+        "type" : "object",
+        "properties" : {
+          "toTypes" : {
+            "type" : "array",
+            "description" : "A list of monitored entity types that can occupy the TO position.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the relationship."
+          }
+        },
+        "description" : "The TO position of a relationship."
+      },
+      "EntityTypeList" : {
         "type" : "object",
         "properties" : {
           "totalCount" : {
             "type" : "integer",
-            "description" : "The total number of log entities in the result.",
-            "format" : "int64"
+            "description" : "The total number of entries in the result.",
+            "format" : "int64",
+            "example" : 100
+          },
+          "pageSize" : {
+            "type" : "integer",
+            "description" : "The number of entries per page.",
+            "format" : "int32",
+            "example" : 50
           },
           "nextPageKey" : {
             "type" : "string",
-            "description" : "The cursor for the next page of results. Without it, you'll get the first page again."
+            "description" : "The cursor for the next page of results. Has the value of `null` on the last page. \n\nUse it in the **nextPageKey** query parameter to obtain subsequent pages of the result.",
+            "example" : "AQAAABQBAAAABQ=="
           },
-          "auditLogs" : {
+          "types" : {
             "type" : "array",
-            "description" : "A list of audit log entries ordered by the creation timestamp.",
+            "description" : "A list of monitored entity types and their parameters.",
             "items" : {
-              "$ref" : "#/components/schemas/AuditLogEntry"
+              "$ref" : "#/components/schemas/EntityType"
             }
           }
         },
-        "description" : "The audit log of your environment.",
+        "description" : "A list of properties of all available entity types."
+      },
+      "CustomDeviceCreationResult" : {
+        "type" : "object",
+        "properties" : {
+          "entityId" : {
+            "type" : "string",
+            "description" : "The Dynatrace entity ID of the custom device."
+          },
+          "groupId" : {
+            "type" : "string",
+            "description" : "The Dynatrace entity ID of the custom device group."
+          }
+        },
+        "description" : "The short representation of a newly created custom device."
+      },
+      "CustomDeviceCreation" : {
+        "required" : [ "customDeviceId", "displayName", "type" ],
+        "type" : "object",
+        "properties" : {
+          "customDeviceId" : {
+            "maxLength" : 512,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The internal ID of the custom device. \n\n If you use the ID of an existing device, the respective parameters will be updated."
+          },
+          "displayName" : {
+            "maxLength" : 1024,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The name of the custom device to be displayed in the user interface."
+          },
+          "group" : {
+            "maxLength" : 512,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "User defined group ID of entity. \n\nThe group ID helps to keep a consistent picture of device-group relations. One of many cases where a proper group is important is service detection: you can define which custom devices should lead to the same service by defining the same group ID for them. \n\nIf you set a group ID, it will be hashed into the Dynatrace entity ID of the custom device. In that case the custom device can only be part of one custom device group. \n\nIf you don't set the group ID, Dynatrace will create it based on the ID or type of the custom device. Also, the group will not be hashed into the device ID which means the device may switch groups."
+          },
+          "ipAddresses" : {
+            "maxItems" : 100,
+            "minItems" : 0,
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "The list of IP addresses that belong to the custom device. \n\nThese addresses are used to automatically discover the horizontal communication relationship between this component and all other observed components within Smartscape. Once a connection is discovered, it is automatically mapped and shown within Smartscape. \n\nIf you send a value (including an empty value), the existing values will be overwritten. \n\nIf you send `null` or omit this field, the existing values will be kept.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "listenPorts" : {
+            "maxItems" : 100,
+            "minItems" : 0,
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "The list of ports the custom devices listens to. \n\nThese ports are used to discover the horizontal communication relationship between this component and all other observed components within Smartscape. \n\nOnce a connection is discovered, it is automatically mapped and shown within Smartscape. \n\nIf ports are specified, you should also add at least one IP address or a DNS name for the custom device. \n\nIf you send a value, the existing values will be overwritten. \n\nIf you send `null`, or an empty value, or omit this field, the existing values will be kept.",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "type" : {
+            "maxLength" : 128,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The technology type definition of the custom device. \n\nIt must be the same technology type of the metric you're reporting. \n\nIf you send a value (including an empty value), the existing value will be overwritten. \n\nIf you send `null` or omit this field, the existing value will be kept."
+          },
+          "faviconUrl" : {
+            "maxLength" : 2048,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The icon to be displayed for your custom component within Smartscape. Provide the full URL of the icon file."
+          },
+          "configUrl" : {
+            "maxLength" : 2048,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The URL of a configuration web page for the custom device, such as a login page for a firewall or router."
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "description" : "The list of key-value pair properties that will be shown beneath the infographics of your custom device."
+            },
+            "description" : "The list of key-value pair properties that will be shown beneath the infographics of your custom device."
+          },
+          "dnsNames" : {
+            "maxItems" : 20,
+            "minItems" : 0,
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "The list of DNS names related to the custom device. \n\nThese names are used to automatically discover the horizontal communication relationship between this component and all other observed components within Smartscape. Once a connection is discovered, it is automatically mapped and shown within Smartscape. \n\nIf you send a value, the existing values will be overwritten. \n\nIf you send `null` or an empty value; or omit this field, the existing values will be kept.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "messageType" : {
+            "type" : "string",
+            "enum" : [ "CUSTOM_DEVICE", "FILTER_VALUE_SUGGESTIONS", "MULTI", "MULTI_TYPE", "SINGLE", "SINGLE_TYPE" ]
+          }
+        },
+        "description" : "Configuration of a custom device.",
         "example" : {
-          "totalCount" : 10,
-          "nextPageKey" : "___a7acX3q0AAAAAACJidWlsdGluOnNlcnZpY2lUVEJCUzBaNVIxVjJOSGt6Y3oyLTcwMUZWRkxlclH__9rtpxferQ",
-          "auditLogs" : [ {
-            "logId" : "197425568800060000",
-            "eventType" : "UPDATE",
-            "category" : "CONFIG",
-            "entityId" : "MOBILE_RUM: MOBILE_APPLICATION-752C223D59734CD2",
-            "environmentId" : "prod-env-13",
-            "user" : "test.user@company.com",
-            "userType" : "USER_NAME",
-            "userOrigin" : "webui (192.168.0.2)",
-            "timestamp" : 1974255688445,
-            "success" : true,
-            "patch" : [ {
-              "op" : "replace",
-              "path" : "/refreshTimeIntervalMillis",
-              "value" : 30000,
-              "oldValue" : 20000
-            } ]
-          } ]
+          "customDeviceId" : "customDeviceId",
+          "displayName" : "coffeeMachine",
+          "group" : "myCustomDeviceGroup",
+          "ipAddresses" : [ "10.0.0.1" ],
+          "listenPorts" : [ 80 ],
+          "faviconUrl" : "https://www.freefavicon.com/freefavicons/food/cup-of-coffee-152-78475.png",
+          "configUrl" : "http://coffee-machine.dynatrace.internal.com/coffeemachine/manage",
+          "type" : "coffee machine",
+          "properties" : { },
+          "tags" : [ "office-linz" ],
+          "dnsNames" : [ "coffee-machine.dynatrace.internal.com" ]
         }
+      },
+      "EntitiesList" : {
+        "type" : "object",
+        "properties" : {
+          "totalCount" : {
+            "type" : "integer",
+            "description" : "The total number of entries in the result.",
+            "format" : "int64",
+            "example" : 100
+          },
+          "pageSize" : {
+            "type" : "integer",
+            "description" : "The number of entries per page.",
+            "format" : "int32",
+            "example" : 50
+          },
+          "nextPageKey" : {
+            "type" : "string",
+            "description" : "The cursor for the next page of results. Has the value of `null` on the last page. \n\nUse it in the **nextPageKey** query parameter to obtain subsequent pages of the result.",
+            "example" : "AQAAABQBAAAABQ=="
+          },
+          "entities" : {
+            "type" : "array",
+            "description" : "A list of monitored entities.",
+            "items" : {
+              "$ref" : "#/components/schemas/Entity"
+            }
+          }
+        },
+        "description" : "A list of monitored entities along with their properties."
       },
       "MetricDefaultAggregation" : {
         "type" : "object",
@@ -579,8 +1580,12 @@
             "type" : "string",
             "description" : "The fully qualified key of the metric. \n\nIf a transformation has been used it is reflected in the metric key."
           },
-          "defaultAggregation" : {
-            "$ref" : "#/components/schemas/MetricDefaultAggregation"
+          "dimensionDefinitions" : {
+            "type" : "array",
+            "description" : "The fine metric division (for example, process group and process ID for some process-related metric).",
+            "items" : {
+              "$ref" : "#/components/schemas/MetricDimensionDefinition"
+            }
           },
           "entityType" : {
             "uniqueItems" : true,
@@ -590,16 +1595,21 @@
               "type" : "string"
             }
           },
-          "dimensionDefinitions" : {
-            "type" : "array",
-            "description" : "The fine metric division (for example, process group and process ID for some process-related metric).",
-            "items" : {
-              "$ref" : "#/components/schemas/MetricDimensionDefinition"
-            }
+          "defaultAggregation" : {
+            "$ref" : "#/components/schemas/MetricDefaultAggregation"
+          },
+          "displayName" : {
+            "type" : "string",
+            "description" : "The name of the metric in the user interface."
           },
           "description" : {
             "type" : "string",
             "description" : "A short description of the metric."
+          },
+          "unit" : {
+            "type" : "string",
+            "description" : "The unit of the metric.",
+            "enum" : [ "Bit", "BitPerHour", "BitPerMinute", "BitPerSecond", "Byte", "BytePerHour", "BytePerMinute", "BytePerSecond", "Cores", "Count", "GibiByte", "Giga", "GigaByte", "Hour", "KibiByte", "KibiBytePerHour", "KibiBytePerMinute", "KibiBytePerSecond", "Kilo", "KiloByte", "KiloBytePerHour", "KiloBytePerMinute", "KiloBytePerSecond", "MebiByte", "MebiBytePerHour", "MebiBytePerMinute", "MebiBytePerSecond", "Mega", "MegaByte", "MegaBytePerHour", "MegaBytePerMinute", "MegaBytePerSecond", "MicroSecond", "MilliCores", "MilliSecond", "MilliSecondPerMinute", "Minute", "NanoSecond", "NanoSecondPerMinute", "NotApplicable", "PerHour", "PerMinute", "PerSecond", "Percent", "Promille", "Ratio", "Second", "State", "Unspecified" ]
           },
           "transformations" : {
             "uniqueItems" : true,
@@ -609,15 +1619,6 @@
               "type" : "string",
               "enum" : [ "filter", "fold", "merge", "names", "parents", "rate" ]
             }
-          },
-          "unit" : {
-            "type" : "string",
-            "description" : "The unit of the metric.",
-            "enum" : [ "Bit", "BitPerHour", "BitPerMinute", "BitPerSecond", "Byte", "BytePerHour", "BytePerMinute", "BytePerSecond", "Cores", "Count", "GibiByte", "Giga", "GigaByte", "Hour", "KibiByte", "KibiBytePerHour", "KibiBytePerMinute", "KibiBytePerSecond", "Kilo", "KiloByte", "KiloBytePerHour", "KiloBytePerMinute", "KiloBytePerSecond", "MebiByte", "MebiBytePerHour", "MebiBytePerMinute", "MebiBytePerSecond", "Mega", "MegaByte", "MegaBytePerHour", "MegaBytePerMinute", "MegaBytePerSecond", "MicroSecond", "MilliCores", "MilliSecond", "MilliSecondPerMinute", "Minute", "NanoSecond", "NanoSecondPerMinute", "NotApplicable", "PerHour", "PerMinute", "PerSecond", "Percent", "Promille", "Ratio", "Second", "State", "Unspecified" ]
-          },
-          "displayName" : {
-            "type" : "string",
-            "description" : "The name of the metric in the user interface."
           }
         },
         "description" : "The descriptor of a metric.",
@@ -775,19 +1776,19 @@
               "format" : "int64"
             }
           },
+          "dimensions" : {
+            "type" : "array",
+            "description" : "The ordered list of dimensions to which the data point list belongs. \n\n Each metric can have a certain number of dimensions. Dimensions exceeding this number are aggregated into one, which is shown as `null` here.",
+            "items" : {
+              "type" : "string"
+            }
+          },
           "values" : {
             "type" : "array",
             "description" : "A list of values of data points. \n\nThe timestamp of data point for each value from this array is located in **timestamps** array at the same index.",
             "items" : {
               "type" : "number",
               "format" : "double"
-            }
-          },
-          "dimensions" : {
-            "type" : "array",
-            "description" : "The ordered list of dimensions to which the data point list belongs. \n\n Each metric can have a certain number of dimensions. Dimensions exceeding this number are aggregated into one, which is shown as `null` here.",
-            "items" : {
-              "type" : "string"
             }
           }
         },
@@ -826,24 +1827,239 @@
             "values" : [ 111.1, 222.2, 333.3 ]
           } ]
         }
+      },
+      "NetworkZone" : {
+        "type" : "object",
+        "properties" : {
+          "numOfConfiguredOneAgents" : {
+            "type" : "integer",
+            "description" : "The number of OneAgents that are configured to use the network zone as primary.",
+            "format" : "int32",
+            "readOnly" : true
+          },
+          "numOfOneAgentsFromOtherZones" : {
+            "type" : "integer",
+            "description" : "The number of OneAgents from other network zones that are using ActiveGates in the network zone. \n\n This is a fraction of **numOfOneAgentsUsing**. \n\nOne possible reason for switching to another zone is that a firewall is preventing a OneAgent from connecting to any ActiveGate in the preferred network zone.\n\n",
+            "format" : "int32",
+            "readOnly" : true
+          },
+          "numOfConfiguredActiveGates" : {
+            "type" : "integer",
+            "description" : "The number of ActiveGates in the network zone.",
+            "format" : "int32",
+            "readOnly" : true
+          },
+          "numOfOneAgentsUsing" : {
+            "type" : "integer",
+            "description" : "The number of OneAgents that are using ActiveGates in the network zone.",
+            "format" : "int32",
+            "readOnly" : true
+          },
+          "alternativeZones" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "A list of alternative network zones.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the network zone",
+            "readOnly" : true
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "A short description of the network zone"
+          }
+        },
+        "description" : "Configuration of a network zone."
+      },
+      "NetworkZoneList" : {
+        "required" : [ "networkZones" ],
+        "type" : "object",
+        "properties" : {
+          "networkZones" : {
+            "type" : "array",
+            "description" : "A list of network zones.",
+            "items" : {
+              "$ref" : "#/components/schemas/NetworkZone"
+            }
+          }
+        },
+        "description" : "A list of network zones."
+      },
+      "EntityShortRepresentation" : {
+        "required" : [ "id" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the Dynatrace entity."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the Dynatrace entity.",
+            "readOnly" : true
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "A short description of the Dynatrace entity.",
+            "readOnly" : true
+          }
+        },
+        "description" : "The short representation of a Dynatrace entity.",
+        "example" : {
+          "id" : "6a98d7bc-abb9-44f8-ae6a-73e68e71812a",
+          "name" : "Dynatrace entity",
+          "description" : "Dynatrace entity for the REST API example"
+        }
+      },
+      "NetworkZoneSettings" : {
+        "type" : "object",
+        "properties" : {
+          "networkZonesEnabled" : {
+            "type" : "boolean",
+            "description" : "Network zones feature is enabled (`true`) or disabled (`false`)."
+          }
+        },
+        "description" : "Global network zone configuration."
+      },
+      "DeletedEntityTags" : {
+        "type" : "object",
+        "properties" : {
+          "matchedEntitiesCount" : {
+            "type" : "integer",
+            "description" : "The number of monitored entities where the tag has been deleted.",
+            "format" : "int64"
+          },
+          "deletedTag" : {
+            "$ref" : "#/components/schemas/METag"
+          }
+        },
+        "description" : "Deleted custom tag.",
+        "example" : {
+          "deletedTag" : {
+            "context" : "CONTEXTLESS",
+            "key" : "booking",
+            "stringRepresentation" : "booking"
+          },
+          "matchedEntitiesCount" : 2
+        }
+      },
+      "AddedEntityTags" : {
+        "type" : "object",
+        "properties" : {
+          "matchedEntitiesCount" : {
+            "type" : "integer",
+            "description" : "The number of monitored entities where the tags have been added.",
+            "format" : "int64"
+          },
+          "appliedTags" : {
+            "type" : "array",
+            "properties" : {
+              "empty" : {
+                "type" : "boolean"
+              }
+            },
+            "description" : "A list of added custom tags.",
+            "items" : {
+              "$ref" : "#/components/schemas/METag"
+            }
+          }
+        },
+        "description" : "A list of custom tags added to monitored entities.",
+        "example" : {
+          "appliedTags" : [ {
+            "context" : "CONTEXTLESS",
+            "key" : "mainApp",
+            "stringRepresentation" : "mainApp"
+          }, {
+            "context" : "CONTEXTLESS",
+            "key" : "booking",
+            "stringRepresentation" : "booking"
+          } ],
+          "matchedEntitiesCount" : 2
+        }
+      },
+      "AddEntityTag" : {
+        "required" : [ "key" ],
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "The key of the custom tag to be added to monitored entities."
+          }
+        },
+        "description" : "The custom tag to be added to monitored entities."
+      },
+      "AddEntityTags" : {
+        "required" : [ "tags" ],
+        "type" : "object",
+        "properties" : {
+          "tags" : {
+            "maxItems" : 1000,
+            "minItems" : 0,
+            "type" : "array",
+            "description" : "A list of tags to be added to monitored entities.",
+            "items" : {
+              "$ref" : "#/components/schemas/AddEntityTag"
+            }
+          }
+        },
+        "description" : "A list of tags to be added to monitored entities.",
+        "example" : {
+          "tags" : [ {
+            "key" : "mainApp"
+          }, {
+            "key" : "bookings"
+          } ]
+        }
+      },
+      "CustomEntityTags" : {
+        "required" : [ "tags" ],
+        "type" : "object",
+        "properties" : {
+          "totalCount" : {
+            "type" : "integer",
+            "description" : "The total number of tags in the response.",
+            "format" : "int64"
+          },
+          "tags" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "properties" : {
+              "empty" : {
+                "type" : "boolean"
+              }
+            },
+            "description" : "A list of custom tags.",
+            "items" : {
+              "$ref" : "#/components/schemas/METag"
+            }
+          }
+        },
+        "description" : "A list of custom tags.",
+        "example" : {
+          "totalCount" : 2,
+          "tags" : [ {
+            "context" : "CONTEXTLESS",
+            "key" : "mainApp",
+            "stringRepresentation" : "mainApp"
+          }, {
+            "context" : "CONTEXTLESS",
+            "key" : "bookings",
+            "stringRepresentation" : "bookings"
+          } ]
+        }
       }
     },
     "_securitySchemes" : {
-      "NetworkZonesWrite" : {
-        "type" : "apiKey",
-        "description" : "API token with the **Write network zones using API V2** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
-        "name" : "Authorization",
-        "in" : "header"
-      },
       "WriteConfig" : {
         "type" : "apiKey",
         "description" : "API token with the **Write configuration** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
-        "name" : "Authorization",
-        "in" : "header"
-      },
-      "NetworkZonesRead" : {
-        "type" : "apiKey",
-        "description" : "API token with the **Read network zones using API V2** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
         "name" : "Authorization",
         "in" : "header"
       },
@@ -853,9 +2069,21 @@
         "name" : "Authorization",
         "in" : "header"
       },
+      "networkZones.write" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Write network zones using API V2** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      },
       "DataImport" : {
         "type" : "apiKey",
         "description" : "API token with the **Data ingest, e.g.: metrics and events** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "entities.write" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Write entities using API V2** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
         "name" : "Authorization",
         "in" : "header"
       },
@@ -865,9 +2093,9 @@
         "name" : "Authorization",
         "in" : "header"
       },
-      "EntitiesWrite" : {
+      "entities.read" : {
         "type" : "apiKey",
-        "description" : "API token with the **Write entities using API V2** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "description" : "API token with the **Read entities using API V2** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
         "name" : "Authorization",
         "in" : "header"
       },
@@ -877,21 +2105,15 @@
         "name" : "Authorization",
         "in" : "header"
       },
+      "networkZones.read" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Read network zones using API V2** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
+        "name" : "Authorization",
+        "in" : "header"
+      },
       "DataExport" : {
         "type" : "apiKey",
         "description" : "API token with the **Access problem and event feed, metrics, and topology** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
-        "name" : "Authorization",
-        "in" : "header"
-      },
-      "DeploymentManagement" : {
-        "type" : "apiKey",
-        "description" : "API token with the **Deployment management** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
-        "name" : "Authorization",
-        "in" : "header"
-      },
-      "EntitiesRead" : {
-        "type" : "apiKey",
-        "description" : "API token with the **Read entities using API V2** permission.\n\n The token is passed in the **Authorization** header in the following format: `Authorization: Api-Token abcdefjhij1234567890`.",
         "name" : "Authorization",
         "in" : "header"
       }
