@@ -1,0 +1,2270 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Dynatrace Cluster API",
+    "description" : "Dynatrace Managed exposes cluster-wide functionality via REST endpoints. This interactive documentation also acts as a REST client you can use to interact with Dynatrace Managed clusters. \n\nTo authorize, use the API Token generated in [Settings - API Tokens page](/cmc#cm/apiToken). The HTTP status code of the response shows the result of your request. The expected response code for a successful request is documented individually per REST endpoint. Additionally the following error response codes can occur in our REST interface:\n\n* 400 - Bad Request: Some request parameters are not correct. See response body for details.\n* 401 - Unauthorized: A valid authorization header is required but is missing.\n* 403 - Forbidden: Execution of request is not allowed, e.g. api-token is invalid.\n* 404 - Not Found: Endpoint does not exist or some entities could not be found.\n* 500 - Internal Server Error: See response body for details.\n\nNotes about compatibility:\n* Operations marked as early adopter or preview may be changed in non-compatible ways, although we try to avoid this.\n* We may add new enum constants without incrementing the API version; thus, clients need to handle unknown enum constants gracefully.",
+    "version" : "2.0"
+  },
+  "servers" : [ {
+    "url" : "{{cmc}}/api/cluster/v2",
+    "variables" : { }
+  } ],
+  "tags" : [ {
+    "name" : "Environments",
+    "description" : "Manage environments"
+  }, {
+    "name" : "User management",
+    "description" : "Manage user sessions"
+  }, {
+    "name" : "Remote access",
+    "description" : "Manage remote access requests"
+  }, {
+    "name" : "Synthetic - Locations and nodes",
+    "description" : "Manage synthetic locations and nodes"
+  }, {
+    "name" : "Tokens",
+    "description" : "Manage Dynatrace API authentication tokens"
+  }, {
+    "name" : "Network zones",
+    "description" : "Manage network zones"
+  } ],
+  "paths" : {
+    "/environments" : {
+      "get" : {
+        "tags" : [ "Environments" ],
+        "summary" : "Lists all existing environments. | maturity=EARLY_ADOPTER",
+        "operationId" : "getAllEnvironments",
+        "parameters" : [ {
+          "name" : "nextPageKey",
+          "in" : "query",
+          "description" : "The cursor for the next page of results. You can find it in the **nextPageKey** field of the previous response. \n\nThe first page is always returned if you don't specify the **nextPageKey** query parameter. \n\nWhen the **nextPageKey** is set to obtain subsequent pages, you must omit all other query parameters. ",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "The desired amount of environments in a single response payload. \n\nThe maximal allowed page size is 1000. \n\nIf not set, 100 is used.",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "The sort order. Possible sorts orders are:\n * 'name' (without quotes): Sort by name ascending.\n * '-name' (without quotes): Sort by name descending.\n * 'creationDate' (without quotes): Sort by creating date ascending.\n * '-creationDate' (without quotes): Sort by name descending.\n",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "Specifies the filter of the query. \n\nYou can set one or several of the following criteria:\n* Name: `name(string)`. The name can be either a substring or the full name of an environment. Case-insensitive.\n* Trial: `trial(true)` or `trial(false)`. Only includes trial environments if true is specified or only non-trial environments if false is specified.\n* State: `state(ENABLED)` or `state(DISABLED)`.\n* Tag: `tag(string)`. To filter by multiple tags by applying OR logic use `tag(string1,string2)`. To filter by multiple tags by applying AND logic use `tag(string1),tag(string2)`.\nTo set several criteria, separate them with a comma (`,`). Only results, matching **all** criteria, are included into response.\n",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EnvironmentList"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "ENVIRONMENT_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "post" : {
+        "tags" : [ "Environments" ],
+        "summary" : "Creates a new environment. | maturity=EARLY_ADOPTER",
+        "operationId" : "createEnvironment",
+        "parameters" : [ {
+          "name" : "createToken",
+          "in" : "query",
+          "description" : "If true, a token with the permission 'Token management' is created when creating a new environment. This token is then returned in the response body. It can be used within the newly created environment to create other tokens for configuring this environment.",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. The body must not provide an ID as it will be automatically assigned by the Dynatrace server.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Environment"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Success. The environment has been created and started. The response body contains the generated ID of the environment and a token with the 'Token management' permission. The location header contains the generated ID as well.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EnvironmentShortRepresentation"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "ENVIRONMENT_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/environments/{id}/tokenManagementToken" : {
+      "post" : {
+        "tags" : [ "Environments" ],
+        "summary" : "Creates a new tenant management token for an environment. | maturity=EARLY_ADOPTER",
+        "description" : "The newly created token will be owned by the same user who owns the token used for authentication of creation call.",
+        "operationId" : "createTokenManagementToken",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the environment where the token is valid.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains parameters of the token.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateEnvironmentTokenManagementToken"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Success. The token has been created. The response body contains the token itself.",
+            "headers" : {
+              "Location" : {
+                "description" : "Token Id",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "EnvironmentTokenManagement" : [ ]
+        } ],
+        "x-feature-flag" : "ENVIRONMENT_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/environments/{id}" : {
+      "get" : {
+        "tags" : [ "Environments" ],
+        "summary" : "Gets the properties of the specified environment. | maturity=EARLY_ADOPTER",
+        "operationId" : "getSingleEnvironment",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the environment.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Environment"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "ENVIRONMENT_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Environments" ],
+        "summary" : "Updates an existing environment or creates a new one. | maturity=EARLY_ADOPTER",
+        "description" : "If the environment with the specified ID does not exist, a new environment will be created.",
+        "operationId" : "createOrUpdateEnvironment",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the environment to update.\n\n If you set the ID in the body as well, it must match this ID.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "createToken",
+          "in" : "query",
+          "description" : "If true, a token with the permission 'Token management' is created when creating a new environment. This token is then returned in the response body. It can be used within the newly created environment to create other tokens for configuring this environment.",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "requestBody" : {
+          "description" : "JSON body of the request, containing updated parameters of the environment.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Environment"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Success. The new environment has been created. The response body contains the ID, the name and a token with the 'Token management' permission.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EnvironmentShortRepresentation"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "Success. The environment has been updated. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "ENVIRONMENT_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Environments" ],
+        "summary" : "Deletes the specified environment. An environment must be disabled before it can be deleted. | maturity=EARLY_ADOPTER",
+        "operationId" : "deleteEnvironment",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the environment to be deleted.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Deleted. Response does not have a body."
+          },
+          "400" : {
+            "description" : "Failed. For example, if an environment is not disabled."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "ENVIRONMENT_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/remoteaccess/requests" : {
+      "get" : {
+        "tags" : [ "Remote access" ],
+        "summary" : "Get all access requests",
+        "operationId" : "getAllAccessRequests",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/AccessRequestData"
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Approving remote access request is disabled"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Remote access" ],
+        "summary" : "Grant remote access permission",
+        "operationId" : "addAccessRequest",
+        "parameters" : [ ],
+        "requestBody" : {
+          "description" : "The JSON body of the request, containing parameters of access request.",
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateAccessRequestDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Successfully created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AccessRequestData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters"
+          },
+          "403" : {
+            "description" : "Approving remote access request is disabled"
+          },
+          "500" : {
+            "description" : "Operation failed"
+          },
+          "513" : {
+            "description" : "Mission Control is unavailable"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/remoteaccess/requests/{requestId}" : {
+      "get" : {
+        "tags" : [ "Remote access" ],
+        "summary" : "Get access request",
+        "operationId" : "getAccessRequest",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "description" : "Request id param",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AccessRequestData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "403" : {
+            "description" : "Approving remote access request is disabled"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/remoteaccess/requests/{requestId}/state" : {
+      "put" : {
+        "tags" : [ "Remote access" ],
+        "summary" : "Change state of access request",
+        "operationId" : "accessRequestChangeState",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "description" : "Request id param",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request, containing new state of access request.",
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AccessRequestStateData"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "403" : {
+            "description" : "Approving remote access request is disabled"
+          },
+          "404" : {
+            "description" : "Access request not found"
+          },
+          "409" : {
+            "description" : "Access request was found, but it's already expired"
+          },
+          "500" : {
+            "description" : "Operation failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/clusterConfig/userSessions" : {
+      "get" : {
+        "tags" : [ "User management" ],
+        "summary" : "Get user sessions configuration",
+        "operationId" : "getConcurrentSessionPolicyConfig",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserSessionsConfig"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "User management" ],
+        "summary" : "Update user sessions configuration",
+        "operationId" : "updateConcurrentSessionPolicyConfig",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UserSessionsConfig"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Wrong parameters"
+          },
+          "510" : {
+            "description" : "Configuration update failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/userSessions" : {
+      "get" : {
+        "tags" : [ "User management" ],
+        "summary" : "Get user sessions",
+        "operationId" : "getUserSessions",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "query",
+          "description" : "User ID (optional)",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserSession"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Operation failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "User management" ],
+        "summary" : "Remove user sessions for a given user",
+        "operationId" : "removeUserSession",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "query",
+          "description" : "User ID (mandatory)",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "400" : {
+            "description" : "Bad request. User id must be filled in."
+          },
+          "404" : {
+            "description" : "User sessions not found"
+          },
+          "500" : {
+            "description" : "Operation failed"
+          },
+          "510" : {
+            "description" : "Failed to invalidate sessions"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/networkZones/{id}" : {
+      "get" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Gets parameters of the specified network zone | maturity=EARLY_ADOPTER",
+        "operationId" : "getSingleNetworkZone",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the required network zone.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NetworkZone"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Updates an existing network zone or creates a new one | maturity=EARLY_ADOPTER",
+        "description" : "If the network zone with the specified ID does not exist, a new network zone is created. \n\n The ID is not case sensitive. Dynatrace stores the ID in lowercase.",
+        "operationId" : "createOrUpdateNetworkZone",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the network zone to be updated. \n\n If you set the ID in the body as well, it must match this ID. \n\n The ID is not case sensitive. Dynatrace stores the ID in lowercase.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains parameters of the network zone.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NetworkZone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Success. The new network zone has been created. The response body contains the ID of the new network zone.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntityShortRepresentation"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "Success. The network zone has been updated. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Deletes the specified network zone | maturity=EARLY_ADOPTER",
+        "description" : "You can only delete an empty network zone (a zone that no ActiveGate or OneAgent is using). \n\n If the network zone is used as an alternative zone for any OneAgent, it will be automatically removed from the list of possible alternatives.",
+        "operationId" : "deleteNetworkZone",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the network zone to be deleted.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Deleted. Response doesn't have a body."
+          },
+          "400" : {
+            "description" : "Failed. See error message in the response body for details.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/networkZones" : {
+      "get" : {
+        "tags" : [ "Network zones" ],
+        "summary" : "Lists all existing network zones | maturity=EARLY_ADOPTER",
+        "operationId" : "getAllNetworkZones",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NetworkZoneList"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "NETWORK_ZONE_REST_API_RESOURCE",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/synthetic/locations/{locationId}" : {
+      "get" : {
+        "tags" : [ "Synthetic - Locations and nodes" ],
+        "summary" : "Gets properties of the specified cluster location | maturity=EARLY_ADOPTER",
+        "operationId" : "getLocation",
+        "parameters" : [ {
+          "name" : "locationId",
+          "in" : "path",
+          "description" : "The Dynatrace entity ID of the required cluster location.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success. The response contains parameters of the synthetic cluster location.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SyntheticLocation"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Synthetic - Locations and nodes" ],
+        "summary" : "Updates the specified private synthetic cluster location | maturity=EARLY_ADOPTER",
+        "operationId" : "updateLocation",
+        "parameters" : [ {
+          "name" : "locationId",
+          "in" : "path",
+          "description" : "The Dynatrace entity ID of the private synthetic cluster location to be updated.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains updated parameters of the private synthetic cluster location.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PrivateSyntheticLocation"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json; charset=utf-8" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "MANAGE_PRIVATE_LOCATIONS_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Synthetic - Locations and nodes" ],
+        "summary" : "Deletes the specified private synthetic cluster location | maturity=EARLY_ADOPTER",
+        "operationId" : "removeLocation",
+        "parameters" : [ {
+          "name" : "locationId",
+          "in" : "path",
+          "description" : "The Dynatrace entity ID of the private synthetic cluster location to be deleted.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json; charset=utf-8" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "MANAGE_PRIVATE_LOCATIONS_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/synthetic/locations" : {
+      "get" : {
+        "tags" : [ "Synthetic - Locations and nodes" ],
+        "summary" : "Lists all cluster private synthetic locations | maturity=EARLY_ADOPTER",
+        "operationId" : "getLocations",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SyntheticLocations"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "post" : {
+        "tags" : [ "Synthetic - Locations and nodes" ],
+        "summary" : "Creates a new private synthetic cluster location | maturity=EARLY_ADOPTER",
+        "operationId" : "addLocation",
+        "parameters" : [ ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains parameters of the new private synthetic cluster location",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PrivateSyntheticLocation"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntityIdDto"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-feature-flag" : "MANAGE_PRIVATE_LOCATIONS_API",
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/synthetic/nodes" : {
+      "get" : {
+        "tags" : [ "Synthetic - Locations and nodes" ],
+        "summary" : "Lists all synthetic cluster nodes | maturity=EARLY_ADOPTER",
+        "operationId" : "getNodes",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Nodes"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/synthetic/nodes/{nodeId}" : {
+      "get" : {
+        "tags" : [ "Synthetic - Locations and nodes" ],
+        "summary" : "Lists properties of the specified synthetic cluster node | maturity=EARLY_ADOPTER",
+        "operationId" : "getNode",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "path",
+          "description" : "The ID of the required synthetic cluster node.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Node"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/tokens/{id}" : {
+      "get" : {
+        "tags" : [ "Tokens" ],
+        "summary" : "Lists token metadata by token ID",
+        "description" : "The token itself is **not** exposed.",
+        "operationId" : "getTokenMetadata",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the required token.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenMetadata"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Failed. The requested token has not been found.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "TokenManagement" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Tokens" ],
+        "summary" : "Updates a specific token. This token cannot be the same one currently used.",
+        "operationId" : "updateToken",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "id of the token",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateToken"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Success. Token was updated."
+          },
+          "400" : {
+            "description" : "Failed. Cannot revoke token currently in use",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Failed. Token not found or not assigned to customer",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "TokenManagement" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Tokens" ],
+        "summary" : "Deletes the specified token",
+        "operationId" : "deleteToken",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The ID of the token to be deleted. Can either be the public identifier or the secret.\n\n You can't delete the token you're using for authentication of the request.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Success. The token has been deleted."
+          },
+          "400" : {
+            "description" : "Failed. You can't delete the token you're using for authentication of the request.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Failed. The token has not been found.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "TokenManagement" : [ ]
+        } ]
+      }
+    },
+    "/tokens" : {
+      "get" : {
+        "tags" : [ "Tokens" ],
+        "summary" : "Lists available tokens in your environment",
+        "description" : "You can narrow down the output by adding parameters. The token has to match *all* the specified parameters. \n\n You can also specify the limit of returned tokens.\n\n **This list may contain tokens which were created automatically** (e.g. InstallerDownload, Mobile, ...) and are not visible on the `Settings` page. Deleting those might have unintended side-effects as they might still be in use.",
+        "operationId" : "listTokens",
+        "parameters" : [ {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Limits the maximum number of returned tokens. \n\n If not set the value of `1000` is used. \n\n Maximum value is 1000000.",
+          "schema" : {
+            "maximum" : 1000000,
+            "minimum" : 0,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 1000
+          }
+        }, {
+          "name" : "user",
+          "in" : "query",
+          "description" : "Filters the resulting set of tokens by user, who owns the token.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "permissions",
+          "in" : "query",
+          "description" : "Filters the resulting set of tokens by permissions, assigned to the token. \n\n You can specify several permissions in the following format: `permissions=permission1&permissions=permission2`. The token must have *all* the specified permissions.",
+          "schema" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "ClusterTokenManagement", "ControlManagement", "DiagnosticExport", "EnvironmentTokenManagement", "ExternalSyntheticIntegration", "Nodekeeper", "ReadSyntheticData", "ServiceProviderAPI", "UnattendedInstall" ]
+            }
+          }
+        }, {
+          "name" : "from",
+          "in" : "query",
+          "description" : "Last used after this timestamp (UTC milliseconds).",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "Last used before this timestamp (UTC milliseconds).",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StubList"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "TokenManagement" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Tokens" ],
+        "summary" : "Creates a new token",
+        "description" : "The newly created token will be owned by the same user who owns the token used for authentication of creation call.",
+        "operationId" : "createToken",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateToken"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Success. The token has been created. The response body contains the token itself.",
+            "headers" : {
+              "Location" : {
+                "description" : "Token Id",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Token"
+                }
+              },
+              "text/csv; header=present; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Token"
+                }
+              },
+              "text/csv; header=absent; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Token"
+                }
+              },
+              "text/plain; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Failure. Token was not created due to invalid input.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              },
+              "text/csv; header=present; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              },
+              "text/csv; header=absent; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              },
+              "text/plain; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "TokenManagement" : [ ]
+        } ]
+      }
+    },
+    "/tokens/lookup" : {
+      "post" : {
+        "tags" : [ "Tokens" ],
+        "summary" : "Lists token metadata by token itself",
+        "operationId" : "getTokenMetadataBySecret",
+        "parameters" : [ ],
+        "requestBody" : {
+          "description" : "The JSON body of the request. Contains the required token.",
+          "content" : {
+            "application/json; charset=utf-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Token"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success.",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenMetadata"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ApiToken" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "EnvironmentShortRepresentation" : {
+        "required" : [ "id" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the Dynatrace entity."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the Dynatrace entity.",
+            "readOnly" : true
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "A short description of the Dynatrace entity.",
+            "readOnly" : true
+          },
+          "tokenManagementToken" : {
+            "type" : "string",
+            "description" : "A token with the 'Token management' permission. Can be used to within the newly created environment to create other tokens for configuring this environment. This value is only set if an environment was created with the query parameter 'createToken=true'.",
+            "readOnly" : true
+          }
+        },
+        "description" : "The short representation of an environment."
+      },
+      "Environment" : {
+        "required" : [ "name" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "maxLength" : 100,
+            "minLength" : 1,
+            "type" : "string",
+            "description" : "The display name of the environment."
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the environment."
+          },
+          "trial" : {
+            "type" : "boolean",
+            "description" : "Specifies whether the environment is a trial environment or a non-trial environment. Creating a trial environment is only possible if your license allows that. The default value is false (non-trial)."
+          },
+          "state" : {
+            "type" : "string",
+            "description" : "Indicates whether the environment is enabled or disabled. The default value is ENABLED.",
+            "enum" : [ "DISABLED", "ENABLED" ]
+          },
+          "tags" : {
+            "maxItems" : 1024,
+            "minItems" : 0,
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "A set of tags that are assigned to this environment. Every tag can have a maximum length of 100 characters.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "creationDate" : {
+            "type" : "string",
+            "description" : "The creation date of the environment in ISO 8601 format (yyyy-MM-dd'T'HH:mm:ss.SSS'Z')",
+            "readOnly" : true
+          }
+        },
+        "description" : "Basic configuration for an environment.",
+        "example" : {
+          "name" : "example environment",
+          "state" : "ENABLED",
+          "tags" : [ "tag1", "tag2" ],
+          "trial" : false
+        }
+      },
+      "Token" : {
+        "required" : [ "token" ],
+        "type" : "object",
+        "properties" : {
+          "token" : {
+            "type" : "string",
+            "description" : "Dynatrace API authentication token."
+          }
+        },
+        "example" : {
+          "token" : "abcdefjhij1234567890"
+        }
+      },
+      "ConstraintViolation" : {
+        "type" : "object",
+        "properties" : {
+          "parameterLocation" : {
+            "type" : "string",
+            "enum" : [ "PATH", "PAYLOAD_BODY", "QUERY" ]
+          },
+          "location" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Error" : {
+        "type" : "object",
+        "properties" : {
+          "constraintViolations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ConstraintViolation"
+            }
+          },
+          "code" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ErrorEnvelope" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "$ref" : "#/components/schemas/Error"
+          }
+        }
+      },
+      "CreateEnvironmentTokenManagementToken" : {
+        "required" : [ "name" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the token."
+          },
+          "expiresIn" : {
+            "$ref" : "#/components/schemas/Duration"
+          }
+        },
+        "example" : {
+          "name" : "Token Management",
+          "expiresIn" : {
+            "value" : 3600,
+            "unit" : "SECONDS"
+          }
+        }
+      },
+      "Duration" : {
+        "required" : [ "value" ],
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "integer",
+            "description" : "The amount of time.",
+            "format" : "int64"
+          },
+          "unit" : {
+            "type" : "string",
+            "description" : "The unit of time. \n\n If not set, millisecond is used.",
+            "enum" : [ "DAYS", "HOURS", "MILLIS", "MINUTES", "SECONDS" ]
+          }
+        },
+        "description" : "Defines a period of time."
+      },
+      "EnvironmentList" : {
+        "required" : [ "environments" ],
+        "type" : "object",
+        "properties" : {
+          "totalCount" : {
+            "type" : "integer",
+            "description" : "The total number of entries in the result.",
+            "format" : "int64"
+          },
+          "pageSize" : {
+            "type" : "integer",
+            "description" : "The number of entries per page.",
+            "format" : "int32"
+          },
+          "nextPageKey" : {
+            "type" : "string",
+            "description" : "The cursor for the next page of results. Has the value of `null` on the last page. \n\nUse it in the **nextPageKey** query parameter to obtain subsequent pages of the result.",
+            "example" : "AQAAABQBAAAABQ=="
+          },
+          "environments" : {
+            "type" : "array",
+            "description" : "The list of environments.",
+            "items" : {
+              "$ref" : "#/components/schemas/Environment"
+            }
+          }
+        },
+        "description" : "A list of environments."
+      },
+      "AccessRequestData" : {
+        "type" : "object",
+        "properties" : {
+          "requestId" : {
+            "type" : "string",
+            "description" : "Request id"
+          },
+          "userId" : {
+            "type" : "string",
+            "description" : "User id"
+          },
+          "reason" : {
+            "type" : "string",
+            "description" : "Request reason description"
+          },
+          "requestedDays" : {
+            "type" : "integer",
+            "description" : "For how many days access is requested",
+            "format" : "int32"
+          },
+          "role" : {
+            "type" : "string",
+            "description" : "Requested role",
+            "enum" : [ "devops-admin", "devops-user", "devops-viewer" ]
+          },
+          "createdTimestamp" : {
+            "type" : "integer",
+            "description" : "Access request created at (timestamp)",
+            "format" : "int64"
+          },
+          "expirationTimestamp" : {
+            "type" : "integer",
+            "description" : "Access expires at (timestamp)",
+            "format" : "int64"
+          },
+          "state" : {
+            "type" : "string",
+            "description" : "Access request state",
+            "enum" : [ "ACCEPTED", "EXPIRED", "PENDING", "REJECTED" ]
+          },
+          "stateModifiedByUser" : {
+            "type" : "string",
+            "description" : "Access request state was modified by user"
+          }
+        },
+        "description" : "Access Request data"
+      },
+      "CreateAccessRequestDto" : {
+        "type" : "object",
+        "properties" : {
+          "userId" : {
+            "type" : "string"
+          },
+          "reason" : {
+            "type" : "string"
+          },
+          "requestedDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "role" : {
+            "type" : "string"
+          }
+        }
+      },
+      "AccessRequestStateData" : {
+        "type" : "object",
+        "properties" : {
+          "state" : {
+            "type" : "string",
+            "description" : "Access request state",
+            "enum" : [ "ACCEPTED", "EXPIRED", "PENDING", "REJECTED" ]
+          }
+        },
+        "description" : "Access request data - format used to change a state of a request"
+      },
+      "AutomaticLogoutConfiguration" : {
+        "required" : [ "logoutInactiveUsersEnabled", "userInactivityTimeout" ],
+        "type" : "object",
+        "properties" : {
+          "logoutInactiveUsersEnabled" : {
+            "type" : "boolean",
+            "description" : "True if automatic logout is enabled"
+          },
+          "userInactivityTimeout" : {
+            "minimum" : 1,
+            "type" : "integer",
+            "description" : "User inactivity timeout",
+            "format" : "int32"
+          }
+        },
+        "description" : "Configuration of automatic logout.",
+        "example" : {
+          "logoutInactiveUsersEnabled" : true,
+          "userInactivityTimeout" : 900
+        }
+      },
+      "ConcurrentSessionPolicy" : {
+        "required" : [ "adminLimit", "userLimit" ],
+        "type" : "object",
+        "properties" : {
+          "userLimit" : {
+            "type" : "integer",
+            "description" : "Session limit for regular users (0 = no limit)",
+            "format" : "int32"
+          },
+          "adminLimit" : {
+            "type" : "integer",
+            "description" : "Session limit for admin users (0 = no limit)",
+            "format" : "int32"
+          }
+        },
+        "description" : "The configuration of the concurrent sessions policy. Set '0' to disable session limitation."
+      },
+      "UserSessionsConfig" : {
+        "type" : "object",
+        "properties" : {
+          "concurrentSessionPolicyDto" : {
+            "$ref" : "#/components/schemas/ConcurrentSessionPolicy"
+          },
+          "automaticLogoutDto" : {
+            "$ref" : "#/components/schemas/AutomaticLogoutConfiguration"
+          }
+        },
+        "description" : "The configuration of user sessions - concurrent sessions policy and automatic logout."
+      },
+      "UserSession" : {
+        "required" : [ "creationTime", "loginType", "nodeId", "sessionId", "tenantUuid", "userId" ],
+        "type" : "object",
+        "properties" : {
+          "userId" : {
+            "type" : "string",
+            "description" : "User id"
+          },
+          "nodeId" : {
+            "type" : "integer",
+            "description" : "Node on which user session exists",
+            "format" : "int32"
+          },
+          "sessionId" : {
+            "type" : "string",
+            "description" : "User session id"
+          },
+          "creationTime" : {
+            "type" : "integer",
+            "description" : "User session creation timestamp",
+            "format" : "int64"
+          },
+          "lastAccessedTimestamp" : {
+            "type" : "integer",
+            "description" : "Timestamp when session was recently accessed",
+            "format" : "int64"
+          },
+          "tenantUuid" : {
+            "type" : "string",
+            "description" : "UUID of tenant to which user has logged in (or cluster UUID if user has logged in to CMC)"
+          },
+          "loginType" : {
+            "type" : "string",
+            "description" : "The way user has logged in",
+            "enum" : [ "LOCAL", "LDAP", "SSO_MANAGED", "DEVOPSTOKEN" ]
+          },
+          "device" : {
+            "type" : "string",
+            "description" : "Device on which user has logged in"
+          },
+          "ip" : {
+            "type" : "string",
+            "description" : "IP from which has logged in"
+          }
+        },
+        "description" : "Managed user session instance"
+      },
+      "NetworkZone" : {
+        "type" : "object",
+        "properties" : {
+          "alternativeZones" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "A list of alternative network zones.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "numOfOneAgentsUsing" : {
+            "type" : "integer",
+            "description" : "The number of OneAgents that are using ActiveGates in the network zone.",
+            "format" : "int32",
+            "readOnly" : true
+          },
+          "numOfConfiguredOneAgents" : {
+            "type" : "integer",
+            "description" : "The number of OneAgents that are configured to use the network zone as primary.",
+            "format" : "int32",
+            "readOnly" : true
+          },
+          "numOfOneAgentsFromOtherZones" : {
+            "type" : "integer",
+            "description" : "The number of OneAgents from other network zones that are using ActiveGates in the network zone. \n\n This is a fraction of **numOfOneAgentsUsing**. \n\nOne possible reason for switching to another zone is that a firewall is preventing a OneAgent from connecting to any ActiveGate in the preferred network zone.\n\n",
+            "format" : "int32",
+            "readOnly" : true
+          },
+          "numOfConfiguredActiveGates" : {
+            "type" : "integer",
+            "description" : "The number of ActiveGates in the network zone.",
+            "format" : "int32",
+            "readOnly" : true
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "A short description of the network zone"
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the network zone",
+            "readOnly" : true
+          }
+        },
+        "description" : "Configuration of a network zone."
+      },
+      "NetworkZoneList" : {
+        "required" : [ "networkZones" ],
+        "type" : "object",
+        "properties" : {
+          "networkZones" : {
+            "type" : "array",
+            "description" : "A list of network zones.",
+            "items" : {
+              "$ref" : "#/components/schemas/NetworkZone"
+            }
+          }
+        },
+        "description" : "A list of network zones."
+      },
+      "EntityShortRepresentation" : {
+        "required" : [ "id" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the Dynatrace entity."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the Dynatrace entity.",
+            "readOnly" : true
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "A short description of the Dynatrace entity.",
+            "readOnly" : true
+          }
+        },
+        "description" : "The short representation of a Dynatrace entity.",
+        "example" : {
+          "id" : "6a98d7bc-abb9-44f8-ae6a-73e68e71812a",
+          "name" : "Dynatrace entity",
+          "description" : "Dynatrace entity for the REST API example"
+        }
+      },
+      "LocationCollectionElement" : {
+        "required" : [ "entityId", "name", "type" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the location."
+          },
+          "entityId" : {
+            "type" : "string",
+            "description" : "The Dynatrace entity ID of the location."
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "The type of the location.",
+            "enum" : [ "CLUSTER", "PRIVATE", "PUBLIC" ]
+          },
+          "cloudPlatform" : {
+            "type" : "string",
+            "description" : "The cloud provider where the location is hosted. \n\n Only applicable to `PUBLIC` locations.",
+            "enum" : [ "ALIBABA", "AMAZON_EC2", "AZURE", "DYNATRACE_CLOUD", "GOOGLE_CLOUD", "INTEROUTE", "OTHER", "PHYSICAL", "UNDEFINED" ]
+          },
+          "ips" : {
+            "type" : "array",
+            "description" : "The list of IP addresses assigned to the location. \n\n Only applicable to `PUBLIC` locations.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "stage" : {
+            "type" : "string",
+            "description" : "Determines the location stage",
+            "enum" : [ "BETA", "COMING_SOON", "GA" ]
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "Determines whether a location is enabled, disabled or hidden",
+            "enum" : [ "DISABLED", "ENABLED", "HIDDEN" ]
+          }
+        },
+        "description" : "A list of synthetic locations."
+      },
+      "SyntheticLocations" : {
+        "required" : [ "locations" ],
+        "type" : "object",
+        "properties" : {
+          "locations" : {
+            "type" : "array",
+            "description" : "A list of synthetic locations.",
+            "items" : {
+              "$ref" : "#/components/schemas/LocationCollectionElement"
+            }
+          }
+        },
+        "description" : "A list of synthetic locations.",
+        "example" : {
+          "locations" : [ {
+            "name" : "Gdansk",
+            "entityId" : "GEOLOCATION-B8D793BCA914E0AF",
+            "type" : "PUBLIC",
+            "cloudPlatform" : "AMAZON_EC2",
+            "ips" : [ "134.189.153.97", "134.189.153.98" ],
+            "stage" : "GA"
+          }, {
+            "name" : "My private location",
+            "entityId" : "SYNTHETIC_LOCATION-53F47ECB33907667",
+            "type" : "PRIVATE"
+          } ]
+        }
+      },
+      "PrivateSyntheticLocation" : {
+        "required" : [ "entityId", "latitude", "longitude", "name", "nodes", "type" ],
+        "type" : "object",
+        "description" : "Configuration of a private synthetic location. \n\n Some fields are inherited from the base *SyntheticLocation* object.",
+        "example" : {
+          "type" : "PRIVATE",
+          "name" : "Linz Location",
+          "latitude" : 48.306351,
+          "longitude" : 14.287399,
+          "nodes" : [ "93302281" ],
+          "status" : "ENABLED"
+        },
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/SyntheticLocation"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "nodes" : {
+              "type" : "array",
+              "description" : "A list of synthetic nodes belonging to a location.",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        } ]
+      },
+      "EntityIdDto" : {
+        "required" : [ "entityId" ],
+        "type" : "object",
+        "properties" : {
+          "entityId" : {
+            "type" : "string",
+            "description" : "Entity ID to be transferred"
+          }
+        },
+        "description" : "A DTO for entity ID."
+      },
+      "PublicSyntheticLocation" : {
+        "required" : [ "browserType", "browserVersion", "cloudPlatform", "entityId", "ips", "latitude", "longitude", "name", "stage", "type" ],
+        "type" : "object",
+        "description" : "Configuration of a public synthetic location. \n\n Some fields are inherited from the base *SyntheticLocation* object.",
+        "example" : {
+          "entityId" : "GEOLOCATION-95196F3C9A4F4215",
+          "type" : "PUBLIC",
+          "name" : "Amazon US East",
+          "countryCode" : "US",
+          "regionCode" : "VA",
+          "city" : "Amazon US East (N. Virginia)",
+          "latitude" : 39.0436,
+          "longitude" : -77.4875,
+          "cloudPlatform" : "AMAZON_EC2",
+          "ips" : [ "134.189.153.97", "134.189.153.98" ],
+          "stage" : "GA",
+          "browserType" : "Chrome",
+          "browserVersion" : "69.0.3497.81",
+          "status" : "ENABLED"
+        },
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/SyntheticLocation"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "cloudPlatform" : {
+              "type" : "string",
+              "description" : "The cloud provider where the location is hosted.",
+              "enum" : [ "ALIBABA", "AMAZON_EC2", "AZURE", "DYNATRACE_CLOUD", "GOOGLE_CLOUD", "INTEROUTE", "OTHER", "PHYSICAL", "UNDEFINED" ]
+            },
+            "ips" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "description" : "The list of IP addresses assigned to the location.",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "stage" : {
+              "type" : "string",
+              "description" : "The stage of the location.",
+              "enum" : [ "BETA", "COMING_SOON", "GA" ]
+            },
+            "browserType" : {
+              "type" : "string",
+              "description" : "The browser type."
+            },
+            "browserVersion" : {
+              "type" : "string",
+              "description" : "The browser version."
+            }
+          }
+        } ]
+      },
+      "SyntheticLocation" : {
+        "required" : [ "entityId", "latitude", "longitude", "name", "type" ],
+        "type" : "object",
+        "properties" : {
+          "entityId" : {
+            "type" : "string",
+            "description" : "The Dynatrace entity ID of the location."
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "Defines the actual set of fields depending on the value. See one of the following objects: \n\n* `PUBLIC` -> PublicSyntheticLocation \n* `PRIVATE` -> PrivateSyntheticLocation \n* `CLUSTER` -> PrivateSyntheticLocation \n",
+            "enum" : [ "CLUSTER", "PRIVATE", "PUBLIC" ]
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the location."
+          },
+          "countryCode" : {
+            "type" : "string",
+            "description" : "The country code of the location. \n\n Use the alpha-2 code of the [ISO 3166-2 standard](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes), (for example, `AT` for Austria or `PL` for Poland)."
+          },
+          "regionCode" : {
+            "type" : "string",
+            "description" : "The region code of the location. \n\n For the [USA](https://www.iso.org/obp/ui/#iso:code:3166:US) or [Canada](https://www.iso.org/obp/ui/#iso:code:3166:CA) use ISO 3166-2 state codes (without `US-` or `CA-` prefix), for example, `VA` for Virginia or `OR` for Oregon. \n\n For the rest of the world use [FIPS 10-4 codes](https://en.wikipedia.org/wiki/List_of_FIPS_region_codes)."
+          },
+          "city" : {
+            "type" : "string",
+            "description" : "The city of the location."
+          },
+          "latitude" : {
+            "type" : "number",
+            "description" : "The latitude of the location in `DDD.dddd` format.",
+            "format" : "double"
+          },
+          "longitude" : {
+            "type" : "number",
+            "description" : "The longitude of the location in `DDD.dddd` format.",
+            "format" : "double"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "The status of the location",
+            "enum" : [ "DISABLED", "ENABLED", "HIDDEN" ]
+          }
+        },
+        "description" : "Configuration of a synthetic location. \n\n **countryCode**, **regionCode**, **city** parameters are optional as they can be retrieved based on **latitude** and **longitude** of location.\n\n The actual set of fields depends on the **type** of the location.",
+        "discriminator" : {
+          "propertyName" : "type"
+        }
+      },
+      "NodeCollectionElement" : {
+        "required" : [ "activeGateVersion", "autoUpdateEnabled", "browserMonitorsEnabled", "entityId", "healthCheckStatus", "hostname", "ips", "oneAgentRoutingEnabled ", "operatingSystem", "playerVersion", "status", "version" ],
+        "type" : "object",
+        "properties" : {
+          "entityId" : {
+            "type" : "string",
+            "description" : "The ID of a node."
+          },
+          "hostname" : {
+            "type" : "string",
+            "description" : "The hostname of a node."
+          },
+          "ips" : {
+            "type" : "array",
+            "description" : "The IP of a node.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "version" : {
+            "type" : "string",
+            "description" : "The version of a node"
+          },
+          "browserMonitorsEnabled" : {
+            "type" : "boolean",
+            "description" : "Browser check capabilities enabled flag."
+          },
+          "activeGateVersion" : {
+            "type" : "string",
+            "description" : "The version of the Active Gate."
+          },
+          "oneAgentRoutingEnabled " : {
+            "type" : "boolean",
+            "description" : "The Active Gate has the One Agent routing enabled ('true') or not ('false')."
+          },
+          "operatingSystem" : {
+            "type" : "string",
+            "description" : "The Active Gate's host operating system."
+          },
+          "autoUpdateEnabled" : {
+            "type" : "boolean",
+            "description" : "The Active Gate has the Auto update option enabled ('true') or not ('false')"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "The status of the synthetic node."
+          },
+          "playerVersion" : {
+            "type" : "string",
+            "description" : "The version of the synthetic player."
+          },
+          "healthCheckStatus" : {
+            "type" : "string",
+            "description" : "The health check status of the synthetic node."
+          }
+        },
+        "description" : "The short representation of a synthetic object. Only contains the ID and the display name."
+      },
+      "Nodes" : {
+        "required" : [ "nodes" ],
+        "type" : "object",
+        "properties" : {
+          "nodes" : {
+            "type" : "array",
+            "description" : "A list of synthetic nodes",
+            "items" : {
+              "$ref" : "#/components/schemas/NodeCollectionElement"
+            }
+          }
+        },
+        "description" : "A list of synthetic nodes",
+        "example" : {
+          "nodes" : [ {
+            "entityId" : "3086117876",
+            "hostname" : "gdn.dyna.trace",
+            "ips" : [ "238.245.160.14" ],
+            "version" : "1.161.0.20181210-173639",
+            "browserMonitorsEnabled" : true,
+            "activeGateVersion" : "1.172.2.20190607-040913",
+            "oneAgentRoutingEnabled" : true,
+            "operatingSystem" : "Linux",
+            "autoUpdateEnabled" : true,
+            "status" : "Running",
+            "playerVersion" : "1.179.0.20190920-145430",
+            "healthCheckStatus" : "Ok"
+          } ]
+        }
+      },
+      "Node" : {
+        "required" : [ "activeGateVersion", "autoUpdateEnabled", "browserMonitorsEnabled", "browserType", "browserVersion", "entityId", "healthCheckStatus", "hostname", "ips", "oneAgentRoutingEnabled ", "operatingSystem", "playerVersion", "status", "version" ],
+        "type" : "object",
+        "properties" : {
+          "entityId" : {
+            "type" : "string",
+            "description" : "The ID of the synthetic node."
+          },
+          "hostname" : {
+            "type" : "string",
+            "description" : "The hostname of the synthetic node."
+          },
+          "ips" : {
+            "type" : "array",
+            "description" : "The IP of the synthetic node.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "version" : {
+            "type" : "string",
+            "description" : "The version of the synthetic node."
+          },
+          "browserMonitorsEnabled" : {
+            "type" : "boolean",
+            "description" : "The synthetic node is able to execute browser monitors (`true`) or not (`false`)."
+          },
+          "activeGateVersion" : {
+            "type" : "string",
+            "description" : "The version of the Active Gate."
+          },
+          "oneAgentRoutingEnabled " : {
+            "type" : "boolean",
+            "description" : "The Active Gate has the One Agent routing enabled ('true') or not ('false')."
+          },
+          "operatingSystem" : {
+            "type" : "string",
+            "description" : "The Active Gate's host operating system."
+          },
+          "autoUpdateEnabled" : {
+            "type" : "boolean",
+            "description" : "The Active Gate has the Auto update option enabled ('true') or not ('false')"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "The status of the synthetic node."
+          },
+          "playerVersion" : {
+            "type" : "string",
+            "description" : "The version of the synthetic player."
+          },
+          "healthCheckStatus" : {
+            "type" : "string",
+            "description" : "The health check status of the synthetic node."
+          },
+          "browserType" : {
+            "type" : "string",
+            "description" : "The browser type."
+          },
+          "browserVersion" : {
+            "type" : "string",
+            "description" : "The browser version."
+          }
+        },
+        "description" : "Configuration of a synthetic node. \n\n A *synthetic node* is an ActiveGate that is able to execute synthetic monitors.",
+        "example" : {
+          "entityId" : "3086117876",
+          "hostname" : "gdn.dyna.trace",
+          "ips" : [ "238.245.160.14" ],
+          "version" : "1.161.0.20181210-173639",
+          "browserMonitorsEnabled" : true,
+          "activeGateVersion" : "1.172.2.20190607-040913",
+          "oneAgentRoutingEnabled" : true,
+          "operatingSystem" : "Linux",
+          "autoUpdateEnabled" : true,
+          "status" : "Running",
+          "playerVersion" : "1.179.0.20190920-145430",
+          "healthCheckStatus" : "Ok",
+          "browserType" : "Chrome",
+          "browserVersion" : "69.0.3497.81"
+        }
+      },
+      "UpdateToken" : {
+        "type" : "object",
+        "properties" : {
+          "revoked" : {
+            "type" : "boolean",
+            "description" : "The token is revoked (`true`) or active (`false`)."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the token."
+          },
+          "scopes" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "The list of permissions assigned to the token. \n\nApart from the new permissions, you need to submit the existing permissions you want to keep, too. Any existing permission, missing in the payload, is revoked.\n\n* `DiagnosticExport`: DiagnosticExport. \n* `ControlManagement`: ControlManagement. \n* `UnattendedInstall`: UnattendedInstall. \n* `ServiceProviderAPI`: Service Provider API. \n* `ExternalSyntheticIntegration`: Create and read synthetic monitors, locations, and nodes. \n* `ClusterTokenManagement`: Cluster token management. \n* `ReadSyntheticData`: Read synthetic monitors, locations, and nodes. \n* `Nodekeeper`: Nodekeeper access for node management. \n* `EnvironmentTokenManagement`: \"Token Management\" Token creation for existing environments. \n",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "DiagnosticExport", "ControlManagement", "UnattendedInstall", "ServiceProviderAPI", "ExternalSyntheticIntegration", "ClusterTokenManagement", "ReadSyntheticData", "Nodekeeper", "EnvironmentTokenManagement" ]
+            }
+          }
+        }
+      },
+      "CreateToken" : {
+        "required" : [ "name", "scopes" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the token."
+          },
+          "expiresIn" : {
+            "$ref" : "#/components/schemas/Duration"
+          },
+          "scopes" : {
+            "minItems" : 1,
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "The list of permissions to be assigned to the token.\n\n* `DiagnosticExport`: DiagnosticExport. \n* `ControlManagement`: ControlManagement. \n* `UnattendedInstall`: UnattendedInstall. \n* `ServiceProviderAPI`: Service Provider API. \n* `ExternalSyntheticIntegration`: Create and read synthetic monitors, locations, and nodes. \n* `ClusterTokenManagement`: Cluster token management. \n* `ReadSyntheticData`: Read synthetic monitors, locations, and nodes. \n* `Nodekeeper`: Nodekeeper access for node management. \n* `EnvironmentTokenManagement`: \"Token Management\" Token creation for existing environments. \n",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "DiagnosticExport", "ControlManagement", "UnattendedInstall", "ServiceProviderAPI", "ExternalSyntheticIntegration", "ClusterTokenManagement", "ReadSyntheticData", "Nodekeeper", "EnvironmentTokenManagement" ]
+            }
+          }
+        }
+      },
+      "StubList" : {
+        "required" : [ "values" ],
+        "type" : "object",
+        "properties" : {
+          "values" : {
+            "type" : "array",
+            "description" : "An ordered list of short representations of Dynatrace entities.",
+            "items" : {
+              "$ref" : "#/components/schemas/EntityShortRepresentation"
+            }
+          }
+        },
+        "description" : "An ordered list of short representations of Dynatrace entities.",
+        "example" : {
+          "values" : [ {
+            "id" : "6a98d7bc-abb9-44f8-ae6a-73e68e71812a",
+            "name" : "Dynatrace entity 1",
+            "description" : "Dynatrace entity 1 for the REST API example"
+          }, {
+            "id" : "ee70f7d3-9a4e-4f5f-94d2-c9d6156f1618",
+            "name" : "Dynatrace entity 2"
+          }, {
+            "id" : "8cdabe77-9e1a-4be8-b3df-269dd6fa9d7f"
+          } ]
+        }
+      },
+      "TokenMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the token.",
+            "readOnly" : true
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the token."
+          },
+          "userId" : {
+            "type" : "string",
+            "description" : "The owner of the token.",
+            "readOnly" : true
+          },
+          "revoked" : {
+            "type" : "boolean",
+            "description" : "Revocation status of the token. Revoked tokens are disabled."
+          },
+          "created" : {
+            "type" : "integer",
+            "description" : "The creation time as a unix timestamp in milliseconds.",
+            "format" : "int64",
+            "readOnly" : true
+          },
+          "expires" : {
+            "type" : "integer",
+            "description" : "The expiration time as a unix timestamp in milliseconds.",
+            "format" : "int64"
+          },
+          "lastUse" : {
+            "type" : "integer",
+            "description" : "The unix timestamp in milliseconds when the token was last used.",
+            "format" : "int64",
+            "readOnly" : true
+          },
+          "scopes" : {
+            "type" : "array",
+            "description" : "The list of permissions, assigned to the token.",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "ClusterTokenManagement", "ControlManagement", "DiagnosticExport", "EnvironmentTokenManagement", "ExternalSyntheticIntegration", "Nodekeeper", "ReadSyntheticData", "ServiceProviderAPI", "UnattendedInstall" ]
+            }
+          }
+        },
+        "description" : "Metadata of a token.",
+        "example" : {
+          "id" : "acbed0c4-4ef1-4303-991f-102510a69322",
+          "name" : "myToken",
+          "userId" : "john.smith",
+          "revoked" : true,
+          "created" : 1554076800000,
+          "expires" : 1585976400000,
+          "lastUse" : 1554354000000,
+          "scopes" : [ "DataExport", "ReadConfig", "WriteConfig" ]
+        }
+      }
+    },
+    "__securitySchemes" : {
+      "EnvironmentTokenManagement" : {
+        "type" : "apiKey",
+        "description" : "API token with the ***Environment Token Management*** permission. Format: \"Authorization: Api-Token abcdefjhij1234567890\"",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "ServiceProviderAPI" : {
+        "type" : "apiKey",
+        "description" : "API token that enables access to Dynatrace Managed cluster management interface. Format: \"Authorization: Api-Token abcdefjhij1234567890\"",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "ApiToken" : {
+        "type" : "apiKey",
+        "description" : "API token with any permission. Format: \"Authorization: Api-Token abcdefjhij1234567890\"",
+        "name" : "Authorization",
+        "in" : "header"
+      },
+      "TokenManagement" : {
+        "type" : "apiKey",
+        "description" : "API token with the **Cluster Token Management** permission. Format: \"Authorization: Api-Token abcdefjhij1234567890\"",
+        "name" : "Authorization",
+        "in" : "header"
+      }
+    }
+  }
+}

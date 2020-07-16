@@ -1,0 +1,5134 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Dynatrace Cluster API",
+    "description" : "Dynatrace Managed exposes cluster management functionality via REST endpoints. This interactive documentation also acts as a REST client you can use to interact with Dynatrace Managed clusters. \n\nTo authorize, use the API Token generated in [Settings - API Tokens page](/cmc#cm/apiToken). The HTTP status code of the response shows the result of your request. The expected response code for a successful request is documented individually per REST endpoint. Additionally the following error response codes can occur in our REST interface:\n\n* 400 - Bad Request: Some request parameters are not correct. See response body for details.\n* 401 - Unauthorized: A valid authorization header is required but is missing.\n* 403 - Forbidden: Execution of request is not allowed, e.g. api-token is invalid.\n* 404 - Not Found: Endpoint does not exist or some entities could not be found, e.g. User account.\n* 500 - Internal Server Error: See response body for details.\n",
+    "version" : "1.0"
+  },
+  "servers" : [ {
+    "url" : "{{cmc}}/api/v1.0/onpremise",
+    "variables" : { }
+  } ],
+  "paths" : {
+    "/backup/clusterCheckDir" : {
+      "get" : {
+        "tags" : [ "Backup configuration" ],
+        "summary" : "Check if given directory is valid for backup in the cluster",
+        "operationId" : "checkBackupDirForCluster",
+        "parameters" : [ {
+          "name" : "dir",
+          "in" : "query",
+          "description" : "Backup store directory path parameter. Missing or empty values will return a 'Bad Request'",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "datacenter",
+          "in" : "query",
+          "description" : "Datacenter where backup should be executed. Should be omitted for Single Datacenter Cluster",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StorageTestImpl"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "No directory information received for validation"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/backup/config" : {
+      "get" : {
+        "tags" : [ "Backup configuration" ],
+        "summary" : "Return backup configuration overview",
+        "operationId" : "getBackupConfig",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/backupConfigDto"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Backup configuration" ],
+        "summary" : "Change backup configuration",
+        "operationId" : "changeBackupConfig",
+        "requestBody" : {
+          "description" : "The JSON body of the request, containing new state of backup configuration.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/backupConfigDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "512" : {
+            "description" : "Configuration change failed."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/backup/config/status" : {
+      "get" : {
+        "tags" : [ "Backup configuration" ],
+        "summary" : "Check status of change backup configuration",
+        "operationId" : "getStatusOfChangeBackupConfig",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "404" : {
+            "description" : "There is no response for your request id, it might have been already removed from cache if request was made several hours ago. Please make sure that request id is correct and not empty."
+          },
+          "207" : {
+            "description" : "Request accepted. There will be an id in the response body to check status through the config/status endpoint."
+          },
+          "512" : {
+            "description" : "Configuration change failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/bootstrapManagement/files/secureConfigProperties" : {
+      "get" : {
+        "tags" : [ "Startup configuration" ],
+        "summary" : "Get secure config properties",
+        "operationId" : "getSecureConfigProperties",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FileDto"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "No 'secure.config.properties' file available"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/bootstrapManagement/files/runtimeProperties" : {
+      "get" : {
+        "tags" : [ "Startup configuration" ],
+        "summary" : "Get runtime properties",
+        "operationId" : "getRuntimeProperties",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FileDto"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "No 'runtime.properties' file available"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/bootstrapManagement/files/installerMetadata" : {
+      "get" : {
+        "tags" : [ "Startup configuration" ],
+        "summary" : "Get installer metadata",
+        "operationId" : "getInstallerMetadata",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstallerMetadata"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/bootstrapManagement/files/ag/configProperties" : {
+      "get" : {
+        "tags" : [ "Startup configuration" ],
+        "summary" : "Get ActiveGate config properties",
+        "operationId" : "getActiveGateConfigProperties",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FileDto"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "No 'config.properties' file available"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/bootstrapManagement/files/ag/secureConfigProperties" : {
+      "get" : {
+        "tags" : [ "Startup configuration" ],
+        "summary" : "Get ActiveGate secure config properties",
+        "operationId" : "getActiveGateSecureConfigProperties",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FileDto"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "No 'secure.config.properties' file available"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/bootstrapManagement/newNodeId" : {
+      "post" : {
+        "tags" : [ "Startup configuration" ],
+        "summary" : "Get new node id",
+        "operationId" : "generateNewNodeId",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FileDto"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "Failed to generate new node Id"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/bootstrapManagement/files/keyStore" : {
+      "get" : {
+        "tags" : [ "Startup configuration" ],
+        "summary" : "Get key store",
+        "operationId" : "getKeyStore",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FileDto"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "No 'key store' file available"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/bootstrapManagement/files/configProperties" : {
+      "get" : {
+        "tags" : [ "Startup configuration" ],
+        "summary" : "Get config properties",
+        "operationId" : "getConfigProperties",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FileDto"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "No 'config.properties' file available"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/endpoint/webUiAddress" : {
+      "get" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Get WebUi address",
+        "operationId" : "getWebUiAddress",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddressWrapper"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Update WebUi address",
+        "operationId" : "updateWebUiAddress",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddressWrapper"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddressWrapper"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "Operation failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/endpoint/cdnAddress" : {
+      "get" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Get root CDN address",
+        "operationId" : "getRootCDNAddress",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddressWrapper"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Update root CDN address",
+        "operationId" : "updateRootCDNAddress",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddressWrapper"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddressWrapper"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "Operation failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/endpoint/beaconForwarderAddress" : {
+      "get" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Get beacon forwarder address",
+        "operationId" : "getBeaconForwarderAddress",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddressWrapper"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Update beacon forwarder address",
+        "operationId" : "updateBeaconForwarderAddress",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddressWrapper"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddressWrapper"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "Operation failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/endpoint/publicIp/domain/{nodeId}" : {
+      "get" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Get node IP for domain",
+        "operationId" : "getNodeIpForDomain",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "path",
+          "description" : "Node ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddressWrapper"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Node not found by id"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Store node IP for domain",
+        "operationId" : "storeNodeIpForDomain",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "path",
+          "description" : "Node ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "String",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddressWrapper"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "Operation failed"
+          },
+          "550" : {
+            "description" : "Invalid IP address"
+          },
+          "551" : {
+            "description" : "Storing IP failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/endpoint/publicIp/agents/{nodeId}" : {
+      "get" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Get node IP for OneAgents",
+        "operationId" : "getNodeIpForAgents",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "path",
+          "description" : "Node ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddressWrapper"
+                }
+              }
+            }
+          },
+          "550" : {
+            "description" : "Invalid address"
+          },
+          "552" : {
+            "description" : "Collector not found"
+          },
+          "544" : {
+            "description" : "Timeout"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Public endpoints" ],
+        "summary" : "Store node IP for OneAgents",
+        "operationId" : "storeNodeIpForAgents",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "path",
+          "description" : "Node ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "String",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "510" : {
+            "description" : "Operation failed"
+          },
+          "540" : {
+            "description" : "Storing configuration failed"
+          },
+          "550" : {
+            "description" : "Invalid IP address"
+          },
+          "552" : {
+            "description" : "Collector not found"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/cluster/configuration" : {
+      "get" : {
+        "tags" : [ "Cluster" ],
+        "summary" : "Cluster nodes configuration",
+        "operationId" : "nodesConfiguration",
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Cluster" ],
+        "summary" : "Configure cluster nodes responsibilities",
+        "operationId" : "configureNodes",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ClusterNodesConfigDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/cluster/configuration/status" : {
+      "get" : {
+        "tags" : [ "Cluster" ],
+        "summary" : "Get cluster nodes configuration current status",
+        "operationId" : "configureNodesStatus",
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/cluster/configuration/status/{requestedAt}" : {
+      "get" : {
+        "tags" : [ "Cluster" ],
+        "summary" : "Get cluster nodes configuration request status",
+        "operationId" : "configureNodesStatus_1",
+        "parameters" : [ {
+          "name" : "requestedAt",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/cluster" : {
+      "get" : {
+        "tags" : [ "Cluster" ],
+        "summary" : "Get information about known servers",
+        "operationId" : "getClustersInfo",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/multiDc/migration/clusterState" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get cluster state of migration from single to multi datacenter cluster and its sub steps | maturity=EARLY_ADOPTER",
+        "operationId" : "getClusterState",
+        "responses" : {
+          "200" : {
+            "description" : "Successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SingleToMultiDcMigrationClusterState"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Modify the overall cluster state of migration from single to multi datacenter cluster | maturity=EARLY_ADOPTER",
+        "operationId" : "modifyClusterState",
+        "parameters" : [ {
+          "name" : "status",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "FAILED", "IN_PROGRESS", "NOT_STARTED", "SUCCEEDED" ]
+          }
+        }, {
+          "name" : "details",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "default" : ""
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/inServerconfigState" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get state of in-server config migration (from single to multi datacenter cluster) | maturity=EARLY_ADOPTER",
+        "operationId" : "getMigrationStateForAllComponents",
+        "responses" : {
+          "200" : {
+            "description" : "Successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InServerConfigDatacenterMigrationState"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/clusterState/{subStep}" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get sub step of migration from single to multi datacenter cluster | maturity=EARLY_ADOPTER",
+        "operationId" : "getSubStepState",
+        "parameters" : [ {
+          "name" : "subStep",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "SERVER_RECONFIGURATION" ]
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MigrationState"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "put" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Modify sub step of migration from single to multi datacenter cluster | maturity=EARLY_ADOPTER",
+        "operationId" : "modifySubStepState",
+        "parameters" : [ {
+          "name" : "subStep",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "SERVER_RECONFIGURATION" ]
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "FAILED", "IN_PROGRESS", "NOT_STARTED", "SUCCEEDED" ]
+          }
+        }, {
+          "name" : "details",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/datacenterTopology" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get cluster topology draft | maturity=EARLY_ADOPTER",
+        "operationId" : "getMultiDCTopologyDraft",
+        "responses" : {
+          "200" : {
+            "description" : "Successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MultiDatacenterTopology"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "post" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Create cluster topology draft | maturity=EARLY_ADOPTER",
+        "operationId" : "createMultiDCTopologyDraft",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DatacenterMigrationDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Invalid datacenter migration draft"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      },
+      "delete" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Delete cluster topology draft | maturity=EARLY_ADOPTER",
+        "operationId" : "deleteMultiDCTopologyDraft",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/clusterNodes/currentDc" : {
+      "post" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Start cluster topology configuration - open firewall ports | maturity=EARLY_ADOPTER",
+        "operationId" : "initTopologyConfiguration",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/clusterNodes/currentDc/{requestId}" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get topology configuration status | maturity=EARLY_ADOPTER",
+        "operationId" : "getTopologyConfiguration",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "207" : {
+            "description" : "Your request is still progressed."
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "404" : {
+            "description" : "There is no response for your request id. Please make sure that request id is correct and retry. You may get this error when components are restarting or this request is already removed from cache"
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/nodekeeper/healthCheck" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get nodekeeper helathcheck | maturity=EARLY_ADOPTER",
+        "operationId" : "getMultiDcNodekeeperHealthcheck",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/cassandra/currentDc" : {
+      "post" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Start cassandra migration in current datacenter | maturity=EARLY_ADOPTER",
+        "operationId" : "initMigrateCassandraOldDatacenter",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/cassandra/currentDc/{requestId}" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get cassandra migration status in current datacenter | maturity=EARLY_ADOPTER",
+        "operationId" : "getMigrateCassandraOldDatacenter",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "207" : {
+            "description" : "Your request is still progressed."
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "404" : {
+            "description" : "There is no response for your request id. Please make sure that request id is correct and retry. You may get this error when components are restarting or this request is already removed from cache"
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/cassandra/newDc" : {
+      "post" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Start cassandra migration in new datacenter | maturity=EARLY_ADOPTER",
+        "operationId" : "initMigrateCassandraNewDatacenter",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/cassandra/newDc/{requestId}" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get cassandra migration status in new datacenter | maturity=EARLY_ADOPTER",
+        "operationId" : "getMigrateCassandraNewDatacenter",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "207" : {
+            "description" : "Your request is still progressed."
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "404" : {
+            "description" : "There is no response for your request id. Please make sure that request id is correct and retry. You may get this error when components are restarting or this request is already removed from cache"
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/elasticsearch" : {
+      "post" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Start elasticsearch migration | maturity=EARLY_ADOPTER",
+        "operationId" : "migrateElasticsearch",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/elasticsearch/{requestId}" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get elasticsearch migration status | maturity=EARLY_ADOPTER",
+        "operationId" : "getMigrateElasticsearchStatus",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "207" : {
+            "description" : "Your request is still progressed."
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "404" : {
+            "description" : "There is no response for your request id. Please make sure that request id is correct and retry. You may get this error when components are restarting or this request is already removed from cache"
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/elasticsearch/indexMigrationStatus" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Verify elasticsearch migration status | maturity=EARLY_ADOPTER",
+        "operationId" : "getVerifyElasticsearchMigration",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/cassandra/rebuildStatus" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Verify cassandra rebuild status | maturity=EARLY_ADOPTER",
+        "operationId" : "getVerifyCassandraStatus",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/server" : {
+      "post" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Start server migration in current datacenter | maturity=EARLY_ADOPTER",
+        "operationId" : "migrateServer",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/server/{requestId}" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get server migration status | maturity=EARLY_ADOPTER",
+        "operationId" : "getMigrateServerStatus",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "207" : {
+            "description" : "Your request is still progressed."
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "404" : {
+            "description" : "There is no response for your request id. Please make sure that request id is correct and retry. You may get this error when components are restarting or this request is already removed from cache"
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/serverRecovery" : {
+      "post" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Start server after disaster recovery in current datacenter | maturity=EARLY_ADOPTER",
+        "operationId" : "startComponentsAfterMigration",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/serverRecovery/{requestId}" : {
+      "get" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Get status after server start in disaster recovery | maturity=EARLY_ADOPTER",
+        "operationId" : "startComponentsAfterMigration_1",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "207" : {
+            "description" : "Your request is still progressed."
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "404" : {
+            "description" : "There is no response for your request id. Please make sure that request id is correct and retry. You may get this error when components are restarting or this request is already removed from cache"
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/lostDatacenterCleanUp" : {
+      "post" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Clean up lost datacenter settings | maturity=EARLY_ADOPTER",
+        "operationId" : "initDatacenterCleanUp",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/multiDc/migration/finish" : {
+      "post" : {
+        "tags" : [ "Migration to multi-datacenter deployment" ],
+        "summary" : "Finish migration | maturity=EARLY_ADOPTER",
+        "operationId" : "finishMigration",
+        "responses" : {
+          "200" : {
+            "description" : "Successful"
+          },
+          "400" : {
+            "description" : "Request is incorrect please validate your path and arguments."
+          },
+          "500" : {
+            "description" : "Unexpected problem in server."
+          },
+          "512" : {
+            "description" : "There was problem in your request. Please check body or logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ],
+        "x-maturity" : "EARLY_ADOPTER"
+      }
+    },
+    "/firewallManagement/clusterNodes" : {
+      "get" : {
+        "tags" : [ "Firewall configuration" ],
+        "summary" : "Get cluster nodes",
+        "operationId" : "getClusterNodes",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClusterNodesConfigDto"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "Operation failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/firewallManagement/removeClusterNode" : {
+      "post" : {
+        "tags" : [ "Firewall configuration" ],
+        "summary" : "Remove cluster node",
+        "operationId" : "removeClusterNodes",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FirewallNodeIp"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "422" : {
+            "description" : "Removal of node failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/firewallManagement/removeClusterNode/{ip}" : {
+      "delete" : {
+        "tags" : [ "Firewall configuration" ],
+        "operationId" : "removeClusterNodesDeleteMethod",
+        "parameters" : [ {
+          "name" : "ip",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "scope",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/firewallManagement/addClusterNode" : {
+      "post" : {
+        "tags" : [ "Firewall configuration" ],
+        "summary" : "Add cluster node",
+        "operationId" : "addClusterNodes",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NodeConfigDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "422" : {
+            "description" : "Addition of node failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/nodeRestart" : {
+      "post" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Restart node",
+        "operationId" : "nodeRestart",
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "510" : {
+            "description" : "Restart failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/nodeServerStatus" : {
+      "get" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Get node's server status",
+        "operationId" : "getNodeServerStatus",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "enum" : [ "DATABASE_DISCONNECTED", "EMERGENCY", "OFFLINE", "RUNNING", "RUNNING_FORSAKEN", "SHUTDOWN", "SHUTDOWN_IMMINENT", "SHUTDOWN_PHASED_OUT", "STARTUP", "STARTUP_CANCELED", "STARTUP_SUSPENDED", "UNDEFINED" ]
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/productVersion" : {
+      "get" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Get product version",
+        "operationId" : "getNodeProductVersion",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductVersion"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/nodekeeperProductVersion" : {
+      "get" : {
+        "tags" : [ "Cluster node" ],
+        "operationId" : "getNodekeeperProductVersion",
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/responsibilityOverride" : {
+      "put" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Override which nodes can perform internal responsibilities",
+        "description" : "This API allows you to define which nodes can perform cluster-wide responsibilities, for example metric aging or problem detection, by specifying nodes IDs. \n\nTypically you only need it in multi-datacenter fail-over scenarios. \n\n To reset the overrides call the API with an empty list of node IDs.",
+        "operationId" : "responsibilityOverride",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ResponsibilityOverrideDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/cassandraQuorumOverride/{quorum}" : {
+      "put" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Override cassandra read quorum at runtime only for this particular server instance",
+        "description" : "This API allows you to override cassandra read quorum of this particular server instance. Other server instances are not affected.\n\nNote that this will not be persisted, after server restart this override will be lost!\n\nTypically you only need it in multi-datacenter fail-over scenarios. \n\n To reset the overrides call the API with the UNSET value.",
+        "operationId" : "forceCassandraQuorumOverride",
+        "parameters" : [ {
+          "name" : "quorum",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "CL_ALL", "CL_ANY", "CL_EACH_QUORUM", "CL_LOCAL_ONE", "CL_LOCAL_QUORUM", "CL_ONE", "CL_QUORUM", "CL_THREE", "CL_TWO", "UNSET" ]
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/cassandraQuorumOverride" : {
+      "get" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Get the cassandra read quorum override.",
+        "description" : "Does not return actual used read quorum if no override is set, in this case UNSET is returned.",
+        "operationId" : "getCassandraQuorumOverride",
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/tryLockRemoval" : {
+      "put" : {
+        "tags" : [ "Cluster node" ],
+        "operationId" : "tryLockRemoval",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "ip",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "requestedOnNode",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "requestedByUser",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/unlockRemoval" : {
+      "put" : {
+        "tags" : [ "Cluster node" ],
+        "operationId" : "unlockRemoval",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "ip",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "removalStopReason",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/nodeRemovalStatus" : {
+      "get" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Get node removal status",
+        "description" : "Responses with status of current node removal (if it's already running) and statuses of historical removals.",
+        "operationId" : "getNodeRemovalStatus",
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/deadNodeCleaning" : {
+      "delete" : {
+        "tags" : [ "Cluster node" ],
+        "operationId" : "deadNodeCleaning",
+        "parameters" : [ {
+          "name" : "ip",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "requestedOnNode",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "requestedByUser",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/triggerRemoveNode" : {
+      "post" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Remove node",
+        "operationId" : "triggerRemoveNode",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RemoveNode"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Node removal process started successfully"
+          },
+          "404" : {
+            "description" : "Node not found by id or IP address"
+          },
+          "505" : {
+            "description" : "Node joining operation is in progress"
+          },
+          "506" : {
+            "description" : "Node removal operation is in progress"
+          },
+          "507" : {
+            "description" : "Node removal operation timeout"
+          },
+          "530" : {
+            "description" : "Offline node removal operation error. Cleaning cluster configuration was not completed"
+          },
+          "531" : {
+            "description" : "Lock node removal operation error"
+          },
+          "532" : {
+            "description" : "Trigger node removal process error"
+          },
+          "533" : {
+            "description" : "Node removal operation is not allowed. Upgrade is in progress."
+          },
+          "534" : {
+            "description" : "Node removal operation is not allowed. Cassandra nodes are not in valid state (UN)."
+          },
+          "535" : {
+            "description" : "Node removal operation is not allowed. Elasticsearch is sharding data."
+          },
+          "536" : {
+            "description" : "Node is not reachable error"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/installerStatus" : {
+      "post" : {
+        "tags" : [ "Cluster node" ],
+        "operationId" : "setInstallerStatus",
+        "parameters" : [ {
+          "name" : "ip",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InstallerStatusDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/tryLockJoining" : {
+      "put" : {
+        "tags" : [ "Cluster node" ],
+        "operationId" : "tryLockJoining",
+        "parameters" : [ {
+          "name" : "ip",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/finalizeJoining" : {
+      "put" : {
+        "tags" : [ "Cluster node" ],
+        "operationId" : "finalizeJoining",
+        "parameters" : [ {
+          "name" : "ip",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "ABORTED", "FAILURE", "IN_PROGRESS", "STOPPED", "SUCCESS", "UNKNOWN" ]
+          }
+        }, {
+          "name" : "forceUnlock",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FinalizeNodeJoiningRequestDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/joining" : {
+      "post" : {
+        "tags" : [ "Cluster node" ],
+        "operationId" : "initializeNodeJoining",
+        "parameters" : [ {
+          "name" : "ip",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "timestamp",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "datacenter",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/joining/{requestId}" : {
+      "get" : {
+        "tags" : [ "Cluster node" ],
+        "operationId" : "getNodeJoining",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/join/check" : {
+      "post" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Initialize verification if a node can be added to the cluster",
+        "operationId" : "initializeNodeJoinCheck",
+        "parameters" : [ {
+          "name" : "ip",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "timestamp",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "datacenter",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NodeJoiningInitializePreCheckResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/nodeManagement/join/check/{requestId}" : {
+      "get" : {
+        "tags" : [ "Cluster node" ],
+        "summary" : "Verification if a node can be added to the cluster status",
+        "operationId" : "getNodeJoin",
+        "parameters" : [ {
+          "name" : "requestId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NodeJoiningPreCheckStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/preferences" : {
+      "get" : {
+        "tags" : [ "Preferences" ],
+        "summary" : "Get Dynatrace Managed specific properties",
+        "operationId" : "getProperties",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Preferences"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Preferences" ],
+        "summary" : "Update properties",
+        "operationId" : "updateProperties",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Preferences"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Preferences"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/smtp" : {
+      "get" : {
+        "tags" : [ "SMTP settings" ],
+        "summary" : "Get SMTP configuration",
+        "operationId" : "getSmtpConfiguration",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SmtpConfiguration"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "SMTP settings" ],
+        "summary" : "Update SMTP configuration",
+        "operationId" : "updateSmtpConfiguration",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SmtpConfiguration"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SmtpConfiguration"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid SMTP configuration"
+          },
+          "406" : {
+            "description" : "SMTP configuration not accepted"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/smtp/sendTestMessage/{emailAddress}" : {
+      "post" : {
+        "tags" : [ "SMTP settings" ],
+        "summary" : "Send test email",
+        "description" : "You can send only one test email per minute",
+        "operationId" : "sendTestEmail",
+        "parameters" : [ {
+          "name" : "emailAddress",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully sent",
+            "content" : {
+              "text/plain" : { }
+            }
+          },
+          "406" : {
+            "description" : "Incorrect email address"
+          },
+          "429" : {
+            "description" : "Too short a time interval between sending attempts"
+          },
+          "510" : {
+            "description" : "Sending email failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/sslCertificate/store/{entityType}/{entityId}" : {
+      "get" : {
+        "tags" : [ "SSL certificates" ],
+        "summary" : "Get certificate-storage status",
+        "operationId" : "getStoringSslCertificateStatus",
+        "parameters" : [ {
+          "name" : "entityType",
+          "in" : "path",
+          "description" : "entity type, possible values = \"COLLECTOR\" ",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "COLLECTOR", "SERVER" ]
+          }
+        }, {
+          "name" : "entityId",
+          "in" : "path",
+          "description" : "Node ID, which can be extracted from the URL in 'Node details' view.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful or in progress",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Incorrect entity type",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Status not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          },
+          "522" : {
+            "description" : "Certificate chain is invalid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "523" : {
+            "description" : "Private key does not match public key certificate",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "525" : {
+            "description" : "Public key certificate is invalid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "526" : {
+            "description" : "Private key is invalid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "527" : {
+            "description" : "Error while storing SSL certificate",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "528" : {
+            "description" : "Certificate has been stored but has not been refreshed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "529" : {
+            "description" : "Internal error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "SSL certificates" ],
+        "summary" : "Store SSL certificate status",
+        "operationId" : "storeSslCertificateStatus",
+        "parameters" : [ {
+          "name" : "entityType",
+          "in" : "path",
+          "description" : "entity type, possible values = \"SERVER, COLLECTOR\" ",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "COLLECTOR", "SERVER" ]
+          }
+        }, {
+          "name" : "entityId",
+          "in" : "path",
+          "description" : "Node ID, which can be extracted from the URL in 'Node details' view.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/sslCertDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successful or in progress",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Incorrect entity type",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          },
+          "522" : {
+            "description" : "Certificate chain is invalid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "523" : {
+            "description" : "Private key does not match public key certificate",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "525" : {
+            "description" : "Public key certificate is invalid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "526" : {
+            "description" : "Private key is invalid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "527" : {
+            "description" : "Error while storing SSL certificate",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "528" : {
+            "description" : "Certificate has been stored but has not been refreshed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          },
+          "529" : {
+            "description" : "Internal error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate store status"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/sslCertificate/{entityType}/{entityId}" : {
+      "get" : {
+        "tags" : [ "SSL certificates" ],
+        "summary" : "SSL certificate details.",
+        "operationId" : "getSslCertificateDetails",
+        "parameters" : [ {
+          "name" : "entityType",
+          "in" : "path",
+          "description" : "entity type, possible values = \"SERVER, COLLECTOR\" ",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "COLLECTOR", "SERVER" ]
+          }
+        }, {
+          "name" : "entityId",
+          "in" : "path",
+          "description" : "Node ID, which can be extracted from the URL in 'Node details' view.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SSL Details"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/sso/saml/sp/cert" : {
+      "get" : {
+        "tags" : [ "SSO configuration" ],
+        "summary" : "Get SAML SP X.509 certificate details",
+        "operationId" : "getSamlSpCert",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Certificate details"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "SSO configuration" ],
+        "summary" : "Update SAML SP X.509 certificate",
+        "operationId" : "updateSamlSpCert",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/certDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "400" : {
+            "description" : "Failed. The input is invalid.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "510" : {
+            "description" : "Operation failed. Check server logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/supportArchive/{id}/status" : {
+      "get" : {
+        "tags" : [ "Support Archives" ],
+        "summary" : "Get support upgrade generation status",
+        "operationId" : "getSupportArchiveStatus",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Support archive generation state",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SupportArchiveDownload"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Could not find support archive request"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/supportArchive/{id}/report" : {
+      "get" : {
+        "tags" : [ "Support Archives" ],
+        "summary" : "Get support upgrade generation report",
+        "operationId" : "getSupportArchiveReport",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Support archive generation report",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SupportArchiveDownload"
+                }
+              }
+            }
+          },
+          "202" : {
+            "description" : "Support archive generation has not completed yet"
+          },
+          "404" : {
+            "description" : "Could not find support archive request"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/supportArchive/{id}" : {
+      "get" : {
+        "tags" : [ "Support Archives" ],
+        "summary" : "Get support upgrade file",
+        "operationId" : "getSupportArchive",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Ok - download file",
+            "content" : {
+              "application/zip" : { }
+            }
+          },
+          "202" : {
+            "description" : "Support archive generation has not completed yet"
+          },
+          "404" : {
+            "description" : "Could not find support archive request"
+          },
+          "410" : {
+            "description" : "Support archive was already deleted from disk"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Support Archives" ],
+        "summary" : "Cancel support upgrade generation",
+        "operationId" : "cancelSupportArchiveCreation",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Ok"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Support Archives" ],
+        "summary" : "Delete existing support archive",
+        "operationId" : "deleteSupportArchive",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Ok - deleted successfully"
+          },
+          "404" : {
+            "description" : "Could not find support archive request"
+          },
+          "409" : {
+            "description" : "Support archive generation in progress - please cancel it using /cancel"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/supportArchive" : {
+      "post" : {
+        "tags" : [ "Support Archives" ],
+        "summary" : "Trigger support upgrade generation",
+        "operationId" : "startCreatingSupportArchive",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SupportArchiveRequestImpl"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Ok - returns support archive id",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int64"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Could not trigger support archive generation"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/upgradeManagement/triggerUpgrade" : {
+      "post" : {
+        "tags" : [ "Updates" ],
+        "summary" : "Trigger manual cluster upgrade",
+        "operationId" : "triggerManualUpgrade",
+        "responses" : {
+          "200" : {
+            "description" : "Started successfully."
+          },
+          "412" : {
+            "description" : "Triggering of upgrade failed due to missing new version on all nodes."
+          },
+          "510" : {
+            "description" : "Could not trigger upgrade. Check logs for details..."
+          },
+          "553" : {
+            "description" : "Upgrade suspended by Dynatrace Mission Control. Could not upgrade cluster now."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/upgradeManagement/clusterUpgradeStartupState" : {
+      "get" : {
+        "tags" : [ "Updates" ],
+        "summary" : "Get system precondition check state for the cluster",
+        "operationId" : "getClusterUpgradeStartupState",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UpgradeStartupState"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/upgradeManagement/installationFiles" : {
+      "get" : {
+        "tags" : [ "Updates" ],
+        "summary" : "Get list of installation files and their cluster-wide availability information",
+        "operationId" : "getInstallationFileList",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json; charset=utf-8" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Installation package"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/upgradeManagement/installationFiles/{type}/{version}" : {
+      "delete" : {
+        "tags" : [ "Updates" ],
+        "summary" : "Trigger removal of installation package",
+        "operationId" : "removeInstallationBatch",
+        "parameters" : [ {
+          "name" : "type",
+          "in" : "path",
+          "description" : "Installation package type, possible values = \"SERVER, AGENT, JS_AGENT, SG, NGINX\" ",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "AGENT", "BAD_AGENTS", "JS_AGENT", "NGINX", "SERVER", "SG", "SYNTHETIC" ]
+          }
+        }, {
+          "name" : "version",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully scheduled. Package should be removed from all nodes within a couple of minutes."
+          },
+          "404" : {
+            "description" : "Specified installation package was not found."
+          },
+          "412" : {
+            "description" : "Removing installation files is not allowed. Update list is synchronized with Mission Control."
+          },
+          "510" : {
+            "description" : "Operation failed. Check server logs for more details."
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/groups/bulk" : {
+      "post" : {
+        "tags" : [ "User groups" ],
+        "summary" : "Create groups",
+        "operationId" : "createGroups",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/GroupConfig"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GroupConfig"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "No group information received for the create-group request"
+          },
+          "406" : {
+            "description" : "Unacceptable or incomplete request. Some groups were added.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GroupConfig"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/groups" : {
+      "get" : {
+        "tags" : [ "User groups" ],
+        "summary" : "Get groups",
+        "operationId" : "getGroups",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GroupConfig"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "User groups" ],
+        "summary" : "Update group",
+        "operationId" : "updateGroup",
+        "requestBody" : {
+          "description" : "Request body used for updating existing user group. \nFor updating user group set correct 'id', not setting 'id' will return 'Bad Request'. \nTrying to change group name to one that already exists will return 'Bad Request'. \nTrying to update group that doesn't exist will return 'Not Acceptable'.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GroupConfig"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successfully updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroupConfig"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Operation failed. The input is invalid. Possible reasons:\n - No group information received for the request to create a group\n - Group ID is not set\n - Group name cannot be null or empty\n - At least one of the specified environments doesn't exist\n"
+          },
+          "406" : {
+            "description" : "Not acceptable. Group name already exists or group not found"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "User groups" ],
+        "summary" : "Create group",
+        "operationId" : "createGroup",
+        "requestBody" : {
+          "description" : "Request body used for creating new user group. \nFor creating user group leave 'id' empty, setting 'id' will return 'Bad Request'. \nTrying to create group with name that already exists will return 'Not Acceptable'.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GroupConfig"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successfully updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroupConfig"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Operation failed. The input is invalid. Possible reasons:\n - No group information received for the request to create a group\n - Group ID cannot be set\n - Group name cannot be null or empty\n - At least one of the specified environments doesn't exist\n"
+          },
+          "406" : {
+            "description" : "Not acceptable. Group already exists"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/groups/{groupId}" : {
+      "get" : {
+        "tags" : [ "User groups" ],
+        "summary" : "Get group",
+        "operationId" : "getGroup",
+        "parameters" : [ {
+          "name" : "groupId",
+          "in" : "path",
+          "description" : "Group ID path parameter. Missing or empty values will return a 'Bad Request'.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroupConfig"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not found"
+          },
+          "400" : {
+            "description" : "No ID information received for the request to get a group"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "User groups" ],
+        "summary" : "Delete group",
+        "operationId" : "removeGroup",
+        "parameters" : [ {
+          "name" : "groupId",
+          "in" : "path",
+          "description" : "Group ID path parameter. Missing or empty values will return a 'Bad Request'.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully deleted",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroupConfig"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Not Found"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/groups/managementZones" : {
+      "get" : {
+        "tags" : [ "User groups" ],
+        "summary" : "Get management zone permissions for all groups",
+        "description" : "This is a list of management zone specific permissions only. Environment permissions are not taken into account here. Groups with permissions for whole environments can also see all management zones defined in these environments, even if they have no management zone specific permissions and the list returned by this request is empty.",
+        "operationId" : "getManagementZonesPermissions",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MzPermissionsForGroup"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "User groups" ],
+        "summary" : "Update management zone permissions for a single group",
+        "operationId" : "updateManagementZonesPermissionsForGroup",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MzPermissionsForGroup"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successfully updated"
+          },
+          "400" : {
+            "description" : "Provided model is incorrect or is missing required elements"
+          },
+          "404" : {
+            "description" : "A group, environment or management zone does not exist"
+          },
+          "510" : {
+            "description" : "Operation failed"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/groups/managementZones/{groupId}" : {
+      "get" : {
+        "tags" : [ "User groups" ],
+        "summary" : "Get management zone permissions for a given group",
+        "description" : "This is a list of management zone specific permissions only. Environment permissions are not taken into account here. Groups with permissions for whole environments can also see all management zones defined in these environments, even if they have no management zone specific permissions and the list returned by this request is empty.",
+        "operationId" : "getManagementZonesPermissionsForGroup",
+        "parameters" : [ {
+          "name" : "groupId",
+          "in" : "path",
+          "description" : "Group ID path parameter. Missing or empty values will return a 'Bad Request'.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MzPermissionsForGroup"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Group not found"
+          },
+          "400" : {
+            "description" : "No ID information received for the request to get group MZ permissions"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/users" : {
+      "get" : {
+        "tags" : [ "Users" ],
+        "summary" : "Get users",
+        "operationId" : "getUsers",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserConfig"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Users" ],
+        "summary" : "Update user",
+        "operationId" : "updateUser",
+        "requestBody" : {
+          "description" : "The JSON body of the request, containing parameters of the user.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UserConfig"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successfully updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserConfig"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Operation failed. The input is invalid. Possible reasons:\n - all required values (ID, email, first name, last name) must be set\n - invalid user data\n - user email address already assigned\n - user group ID does not exist"
+          },
+          "403" : {
+            "description" : "Operation forbidden - either LDAP or SSO with group assignment integration is turned on"
+          },
+          "404" : {
+            "description" : "Not found"
+          },
+          "524" : {
+            "description" : "Email address already registered"
+          },
+          "406" : {
+            "description" : "Unacceptable request"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Users" ],
+        "summary" : "Create user",
+        "operationId" : "createUser",
+        "requestBody" : {
+          "description" : "The JSON body of the request, containing parameters of the user.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UserConfig"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successfully created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserConfig"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Operation failed. The input is invalid. Possible reasons:\n - all required values (ID, email, first name, last name) must be set\n - invalid user data\n - user ID already exists\n - user email address already assigned\n - user group ID does not exist"
+          },
+          "403" : {
+            "description" : "Operation forbidden - either LDAP or SSO with group assignment integration is turned on"
+          },
+          "522" : {
+            "description" : "Couldn't create user"
+          },
+          "523" : {
+            "description" : "User already exists"
+          },
+          "524" : {
+            "description" : "Email address already registered"
+          },
+          "406" : {
+            "description" : "Unacceptable request"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/users/bulk" : {
+      "post" : {
+        "tags" : [ "Users" ],
+        "summary" : "Create users",
+        "operationId" : "createUsers",
+        "requestBody" : {
+          "description" : "The JSON body of the request, containing parameters of the users.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/UserConfig"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserConfig"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Operation failed. The input is invalid. Possible reasons:\n - no user information received for the create-users request\n - all required values (ID, email, first name, last name) must be set\n - invalid user data\n - input contains duplicated IDs\n - input contains duplicated email addresses\n - user ID already exists\n - user email address already assigned\n - user group ID does not exist"
+          },
+          "403" : {
+            "description" : "Operation forbidden - either LDAP or SSO with group assignment integration is turned on"
+          },
+          "406" : {
+            "description" : "Unacceptable or incomplete request. Some users added",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserConfig"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/users/{id}" : {
+      "get" : {
+        "tags" : [ "Users" ],
+        "summary" : "Get user",
+        "operationId" : "getUser",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "User ID path parameter. Missing or empty values will return a 'Bad Request'",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserConfig"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not found"
+          },
+          "400" : {
+            "description" : "No ID information received for the get-user request"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Users" ],
+        "summary" : "Delete user",
+        "operationId" : "removeUser",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "User ID path parameter. Missing or empty values will return a 'Bad Request'.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully deleted",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserConfig"
+                }
+              }
+            }
+          },
+          "304" : {
+            "description" : "Not modified"
+          },
+          "406" : {
+            "description" : "Unacceptable request"
+          },
+          "400" : {
+            "description" : "No ID information received for the delete-user request"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/userRepository/authenticationMode" : {
+      "get" : {
+        "tags" : [ "User repository configuration" ],
+        "summary" : "Get authentication mode",
+        "operationId" : "getAuthenticationMode",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuthenticationMode"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "User repository configuration" ],
+        "summary" : "Update authentication mode",
+        "operationId" : "updateAuthenticationMode",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AuthenticationModel"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuthenticationMode"
+                }
+              }
+            }
+          },
+          "406" : {
+            "description" : "Not Acceptable. LDAP cannot be turned on if \"Import user groups\" from SSO flag is turned on"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/userRepository/ldap/connectionConfiguration" : {
+      "get" : {
+        "tags" : [ "User repository configuration" ],
+        "summary" : "Get LDAP configuration",
+        "operationId" : "getLdapConnectionConfiguration",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LdapConnectionDescImpl"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "User repository configuration" ],
+        "summary" : "Update LDAP connection",
+        "operationId" : "updateLdapConnection",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LdapConnectionDescImpl"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "406" : {
+            "description" : "Not Acceptable"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/userRepository/ldap/queryGroups" : {
+      "get" : {
+        "tags" : [ "User repository configuration" ],
+        "summary" : "Get LDAP group configuration",
+        "operationId" : "getLdapGroupsQuery",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LdapGroupsQueryDescImpl"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "User repository configuration" ],
+        "summary" : "Update LDAP groups query configuration",
+        "operationId" : "updateLdapGroupsQuery",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LdapGroupsQueryDescImpl"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "406" : {
+            "description" : "Unacceptable request"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/userRepository/ldap/queryUsers" : {
+      "get" : {
+        "tags" : [ "User repository configuration" ],
+        "summary" : "Get LDAP users query configuration",
+        "operationId" : "getLdapLdapUsersQuery",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LdapUsersQueryDescImpl"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "User repository configuration" ],
+        "summary" : "Update LDAP users query configuration",
+        "operationId" : "updateLdapUsersQueryDescImpl",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LdapUsersQueryDescImpl"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+          },
+          "406" : {
+            "description" : "Unacceptable request"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/proxy/test" : {
+      "put" : {
+        "tags" : [ "Internet proxy" ],
+        "summary" : "Test Internet connection using given proxy configuration",
+        "operationId" : "testConnectionInSingleDCMode",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Internet proxy change request"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Request was processed, check response body for details",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Connection status"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/proxy/test/{dc}" : {
+      "put" : {
+        "tags" : [ "Internet proxy" ],
+        "summary" : "Test Internet connection from specific Data Center using given proxy configuration (Multi Data Center deployment)",
+        "operationId" : "testConnectionInMultiDCMode",
+        "parameters" : [ {
+          "name" : "dc",
+          "in" : "path",
+          "description" : "Data Center",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Internet proxy change request"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Request was processed, check response body for details",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Connection status"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/proxy/configuration" : {
+      "get" : {
+        "tags" : [ "Internet proxy" ],
+        "summary" : "Get cluster proxy configuration",
+        "operationId" : "getSingleDCConfiguration",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Internet proxy"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Proxy is not configured"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Internet proxy" ],
+        "summary" : "Set/update cluster proxy configuration",
+        "operationId" : "modifySingleDCConfiguration",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Internet proxy change request"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Successful, new configuration created"
+          },
+          "204" : {
+            "description" : "Successful, configuration updated"
+          },
+          "400" : {
+            "description" : "Given proxy configuration is invalid"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Internet proxy" ],
+        "summary" : "Remove cluster proxy configuration",
+        "operationId" : "deleteSingleDCConfiguration",
+        "responses" : {
+          "200" : {
+            "description" : "Successful, previous configuration returned",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Internet proxy"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Proxy was not configured"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/proxy/configurations" : {
+      "get" : {
+        "tags" : [ "Internet proxy" ],
+        "summary" : "Get proxy configurations for all Data Centers (Multi Data Center deployment)",
+        "operationId" : "getAllMultiDCConfigurations",
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Proxy configurations"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    },
+    "/proxy/configurations/{dc}" : {
+      "get" : {
+        "tags" : [ "Internet proxy" ],
+        "summary" : "Get Data Center proxy configuration (Multi Data Center deployment)",
+        "operationId" : "getOneOfMultiDCConfiguration",
+        "parameters" : [ {
+          "name" : "dc",
+          "in" : "path",
+          "description" : "Data Center",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Internet proxy"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Proxy is not configured for given Data Center"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Internet proxy" ],
+        "summary" : "Set/update Data Center proxy configuration (Multi Data Center deployment)",
+        "operationId" : "modifyOneOfMultiDCConfiguration",
+        "parameters" : [ {
+          "name" : "dc",
+          "in" : "path",
+          "description" : "Data Center",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Internet proxy change request"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Successful, new configuration created"
+          },
+          "204" : {
+            "description" : "Successful, configuration updated"
+          },
+          "400" : {
+            "description" : "Given proxy configuration is invalid"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Internet proxy" ],
+        "summary" : "Remove Data Center proxy configuration (Multi Data Center deployment)",
+        "operationId" : "deleteOneOfMultiDCConfiguration",
+        "parameters" : [ {
+          "name" : "dc",
+          "in" : "path",
+          "description" : "Data Center",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful, previous configuration returned",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Internet proxy"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Proxy was not configured for given Data Center"
+          }
+        },
+        "security" : [ {
+          "ServiceProviderAPI" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "StorageTestImpl" : {
+        "type" : "object",
+        "properties" : {
+          "storagePath" : {
+            "type" : "string"
+          },
+          "storageError" : {
+            "type" : "string"
+          },
+          "inProgress" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "backupConfigDto" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean",
+            "description" : "Backups are enabled (`true`) or disabled (`false`).",
+            "readOnly" : true
+          },
+          "datacenter" : {
+            "type" : "string",
+            "description" : "Datacenter which will create backups",
+            "readOnly" : true
+          },
+          "storagePath" : {
+            "type" : "string",
+            "description" : "A full path to the backup archive",
+            "readOnly" : true
+          },
+          "includeRumData" : {
+            "type" : "boolean",
+            "description" : "Include user sessions (`true`) or GDPR compliance (`false`)"
+          },
+          "includeTsMetricData" : {
+            "type" : "boolean",
+            "description" : "Include time series metric-data (`true`) or retain configuration data only (`false`))"
+          },
+          "bandwidthLimitMbits" : {
+            "type" : "integer",
+            "description" : "Bandwidth limit in Mbps",
+            "format" : "int32"
+          },
+          "cassandraScheduledTime" : {
+            "type" : "integer",
+            "description" : "Hour to start Cassandra backups each day.",
+            "format" : "int32"
+          },
+          "pauseBackups" : {
+            "type" : "boolean",
+            "description" : "Pauses Elasticsearch and Cassandra backups. In comparison to enable/disable backup, this option does not modify any configuration like Elasticsearch properties."
+          }
+        },
+        "description" : "Configuration of the cluster backup.",
+        "example" : {
+          "datacenter" : "dc1",
+          "enabled" : true,
+          "storagePath" : "/efs/backup",
+          "includeRumData" : true,
+          "includeTsMetricData" : true,
+          "bandwidthLimitMbits" : 240,
+          "cassandraScheduledTime" : 22,
+          "pauseBackups" : false
+        }
+      },
+      "FileDto" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "byte"
+            }
+          }
+        }
+      },
+      "InstallerMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "clusterBackupPath" : {
+            "type" : "string",
+            "description" : "Network attached storage path for the backup"
+          },
+          "elasticsearchBackupPath" : {
+            "type" : "string",
+            "description" : "Elasticsearch repository used for the backup"
+          }
+        },
+        "description" : "Metadata used by installer"
+      },
+      "AddressWrapper" : {
+        "required" : [ "address" ],
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "type" : "string",
+            "description" : "Address"
+          },
+          "newAddress" : {
+            "type" : "string",
+            "description" : "New address"
+          },
+          "usePublicIpForDomainGeneration" : {
+            "type" : "boolean",
+            "description" : "If true, public IP will be used for domain generation."
+          },
+          "usePublicIpForAgents" : {
+            "type" : "boolean",
+            "description" : "If true, public IP address will be used for OneAgents."
+          }
+        }
+      },
+      "ClusterNodesConfigDto" : {
+        "type" : "object",
+        "properties" : {
+          "clusterNodes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NodeConfigDto"
+            }
+          }
+        }
+      },
+      "NodeConfigDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "webUI" : {
+            "type" : "boolean"
+          },
+          "agent" : {
+            "type" : "boolean"
+          },
+          "datacenter" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Cluster" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "description" : "Node ID",
+            "format" : "int32"
+          },
+          "clusterMemberAddress" : {
+            "type" : "string",
+            "description" : "Cluster member address"
+          },
+          "operationState" : {
+            "type" : "string",
+            "description" : "Operation state"
+          },
+          "buildVersion" : {
+            "type" : "string",
+            "description" : "Server version"
+          },
+          "osInfo" : {
+            "type" : "string",
+            "description" : "OS info"
+          },
+          "jvmInfo" : {
+            "type" : "string",
+            "description" : "JVM info"
+          },
+          "dnsEntryPointUris" : {
+            "type" : "array",
+            "description" : "DNS entry point URIs",
+            "items" : {
+              "type" : "string",
+              "format" : "uri"
+            }
+          },
+          "restServiceRootUris" : {
+            "type" : "array",
+            "description" : "REST service root URIs",
+            "items" : {
+              "type" : "string",
+              "format" : "uri"
+            }
+          },
+          "communicationUris" : {
+            "type" : "array",
+            "description" : "Communication URIs",
+            "items" : {
+              "type" : "string",
+              "format" : "uri"
+            }
+          }
+        }
+      },
+      "MigrationState" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "description" : "Current status of migration",
+            "enum" : [ "FAILED", "IN_PROGRESS", "NOT_STARTED", "SUCCEEDED" ]
+          },
+          "startedAt" : {
+            "type" : "integer",
+            "description" : "Timestamp (milliseconds format) of migration start",
+            "format" : "int64"
+          },
+          "finishedAt" : {
+            "type" : "integer",
+            "description" : "Timestamp (milliseconds format) of migration finish",
+            "format" : "int64"
+          },
+          "details" : {
+            "type" : "string",
+            "description" : "Additional information about migration state"
+          }
+        },
+        "description" : "State of in-server config migration for single component"
+      },
+      "SingleToMultiDcMigrationClusterState" : {
+        "type" : "object",
+        "properties" : {
+          "singleToMultiDcMigration" : {
+            "$ref" : "#/components/schemas/MigrationState"
+          },
+          "migrationSteps" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/MigrationState"
+            },
+            "description" : "Status of the various sub steps of the migration"
+          }
+        },
+        "description" : "State of the cluster during migration of single datacenter to multi datacenter and its substeps"
+      },
+      "InServerConfigDatacenterMigrationState" : {
+        "type" : "object",
+        "properties" : {
+          "componentMigrationStates" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/MigrationState"
+            },
+            "description" : "Map of (component, migration state) pairs"
+          }
+        },
+        "description" : "State of in-server config migration for all components"
+      },
+      "DatacenterMigrationDto" : {
+        "type" : "object",
+        "properties" : {
+          "newDatacenterName" : {
+            "type" : "string"
+          },
+          "nodesIp" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "DatacenterDesc" : {
+        "type" : "object",
+        "properties" : {
+          "datacenterMembersList" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DatacenterMember"
+            }
+          },
+          "newDatacenter" : {
+            "type" : "boolean"
+          }
+        },
+        "description" : "Map of multidatacenter topology"
+      },
+      "DatacenterMember" : {
+        "type" : "object",
+        "properties" : {
+          "nodeId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "nodeIp" : {
+            "type" : "string"
+          }
+        }
+      },
+      "MultiDatacenterTopology" : {
+        "type" : "object",
+        "properties" : {
+          "datacenterTopology" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/DatacenterDesc"
+            },
+            "description" : "Map of multidatacenter topology"
+          },
+          "newDatacenterName" : {
+            "type" : "string"
+          },
+          "oldDatacenterName" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Multi datacenter topology"
+      },
+      "FirewallNodeIp" : {
+        "type" : "object",
+        "properties" : {
+          "ipAddress" : {
+            "type" : "string",
+            "description" : "Node IP address to remove from firewall"
+          }
+        }
+      },
+      "ProductVersion" : {
+        "type" : "object",
+        "properties" : {
+          "productVersion" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ResponsibilityOverrideDto" : {
+        "type" : "object",
+        "properties" : {
+          "responsibilityNodeIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        }
+      },
+      "RemoveNode" : {
+        "type" : "object",
+        "properties" : {
+          "nodeId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "ipAddress" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Information which node is going to be removed."
+      },
+      "InstallerStatusDto" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string"
+          },
+          "details" : {
+            "type" : "string"
+          }
+        }
+      },
+      "FinalizeNodeJoiningRequestDto" : {
+        "type" : "object",
+        "properties" : {
+          "ip" : {
+            "type" : "string"
+          },
+          "result" : {
+            "type" : "string",
+            "enum" : [ "ABORTED", "FAILURE", "IN_PROGRESS", "STOPPED", "SUCCESS", "UNKNOWN" ]
+          },
+          "details" : {
+            "type" : "string"
+          }
+        }
+      },
+      "NodeJoiningInitializePreCheckResponseDto" : {
+        "type" : "object",
+        "properties" : {
+          "requestId" : {
+            "type" : "string"
+          }
+        }
+      },
+      "NodeJoiningPreCheckStatusDto" : {
+        "type" : "object",
+        "properties" : {
+          "nodeJoiningPreCheckFinished" : {
+            "type" : "boolean"
+          },
+          "canRunNodeInstallation" : {
+            "type" : "boolean"
+          },
+          "details" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Preferences" : {
+        "required" : [ "supportSendBilling", "supportSendClusterHealth", "suppressNonBillingRelevantData" ],
+        "type" : "object",
+        "properties" : {
+          "certificateManagementEnabled" : {
+            "type" : "boolean"
+          },
+          "certificateManagementPossible" : {
+            "type" : "boolean"
+          },
+          "supportSendBilling" : {
+            "type" : "boolean",
+            "description" : "If true, usage and billing information will be reported."
+          },
+          "suppressNonBillingRelevantData" : {
+            "type" : "boolean",
+            "description" : "If true, usage and billing information will NOT be reported."
+          },
+          "supportSendClusterHealth" : {
+            "type" : "boolean",
+            "description" : "If true, Dynatrace cluster health will be reported."
+          },
+          "supportSendEvents" : {
+            "type" : "boolean",
+            "description" : "If true, Dynatrace cluster health and OneAgent events will be reported."
+          },
+          "supportAllowRemoteAccess" : {
+            "type" : "boolean",
+            "description" : "If true, audited remote-access to your Dynatrace configuration is allowed settings."
+          },
+          "remoteAccessOnDemandOnly" : {
+            "type" : "boolean",
+            "description" : "If true, audited access to your Dynatrace cluster is allowed by approved Dynatrace employees otherwise by privileged Dynatrace employees."
+          },
+          "communityCreateUser" : {
+            "type" : "boolean",
+            "description" : "If true, each new user will be set up as a Dynatrace Community user upon first login."
+          },
+          "communityExternalSearch" : {
+            "type" : "boolean",
+            "description" : "If true, you can search Dynatrace Answers and Dynatrace Help when using the product search."
+          },
+          "backupEnabled" : {
+            "type" : "boolean",
+            "description" : "Deprecated. Use the backup configuration endpoint. If true, backups are enabled.",
+            "readOnly" : true
+          },
+          "ruxitMonitorsRuxit" : {
+            "type" : "boolean",
+            "description" : "If true, Dynatrace OneAgent monitors Dynatrace."
+          },
+          "woopraIntegration" : {
+            "type" : "boolean",
+            "description" : "If true, Woopra integration is enabled."
+          },
+          "helpChatEnabled" : {
+            "type" : "boolean",
+            "description" : "If true, Dynatrace ONE live chat is enabled."
+          },
+          "readOnlyRemoteAccessAllowed" : {
+            "type" : "boolean",
+            "description" : "If true, audited, read-only remote access to your Dynatrace configuration settings is allowed."
+          }
+        }
+      },
+      "ConstraintViolation" : {
+        "type" : "object",
+        "properties" : {
+          "parameterLocation" : {
+            "type" : "string",
+            "enum" : [ "PATH", "PAYLOAD_BODY", "QUERY" ]
+          },
+          "location" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Error" : {
+        "type" : "object",
+        "properties" : {
+          "constraintViolations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ConstraintViolation"
+            }
+          },
+          "code" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ErrorEnvelope" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "$ref" : "#/components/schemas/Error"
+          }
+        }
+      },
+      "certDto" : {
+        "required" : [ "privateKeyEncoded", "publicKeyCertificateEncoded" ],
+        "type" : "object",
+        "properties" : {
+          "privateKeyEncoded" : {
+            "type" : "string",
+            "description" : "Private key PKCS #8 standard, PEM base64-encoded format"
+          },
+          "publicKeyCertificateEncoded" : {
+            "type" : "string",
+            "description" : "Certificate X.509 standard, PEM base64-encoded format"
+          }
+        },
+        "description" : "Certificate configuration.",
+        "example" : {
+          "privateKeyEncoded" : "-----BEGIN RSA PRIVATE KEY-----\nMIIEow...aHzMvp\n-----END RSA PRIVATE KEY-----",
+          "publicKeyCertificateEncoded" : "-----BEGIN CERTIFICATE-----\nMIIDKT...XbTK+M\n-----END CERTIFICATE-----"
+        }
+      },
+      "Certificate details" : {
+        "type" : "object",
+        "properties" : {
+          "issuer" : {
+            "type" : "string",
+            "description" : "Issuer"
+          },
+          "subject" : {
+            "type" : "string",
+            "description" : "Subject"
+          },
+          "expirationTimestamp" : {
+            "type" : "integer",
+            "description" : "Expiration timestamp",
+            "format" : "int64"
+          },
+          "expirationDate" : {
+            "type" : "string",
+            "description" : "Expiration date"
+          }
+        },
+        "description" : "X.509 certificate for signing/encryption"
+      },
+      "SmtpConfiguration" : {
+        "type" : "object",
+        "properties" : {
+          "hostName" : {
+            "type" : "string",
+            "description" : "Host name"
+          },
+          "port" : {
+            "type" : "integer",
+            "description" : "Integer value of port",
+            "format" : "int32"
+          },
+          "userName" : {
+            "type" : "string",
+            "description" : "User name"
+          },
+          "password" : {
+            "type" : "string",
+            "description" : "Password"
+          },
+          "isPasswordConfigured" : {
+            "type" : "boolean",
+            "description" : "If true, a password has been configured."
+          },
+          "connectionSecurity" : {
+            "type" : "string",
+            "description" : "Connection security",
+            "enum" : [ "NO_ENCRYPTION", "OPTIONAL_STARTTLS", "REQUIRE_STARTTLS", "TLS" ]
+          },
+          "senderEmailAddress" : {
+            "type" : "string",
+            "description" : "Sender email address"
+          },
+          "testEmailAddress" : {
+            "type" : "string",
+            "description" : "Test email address"
+          },
+          "allowFallbackViaMissionControl" : {
+            "type" : "boolean",
+            "description" : "If true, we will send e-mails via Mission Control in case of problems with SMTP server."
+          },
+          "useSmtpServer" : {
+            "type" : "boolean",
+            "description" : "If true, we will send e-mails via SMTP server."
+          }
+        }
+      },
+      "Certificate store status" : {
+        "type" : "object",
+        "properties" : {
+          "certificateStoreStatus" : {
+            "type" : "string",
+            "enum" : [ "BAD_REQUEST", "CERTIFICATE_CHAIN_IS_INVALID", "CERTIFICATE_IS_EXPIRED", "CERTIFICATE_STORED_BUT_NOT_REFRESHED", "ERROR", "GENERAL_ERROR_WHILE_STORING_CERTIFICATE", "IN_PROGRESS", "NOT_FOUND", "OK", "PRIVATE_KEY_DOES_NOT_MATCH_PUBLIC_KEY_CERTIFICATE", "PRIVATE_KEY_IS_INVALID", "PUBLIC_KEY_CERTIFICATE_IS_INVALID" ]
+          },
+          "detailedError" : {
+            "type" : "string"
+          }
+        }
+      },
+      "sslCertDto" : {
+        "required" : [ "privateKeyEncoded", "publicKeyCertificateEncoded" ],
+        "type" : "object",
+        "properties" : {
+          "privateKeyEncoded" : {
+            "type" : "string",
+            "description" : "Private key PKCS #8 standard, PEM base64-encoded format"
+          },
+          "publicKeyCertificateEncoded" : {
+            "type" : "string",
+            "description" : "Certificate X.509 standard, PEM base64-encoded format, server certificate"
+          },
+          "certificateChainEncoded" : {
+            "type" : "string",
+            "description" : "Certificate(s) X.509 standard, PEM base64-encoded format, intermediate and root certificates"
+          }
+        },
+        "description" : "SSL certificate configuration.",
+        "example" : {
+          "privateKeyEncoded" : "-----BEGIN RSA PRIVATE KEY-----\nMIIEow...aHzMvp\n-----END RSA PRIVATE KEY-----",
+          "publicKeyCertificateEncoded" : "-----BEGIN CERTIFICATE-----\nMIIDKT...XbTK+M\n-----END CERTIFICATE-----",
+          "certificateChainEncoded" : "-----BEGIN CERTIFICATE-----\nMIIDKT...XbTK+M\n-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----\nMIIDKT...bXTK+M\n-----END CERTIFICATE-----"
+        }
+      },
+      "SSL Details" : {
+        "type" : "object",
+        "properties" : {
+          "inProgress" : {
+            "type" : "boolean"
+          },
+          "expirationDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "restartRequired" : {
+            "type" : "boolean"
+          },
+          "customKeyStore" : {
+            "type" : "boolean"
+          },
+          "customKeyStoreWritable" : {
+            "type" : "boolean"
+          },
+          "issuer" : {
+            "type" : "string"
+          },
+          "subject" : {
+            "type" : "string"
+          },
+          "default" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "SupportArchiveDownload" : {
+        "type" : "object",
+        "properties" : {
+          "downloadState" : {
+            "type" : "string",
+            "enum" : [ "FINISHED", "PROCESSING", "STARTING", "TRANSFERING" ]
+          },
+          "report" : {
+            "$ref" : "#/components/schemas/SupportArchiveReport"
+          }
+        }
+      },
+      "SupportArchiveReport" : {
+        "type" : "object",
+        "properties" : {
+          "parts" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SupportArchiveReportPart"
+            }
+          }
+        }
+      },
+      "SupportArchiveReportPart" : {
+        "type" : "object",
+        "properties" : {
+          "numberOfFiles" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "uncompressedTotalBytes" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "compressedTotalBytes" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "source" : {
+            "type" : "string"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "SupportArchiveRequestImpl" : {
+        "type" : "object",
+        "properties" : {
+          "numberOfDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "includeServerData" : {
+            "type" : "boolean"
+          },
+          "includeActiveGateData" : {
+            "type" : "boolean"
+          },
+          "includeLogs" : {
+            "type" : "boolean"
+          },
+          "includeDebugLogs" : {
+            "type" : "boolean"
+          },
+          "includeAgentRegistryLogs" : {
+            "type" : "boolean"
+          },
+          "includeLauncherLogs" : {
+            "type" : "boolean"
+          },
+          "includeMonitoringConfigAuditLogs" : {
+            "type" : "boolean"
+          },
+          "includeOtherAuditLogs" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "UpgradeStartupState" : {
+        "type" : "object",
+        "properties" : {
+          "state" : {
+            "type" : "string",
+            "description" : "System precondition check state",
+            "enum" : [ "ERROR", "FINISHED", "LAUNCHING", "NODEKEEPER_UPGRADE", "SYSTEM_CHECK", "UNDEFINED" ]
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "Error"
+          }
+        }
+      },
+      "Installation package" : {
+        "type" : "object",
+        "properties" : {
+          "readyNodeIds" : {
+            "type" : "array",
+            "description" : "IDs of nodes that have finished package processing (i.e, downloaded or removed depending on status)",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "fileSizeInBytes" : {
+            "type" : "integer",
+            "description" : "Total file size of a package in bytes",
+            "format" : "int64"
+          },
+          "deleteEnabled" : {
+            "type" : "boolean",
+            "description" : "If true, it's possible to remove this package via the REST API or the WebUi"
+          },
+          "version" : {
+            "type" : "string",
+            "description" : "Version"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "Cluster-wide status",
+            "enum" : [ "MISSING", "PROBLEM", "PROGRESS", "READY", "REMOVED", "REMOVING", "UPLOADING" ]
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "Type",
+            "enum" : [ "AGENT", "BAD_AGENTS", "JS_AGENT", "NGINX", "SERVER", "SG", "SYNTHETIC" ]
+          }
+        }
+      },
+      "GroupConfig" : {
+        "required" : [ "id", "isClusterAdminGroup", "name" ],
+        "type" : "object",
+        "properties" : {
+          "isClusterAdminGroup" : {
+            "type" : "boolean",
+            "description" : "If true, then the group has the cluster administrator rights."
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "Group ID. Leave empty if creating group. Set if updating group."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Group name"
+          },
+          "ldapGroupNames" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "description" : "LDAP group names",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "accessRight" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "properties" : {
+                "empty" : {
+                  "type" : "boolean"
+                }
+              },
+              "description" : "Access rights",
+              "items" : {
+                "type" : "string",
+                "description" : "Access rights"
+              }
+            },
+            "description" : "Access rights"
+          }
+        }
+      },
+      "MzListForEnvironment" : {
+        "type" : "object",
+        "properties" : {
+          "environmentUuid" : {
+            "type" : "string",
+            "description" : "Environment UUID"
+          },
+          "mzPermissions" : {
+            "type" : "array",
+            "description" : "List of management zone models with permissions",
+            "items" : {
+              "$ref" : "#/components/schemas/MzPermissionsList"
+            }
+          }
+        }
+      },
+      "MzPermissionsForGroup" : {
+        "type" : "object",
+        "properties" : {
+          "groupId" : {
+            "type" : "string",
+            "description" : "Group ID"
+          },
+          "mzPermissionsPerEnvironment" : {
+            "type" : "array",
+            "description" : "List of management zone permissions per environment",
+            "items" : {
+              "$ref" : "#/components/schemas/MzListForEnvironment"
+            }
+          }
+        }
+      },
+      "MzPermissionsList" : {
+        "type" : "object",
+        "properties" : {
+          "mzId" : {
+            "type" : "string",
+            "description" : "The ID of the required management zone"
+          },
+          "permissions" : {
+            "type" : "array",
+            "description" : "The list of permissions for the required management zone",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "DEMO_USER", "LOG_VIEWER", "MANAGE_SETTINGS", "REPLAY_SESSION_DATA", "REPLAY_SESSION_DATA_WITHOUT_MASKING", "VIEWER", "VIEW_SENSITIVE_REQUEST_DATA" ]
+            }
+          }
+        }
+      },
+      "UserConfig" : {
+        "required" : [ "email", "firstName", "id", "lastName" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "User ID"
+          },
+          "email" : {
+            "type" : "string",
+            "description" : "User's email address"
+          },
+          "firstName" : {
+            "type" : "string",
+            "description" : "User's first name"
+          },
+          "lastName" : {
+            "type" : "string",
+            "description" : "User's last name"
+          },
+          "passwordClearText" : {
+            "type" : "string",
+            "description" : "User's password in a clear text; used only to set initial password"
+          },
+          "groups" : {
+            "type" : "array",
+            "description" : "List of user's user group IDs.",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "description" : "The configuration of the user."
+      },
+      "AuthenticationMode" : {
+        "type" : "object",
+        "properties" : {
+          "authenticationProvider" : {
+            "type" : "string",
+            "enum" : [ "INTERNAL", "LDAP" ]
+          }
+        }
+      },
+      "AuthenticationModel" : {
+        "required" : [ "authenticationProvider" ],
+        "type" : "object",
+        "properties" : {
+          "authenticationProvider" : {
+            "type" : "string",
+            "description" : "Defines the authentication provider",
+            "enum" : [ "INTERNAL", "LDAP" ]
+          }
+        }
+      },
+      "LdapConnectionDescImpl" : {
+        "type" : "object",
+        "properties" : {
+          "shouldUseSecureConnection" : {
+            "type" : "boolean"
+          },
+          "hostName" : {
+            "type" : "string"
+          },
+          "port" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "bindDn" : {
+            "type" : "string"
+          },
+          "bindPassword" : {
+            "type" : "string"
+          },
+          "bindPasswordSet" : {
+            "type" : "boolean"
+          },
+          "referralHopLimit" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "LdapGroupsQueryDescImpl" : {
+        "type" : "object",
+        "properties" : {
+          "groupsIdAttribute" : {
+            "type" : "string"
+          },
+          "groupsDisplayNameAttribute" : {
+            "type" : "string"
+          },
+          "groupsMemberAttribute" : {
+            "type" : "string"
+          },
+          "groupsFilter" : {
+            "type" : "string"
+          },
+          "groupsDn" : {
+            "type" : "string"
+          }
+        }
+      },
+      "LdapUsersQueryDescImpl" : {
+        "type" : "object",
+        "properties" : {
+          "usersBaseDn" : {
+            "type" : "string"
+          },
+          "usersAccountNameAttribute" : {
+            "type" : "string"
+          },
+          "usersFirstNameAttribute" : {
+            "type" : "string"
+          },
+          "usersLastNameAttribute" : {
+            "type" : "string"
+          },
+          "usersEmailAttribute" : {
+            "type" : "string"
+          },
+          "usersMembershipAttribute" : {
+            "type" : "string"
+          },
+          "usersFilter" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Connection status" : {
+        "type" : "object",
+        "properties" : {
+          "connectionOk" : {
+            "type" : "boolean",
+            "description" : "Connection test result"
+          },
+          "testExecuted" : {
+            "type" : "boolean",
+            "description" : "Indicates whether test was executed at all"
+          },
+          "testExecutionMessage" : {
+            "type" : "string",
+            "description" : "Additional comments usually indicates why test was not executed"
+          }
+        },
+        "description" : "Internet connection test result"
+      },
+      "Internet proxy change request" : {
+        "required" : [ "port", "scheme", "server" ],
+        "type" : "object",
+        "properties" : {
+          "scheme" : {
+            "pattern" : "http[s]?",
+            "type" : "string",
+            "description" : "Protocol which proxy server uses",
+            "enum" : [ "http", "https" ]
+          },
+          "server" : {
+            "pattern" : "^[a-zA-Z0-9:/.-]*$",
+            "type" : "string",
+            "description" : "Address (either IP or Hostname) of proxy server"
+          },
+          "port" : {
+            "maximum" : 65535,
+            "minimum" : 0,
+            "type" : "integer",
+            "description" : "Port of proxy server",
+            "format" : "int32"
+          },
+          "user" : {
+            "type" : "string",
+            "description" : "User of proxy server, null means do not change previous value"
+          },
+          "password" : {
+            "type" : "string",
+            "description" : "Password of proxy server, null means do not change previous value"
+          }
+        },
+        "description" : "Configuration of proxy server for Internet connection"
+      },
+      "Internet proxy" : {
+        "type" : "object",
+        "properties" : {
+          "scheme" : {
+            "type" : "string",
+            "description" : "Protocol which proxy server uses"
+          },
+          "server" : {
+            "type" : "string",
+            "description" : "Address (either IP or Hostname) of proxy server"
+          },
+          "port" : {
+            "type" : "integer",
+            "description" : "Port of proxy server",
+            "format" : "int32"
+          },
+          "userOrPasswordDefined" : {
+            "type" : "boolean",
+            "description" : "Indicates if user/password for proxy is configured"
+          }
+        },
+        "description" : "Configuration of proxy server for Internet connection"
+      },
+      "Proxy configurations" : {
+        "type" : "object",
+        "properties" : {
+          "configurations" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/Internet proxy"
+            },
+            "description" : "Map of (Data Center name, Proxy) pairs"
+          }
+        },
+        "description" : "Configurations of proxy servers for all existing Data Centers"
+      }
+    },
+    "__securitySchemes" : {
+      "ServiceProviderAPI" : {
+        "type" : "apiKey",
+        "description" : "Token to be used in Managed public API. Format: \"Authorization: Api-Token abcdefjhij1234567890\"",
+        "name" : "Authorization",
+        "in" : "header"
+      }
+    }
+  }
+}
